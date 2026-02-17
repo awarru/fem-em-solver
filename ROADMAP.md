@@ -1,86 +1,41 @@
 # ROADMAP.md — FEM EM Solver Development Roadmap
 
 **Principles:**
-- One chunk = ONE specific task (e.g., "create and verify a cube mesh")
+- One chunk = ONE specific task that can be tested
 - Each chunk has exact test command and expected output
-- NO chunk is marked complete until test passes
+- NO chunk marked complete until test passes
 - If stuck for >30 min, flag via Telegram and move to next chunk
 - Commit after EVERY passing chunk
+
+**Phase 1 Goal:** Helmholtz coil validation (working, tested)
 
 ---
 
 ## Current Status
 
 ### ✅ Chunk 0: Repository structure
-**Status:** COMPLETE
-**Commit:** `9086ecd`
-**Test:** `git log --oneline -1` shows commit
+**Status:** COMPLETE | **Commit:** `9086ecd`
 
 ### ✅ Chunk 1: Current density restriction  
-**Status:** COMPLETE
-**Commit:** `6da3f33`
-**Test:** Code review only (solver API change)
+**Status:** COMPLETE | **Commit:** `6da3f33`
 
 ### ✅ Chunk 2: Circular loop mesh
-**Status:** COMPLETE  
-**Commit:** `e5a0936`
-**Test:** `python3 -c "from fem_em_solver.io.mesh import MeshGenerator; print('OK')"`
+**Status:** COMPLETE | **Commit:** `e5a0936`
 
-### ⬜ Chunk 3-6: KNOWN ISSUES (see below)
+### ⬜ Chunk 3+: Path to Helmholtz (see below)
 
 ---
 
-## KNOWN ISSUES (Flagged for Review)
+## Phase 1: Path to Helmholtz Coil Validation
 
-### ⬜ ISSUE-1: Helmholtz coil mesh hangs
-**Status:** CODE WRITTEN, DOES NOT WORK
-**File:** `src/fem_em_solver/io/mesh.py::helmholtz_coil_domain()`
-**Problem:** Two tori fragmentation creates 1.6M elements, dolfinx conversion hangs
-**Tested:** 2026-02-17, times out after 120s
-**Options:** 
-1. Use box domain instead of sphere (simpler)
-2. Don't fragment - use single wire volume
-3. Remove Helmholtz from Phase 1 scope
-**Recommendation:** Option 3 - Helmholtz not critical for MRI coil goals
-
-### ⬜ ISSUE-2: Convergence test too slow  
-**Status:** TEST SKELETON WRITTEN, SOLVER TOO SLOW
-**File:** `tests/validation/test_convergence.py`
-**Problem:** Straight wire mesh + solve takes >60s per resolution
-**Tested:** 2026-02-17, times out on 2 resolutions
-**Options:**
-1. Use built-in dolfinx mesh (no Gmsh)
-2. Coarser mesh + fewer resolutions  
-3. Skip convergence tests for now
-**Recommendation:** Option 2 - simplify and retest
-
-**ACTION REQUIRED:** User to decide on Issues 1 and 2
+The Helmholtz coil requires two loops that don't cause mesh fragmentation issues. We'll build up to it incrementally.
 
 ---
 
-## Phase 1 Revised: Working Magnetostatics (Small Chunks)
+### ⬜ Chunk 3: Verify circular loop example runs end-to-end
+**Scope:** Run the existing circular loop example in Docker and confirm it produces output
 
-Goal: Have working, tested magnetostatic solver with basic validation.
-
-### ⬜ Chunk 7: Create simple cube mesh with Gmsh
-**Scope:** Use Gmsh Python API to create a cube and export to .msh file
-
-**Why:** Learn Gmsh API, establish mesh testing pattern
-
-**Steps:**
-1. Create `tests/mesh/test_cube.py`
-2. Write test that:
-   ```python
-   import gmsh
-   gmsh.initialize()
-   gmsh.model.add("cube")
-   box = gmsh.model.occ.addBox(0, 0, 0, 1, 1, 1)
-   gmsh.model.occ.synchronize()
-   gmsh.model.mesh.generate(3)
-   gmsh.write("/tmp/test_cube.msh")
-   gmsh.finalize()
-   ```
-3. Assert file `/tmp/test_cube.msh` exists and has >100 lines
+**Why:** Establish baseline that current code works before adding complexity
 
 **Test command:**
 ```bash
@@ -88,237 +43,242 @@ cd ~/Development/fem-em-solver/docker
 docker compose exec fem-em-solver bash -c '
   export PYTHONPATH=/usr/local/dolfinx-real/lib/python3.10/dist-packages:/usr/local/lib:/workspace/src
   cd /workspace
-  python3 -m pytest tests/mesh/test_cube.py -v
+  timeout 60 python3 examples/magnetostatics/02_circular_loop.py 2>&1 | tail -20
 '
 ```
 
 **Expected output:**
 ```
-tests/mesh/test_cube.py::test_gmsh_cube PASSED
+Example completed successfully!
 ```
 
-**Success criteria:** Test passes, cube.msh file created
-**Commit message:** "Add Gmsh cube mesh test"
+**If fails:** Document error and flag to user
+
+**Success criteria:** Example runs without error in <60s
+**Commit message:** "Verify circular loop example runs in Docker"
 
 ---
 
-### ⬜ Chunk 8: Convert cube mesh to dolfinx
-**Scope:** Load .msh file into dolfinx mesh
+### ⬜ Chunk 4: Create cylindrical domain mesh
+**Scope:** Create mesh with cylinder inside box (simpler than Helmholtz)
 
-**Why:** Verify Gmsh → dolfinx pipeline works
-
-**Steps:**
-1. Add to `tests/mesh/test_cube.py`:
-   ```python
-   from dolfinx.io import gmshio
-   from mpi4py import MPI
-   
-   def test_cube_to_dolfinx():
-       mesh, cell_tags, facet_tags = gmshio.read_from_msh(
-           "/tmp/test_cube.msh", MPI.COMM_WORLD, 0, gdim=3
-       )
-       assert mesh.topology.index_map(3).size_global > 0
-   ```
-
-**Test command:** Same as Chunk 7
-
-**Expected output:**
-```
-tests/mesh/test_cube.py::test_gmsh_cube PASSED
-tests/mesh/test_cube.py::test_cube_to_dolfinx PASSED
-```
-
-**Success criteria:** Both tests pass, dolfinx mesh has cells
-**Commit message:** "Add dolfinx mesh conversion test"
-
----
-
-### ⬜ Chunk 9: Solve magnetostatics on cube mesh (no source)
-**Scope:** Run solver on cube with J=0, verify it doesn't crash
-
-**Why:** Test solver works with simple dolfinx mesh
+**Why:** Practice multi-volume meshing without torus complexity
 
 **Steps:**
-1. Create `tests/solver/test_cube_solver.py`
-2. Use `MeshGenerator.create_simple_box()` to make mesh
-3. Create MagnetostaticProblem with no current
-4. Call solver.solve() 
-5. Verify solver._solved is True
+1. Add `cylindrical_domain()` to `mesh.py`
+2. Small cylinder (tag=1) inside larger cylinder (tag=2)
+3. Test creates mesh, exports to file, verifies file exists
 
 **Test command:**
 ```bash
-python3 -m pytest tests/solver/test_cube_solver.py -v
+cd ~/Development/fem-em-solver/docker
+docker compose exec fem-em-solver bash -c '
+  export PYTHONPATH=/usr/local/dolfinx-real/lib/python3.10/dist-packages:/usr/local/lib:/workspace/src
+  cd /workspace
+  python3 -c "
+    from fem_em_solver.io.mesh import MeshGenerator
+    from mpi4py import MPI
+    mesh, ct, ft = MeshGenerator.cylindrical_domain(
+        inner_radius=0.01, outer_radius=0.1, length=0.2, resolution=0.02,
+        comm=MPI.COMM_WORLD
+    )
+    print(f\"Mesh cells: {mesh.topology.index_map(3).size_global}\")
+  "
+'
 ```
 
 **Expected output:**
 ```
-tests/solver/test_cube_solver.py::test_solve_no_source PASSED
+Mesh cells: [number > 0]
 ```
 
-**Success criteria:** Solver completes without error
-**Commit message:** "Test solver on simple cube mesh"
+**Success criteria:** Mesh generates, has cells, no error
+**Commit message:** "Add cylindrical domain mesh generator"
 
 ---
 
-### ⬜ Chunk 10: Solve with uniform current on cube
-**Scope:** Add constant J to cube, solve, check B-field is reasonable
+### ⬜ Chunk 5: Solve magnetostatics on cylinder mesh
+**Scope:** Use solver on cylindrical domain with current in inner cylinder
 
-**Steps:**
-1. Create cube mesh
-2. Define uniform J = [0, 0, 1]
-3. Solve
-4. Compute B-field
-5. Check B-field is not all zeros (has some magnitude)
+**Why:** Verify solver works with multi-volume mesh from Chunk 4
 
 **Test command:**
 ```bash
-python3 -m pytest tests/solver/test_cube_with_current.py -v
+python3 -m pytest tests/solver/test_cylinder.py -v
 ```
 
-**Expected output:**
-```
-tests/solver/test_cube_with_current.py::test_uniform_current PASSED
-```
+**Test file:** `tests/solver/test_cylinder.py` that:
+1. Creates cylindrical mesh
+2. Sets up problem with current in inner volume
+3. Solves
+4. Checks B-field is computed
 
-**Success criteria:** B-field computed and has non-zero values
-**Commit message:** "Test solver with uniform current"
+**Success criteria:** Test passes, B-field non-zero
+**Commit message:** "Test solver on cylindrical domain"
 
 ---
 
-### ⬜ Chunk 11: Document what works
-**Scope:** Write docs showing verified working features
+### ⬜ Chunk 6: Create two-cylinder mesh (no fragmentation)
+**Scope:** Two cylinders side-by-side, no boolean operations
 
-**Steps:**
-1. Create `docs/status.md`
-2. List working features:
-   - Repository structure
-   - Docker setup
-   - Straight wire mesh generation (Gmsh)
-   - Circular loop mesh generation (Gmsh)
-   - Straight wire validation test
-   - Circular loop validation test
-   - Cube mesh (built-in and Gmsh)
-   - Solver on simple meshes
-3. List known issues:
-   - Helmholtz coil mesh too complex
-   - Convergence tests too slow
-4. Add example commands that work
+**Why:** Simpler approach than torus fragmentation for Helmholtz
 
-**Test:** Manual review
+**Mesh design:**
+- Cylinder 1: at x=-0.025, radius=0.01
+- Cylinder 2: at x=+0.025, radius=0.01  
+- Domain: box containing both
+- All separate volumes (no fragment/Boolean)
 
-**Success criteria:** Document exists and is accurate
-**Commit message:** "Add project status documentation"
-
----
-
-### ⬜ Chunk 12: Clean up broken code
-**Scope:** Remove or disable code that doesn't work
-
-**Files to address:**
-1. `examples/magnetostatics/03_helmholtz_coil.py` - move to `examples/broken/`
-2. `tests/validation/test_convergence.py` - mark all tests as skip with reason
-3. Add comments explaining why
-
-**Test:**
+**Test command:**
 ```bash
-python3 -m pytest tests/ -v 2>&1 | grep -E "(PASSED|FAILED|SKIPPED)"
+python3 -c "
+from fem_em_solver.io.mesh import MeshGenerator
+from mpi4py import MPI
+mesh, ct, ft = MeshGenerator.two_cylinder_domain(
+    separation=0.05, radius=0.01, length=0.1, resolution=0.02,
+    comm=MPI.COMM_WORLD
+)
+print(f'Cells: {mesh.topology.index_map(3).size_global}')
+print(f'Tags: {ct.values}')
+"
 ```
 
-**Expected:** No FAILED, broken tests show as SKIPPED
+**Expected:** Two tagged volumes + domain
 
-**Success criteria:** Clean test output, broken code isolated
-**Commit message:** "Isolate broken code, document known issues"
-
----
-
-### ⬜ Chunk 13: Final Phase 1 verification
-**Scope:** Run everything, confirm working state
-
-**Steps:**
-1. Run all tests:
-   ```bash
-   python3 -m pytest tests/ -v --tb=short 2>&1 | tail -20
-   ```
-2. Run working examples:
-   ```bash
-   python3 examples/magnetostatics/01_straight_wire.py
-   python3 examples/magnetostatics/02_circular_loop.py
-   ```
-3. Verify imports:
-   ```bash
-   python3 -c "import fem_em_solver; print('OK')"
-   ```
-
-**Success criteria:**
-- All tests pass or skip cleanly (no failures)
-- Examples run without error
-- Package imports correctly
-
-**Commit message:** "Phase 1 verified: working magnetostatics foundation"
+**Success criteria:** Mesh has 3 volumes, properly tagged
+**Commit message:** "Add two-cylinder mesh for Helmholtz prototype"
 
 ---
 
-## Phase 2 Planning (Post-Phase 1)
+### ⬜ Chunk 7: Solve on two-cylinder mesh with currents
+**Scope:** Current in both cylinders, solve for B-field
 
-After Phase 1 is verified working:
+**Why:** Test two-source problem (prototype for Helmholtz)
 
-### ⬜ Chunk 14: Design time-harmonic formulation
-**Scope:** Write math documentation for E-field formulation
+**Test:** `tests/solver/test_two_cylinder.py`
+- Current in both cylinders (same direction)
+- Solve
+- Check B-field along centerline
 
-### ⬜ Chunk 15: Implement complex material properties
-**Scope:** Add support for ε = ε' - jε''
+**Success criteria:** B-field computed, roughly constant in center
+**Commit message:** "Test solver with two current sources"
 
-### ⬜ Chunk 16: Add PEC boundary conditions
-**Scope:** Implement n×E = 0 boundary
+---
 
-... (more chunks as needed)
+### ⬜ Chunk 8: Convert two-cylinder to two-loop (torus)
+**Scope:** Replace cylinders with tori, same non-fragmenting approach
+
+**Why:** Tori are the correct geometry for coils
+
+**Mesh design:**
+- Torus 1: at z=-0.025
+- Torus 2: at z=+0.025
+- Use `gmsh.model.occ.addTorus()` for each
+- NO boolean operations between them
+- Just place them in domain and tag cells by location
+
+**Test:** Similar to Chunk 7 but with tori
+
+**Success criteria:** Mesh generates in <60s, has 2 wire volumes
+**Commit message:** "Add two-torus mesh (Helmholtz geometry)"
+
+---
+
+### ⬜ Chunk 9: Validate Helmholtz field uniformity
+**Scope:** Run solver on two-torus mesh, check field uniformity
+
+**Why:** Verify Helmholtz condition produces uniform field
+
+**Test:** `tests/validation/test_helmholtz_v2.py`
+- Generate two-torus mesh (Helmholtz spacing)
+- Current in both loops
+- Evaluate B_z along axis
+- Check coefficient of variation in center < 1%
+
+**Success criteria:** Field uniform to <1% in central region
+**Commit message:** "Validate Helmholtz coil field uniformity"
+
+---
+
+### ⬜ Chunk 10: Document Phase 1 completion
+**Scope:** Write docs showing working Helmholtz validation
+
+**Files:**
+- `docs/validation/helmholtz.md` - Helmholtz coil results
+- `docs/status.md` - Updated project status
+
+**Success criteria:** Docs exist and are accurate
+**Commit message:** "Phase 1 complete: Helmholtz coil validated"
+
+---
+
+## Chunks Beyond Phase 1 (Future)
+
+### Phase 2: Time-Harmonic Maxwell
+Goal: E-field formulation for frequency-domain problems
+
+**Chunk 11:** Complex number support in solver
+**Chunk 12:** E-field weak form implementation  
+**Chunk 13:** Plane wave validation test
+**Chunk 14:** Dipole antenna validation
+... (more as needed)
+
+### Phase 3: Material Models
+Goal: Gelled saline phantoms, biological tissues
+
+**Chunk 20:** Complex permittivity model
+**Chunk 21:** Frequency-dependent properties
+**Chunk 22:** Phantom geometry (sphere, cylinder)
+... (more as needed)
+
+### Phase 4: Coil Models
+Goal: Birdcage, TEM, array coils
+
+**Chunk 30:** Multi-port excitation
+**Chunk 31:** Birdcage coil mesh
+**Chunk 32:** TEM coil mesh
+... (more as needed)
 
 ---
 
 ## Testing Protocol (REQUIRED)
 
-**Before marking ANY chunk complete:**
+**Before marking chunk complete:**
 
-1. **Run exact test command from chunk**
-2. **Verify output matches "Expected output"**
-3. **If output differs:**
+1. Run exact test command from chunk
+2. Verify output matches "Expected output"
+3. If differs:
    - Read error carefully
-   - Fix code
+   - Fix code  
    - Re-run test
    - Repeat until pass
-4. **If stuck for >30 min:**
-   - DO NOT mark chunk complete
-   - Add note to chunk: "BLOCKED: [reason]"
+4. If stuck >30 min:
+   - Add note: "BLOCKED: [reason]"
    - Move to next chunk
-   - Send Telegram message flagging issue
-5. **Once test passes:**
-   - Commit
-   - Mark chunk ✅ with commit hash
-   - Move to next chunk
+   - Send Telegram message
+5. Once passes: Commit and mark ✅
 
-**NO EXCEPTIONS.** If a chunk takes multiple sessions, that's fine. Don't fake completion.
+**No exceptions.**
 
 ---
 
-## Immediate Priority
+## Immediate Next Action
 
-**Next chunk to work on:** Chunk 7 (Gmsh cube mesh)
+**Chunk 3:** Verify circular loop example runs
 
-**Why:** Establishes working Gmsh → dolfinx pipeline for future mesh work
+**Why:** Confirm current code works before adding complexity
 
-**Blocked on:** Nothing
+**Estimated time:** 5 minutes
 
-**Estimated time:** 15-30 minutes
+**Blocked:** No
 
-**Ready to start:** Yes
+**Ready:** Yes (at next heartbeat)
 
 ---
 
-## User Decision Needed
+## User Notes
 
-Please reply with decisions on:
-
-1. **Helmholtz coil:** Keep trying to fix, or remove from Phase 1?
-2. **Convergence tests:** Simplify and retry, or skip for now?
-
-Once decided, I'll update ROADMAP and proceed with Chunk 7.
+- Helmholtz kept as Phase 1 goal
+- Path goes: circle → cylinder → two-cylinder → two-torus
+- Each step builds on previous, testable
+- If any chunk fails, we can reassess path
