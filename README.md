@@ -21,7 +21,6 @@ A finite element method (FEM) solver for electromagnetic simulations of MRI coil
 
 #### Option 1: Using Docker (Recommended)
 
-If your user is in the `docker` group (no sudo needed):
 ```bash
 # Build and start the container
 cd docker
@@ -31,25 +30,27 @@ docker compose up -d
 docker compose exec fem-em-solver bash
 ```
 
-If your user is NOT in the `docker` group (sudo required):
-```bash
-# Build and start the container
-cd docker
-sudo docker compose up -d
+**Prerequisites:**
+- Docker installed and running
+- Your user in the `docker` group (to avoid sudo)
 
-# Enter the container
-sudo docker compose exec fem-em-solver bash
-```
-
-**Check if you need sudo:** Run `docker ps` — if you get a permission error, use `sudo`.
-
-**Note:** Modern Docker uses `docker compose` (space). If you have an older version, use `docker-compose` (hyphen) instead.
-
-**To avoid sudo permanently:** Add your user to the docker group:
+**To add your user to docker group:**
 ```bash
 sudo usermod -aG docker $USER
-# Then log out and log back in (or run: newgrp docker)
+# IMPORTANT: Log out and log back in for changes to take effect
 ```
+
+**Test if Docker works:**
+```bash
+docker ps  # Should show containers without sudo
+```
+
+**If you get permission errors** after adding to docker group, you need to log out and back in, or run:
+```bash
+newgrp docker  # Applies group change to current shell (temporary)
+```
+
+**Note:** Modern Docker uses `docker compose` (space). Older versions use `docker-compose` (hyphen).
 
 #### Option 2: Conda Environment
 
