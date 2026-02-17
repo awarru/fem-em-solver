@@ -1,134 +1,238 @@
 # ROADMAP.md — FEM EM Solver Development Roadmap
 
-This file tracks the next actionable chunks of work. Each chunk is a single
-session's worth of effort. When a chunk is completed, mark it ✅ and move on
-to the next one. The heartbeat system reads this file to know what to do next.
+Each chunk is a single focused task that can be completed and tested in one session.
+**CRITICAL:** Each chunk MUST be tested before marking complete. If it doesn't run, fix it.
 
 ---
 
 ## Phase 1: Magnetostatics Foundation
 
 ### ✅ Chunk 0: Initial solver structure
-- Implemented MagnetostaticSolver with A-formulation (H(curl) Nedelec elements)
-- Created straight wire mesh generation via Gmsh
-- Added analytical solutions module (wire, loop, Helmholtz)
-- Implemented error metrics (L2, max relative)
-- Created validation test structure and example script
-- **Committed:** `9086ecd` (2026-02-17)
+**Status:** Complete and tested in Docker
+**Commit:** `9086ecd`
 
-### ✅ Chunk 1: Fix current density restriction to wire subdomain
-**What:** Current density J is applied to the whole mesh domain, not just the wire volume.
-This causes incorrect results because J should be zero outside the wire.
-
-**How to fix:**
-1. Open `src/fem_em_solver/core/solvers.py`
-2. Modify `solve()` to accept `cell_tags` and a `subdomain_id` parameter
-3. Use `ufl.Measure("dx")` with subdomain data from `cell_tags` to restrict the integral:
-   ```python
-   dx_wire = ufl.Measure("dx", domain=mesh, subdomain_data=cell_tags, subdomain_id=wire_tag)
-   L = inner(J, v) * dx_wire
-   ```
-4. The bilinear form (left side) still integrates over the whole domain
-5. Update `examples/magnetostatics/01_straight_wire.py` to pass cell_tags
-6. Run: `cd ~/Development/fem-em-solver && PYTHONPATH=src python3 examples/magnetostatics/01_straight_wire.py`
-7. Verify the B-field magnitude matches analytical solution within ~5%
-
-**Success criteria:** Validation test passes with relative L2 error < 10%
-**Commit message:** `"Phase 1: Restrict current density to wire subdomain using cell_tags"`
-**Committed:** `6da3f33` (2026-02-17)
+### ✅ Chunk 1: Fix current density restriction to wire subdomain  
+**Status:** Complete
+**Commit:** `6da3f33`
 
 ### ✅ Chunk 2: Circular loop mesh and validation
-**What:** Add mesh generation for a circular current loop and validate B_z on axis.
+**Status:** Complete
+**Commit:** `e5a0936`
 
-**How:**
-1. Add `circular_loop_domain()` to `src/fem_em_solver/io/mesh.py`
-   - Create a torus (ring) for the wire using `gmsh.model.occ.addTorus()`
-   - Surround with a spherical or cylindrical air domain
-   - Tag the torus volume as "wire" (tag=1) and air as "domain" (tag=2)
-2. Create `tests/validation/test_circular_loop.py`
-   - Set up loop: radius=0.05m, current=1A, wire cross-section radius=0.001m
-   - Evaluate B_z along the z-axis from z=-0.1 to z=0.1
-   - Compare with `AnalyticalSolutions.circular_loop_magnetic_field_on_axis()`
-   - Assert relative L2 error < 10%
-3. Create `examples/magnetostatics/02_circular_loop.py`
-   - Plot B_z(z) numerical vs analytical
-   - Save plot as `circular_loop_validation.png`
+### ⬜ Chunk 3: Helmholtz coil validation
+**Status:** CODE WRITTEN, NOT WORKING
+**Commit:** `030eb48`
+**⚠️ ISSUE FOUND:** Mesh generation hangs/times out
+**Problem:** Two tori fragmentation is too complex for Gmsh
 
-**Success criteria:** On-axis B_z matches analytical solution within 10%
-**Commit message:** `"Phase 1: Circular loop mesh generation and on-axis validation"`
-**Committed:** `e5a0936` (2026-02-17)
+---
 
-### ✅ Chunk 3: Helmholtz coil validation
-**What:** Two loops separated by one radius. Test field uniformity in center.
+## Current Priority: Fix Broken Chunks
 
-**How:**
-1. Create `helmholtz_coil_domain()` in `src/fem_em_solver/io/mesh.py`
-   - Two tori at z = -R/2 and z = +R/2 (where R is loop radius)
-   - Same approach as circular loop but with two wire volumes
-   - Both wires tagged as "wire" (tag=1)
-2. Create `tests/validation/test_helmholtz.py`
-   - Radius = 0.05m, current = 1A in both loops
-   - Evaluate B_z along z-axis
-   - Compare with `AnalyticalSolutions.helmholtz_coil_field_on_axis()`
-   - Check uniformity: coefficient of variation of B_z in central 20% should be < 1%
-3. Create `examples/magnetostatics/03_helmholtz_coil.py`
+### ⬜ Chunk 4: FIX Helmholtz coil mesh generation
+**Scope:** Make Helmholtz coil actually run without hanging
 
-**Success criteria:** B_z uniform to <1% in central region, matches analytical <10%
-**Commit message:** `"Phase 1: Helmholtz coil mesh and field uniformity validation"`
-**Committed:** `030eb48` (2026-02-17)
+**Problem Analysis:**
+- Current implementation creates two tori and fragments them with domain
+- Gmsh mesh.optimize("Netgen") hangs on complex topology
+- Need simpler approach
 
-### ⬜ Chunk 4: Convergence study infrastructure
-**What:** Prove the solver converges at the expected rate as mesh refines.
+**Fix Options:**
+1. Remove mesh.optimize() call (may produce lower quality mesh)
+2. Use boolean union for wires first, then fragment with domain
+3. Simplify geometry (larger wire radius, coarser mesh)
+4. Use different meshing algorithm
 
-**How:**
+**Steps:**
+1. Try Option 1 first (simplest):
+   - Edit `src/fem_em_solver/io/mesh.py`
+   - Comment out `gmsh.model.mesh.optimize("Netgen")` in helmholtz_coil_domain()
+   
+2. Test in Docker:
+   ```bash
+   cd ~/Development/fem-em-solver/docker
+   docker compose exec fem-em-solver bash
+   cd /workspace
+   export PYTHONPATH=/usr/local/dolfinx-real/lib/python3.10/dist-packages:/usr/local/lib:/workspace/src
+   timeout 60 python3 examples/magnetostatics/03_helmholtz_coil.py
+   ```
+
+3. If that doesn't work, try Option 2:
+   - Create both tori
+   - Use `gmsh.model.occ.fuse()` to merge them into one object
+   - Then fragment with domain
+   
+4. Repeat test until it completes in <60 seconds
+
+5. Once working, commit fix
+
+**Success criteria:** Helmholtz example runs to completion in under 60 seconds
+**Commit message:** "Fix Helmholtz coil mesh generation - prevent hang"
+
+---
+
+## Remaining Phase 1 Work (After Fix)
+
+### ⬜ Chunk 5: VERIFY Helmholtz coil results
+**Scope:** Run and check output is physically reasonable
+
+**Steps:**
+1. Run example and capture output
+2. Check B_z at center matches analytical ~0.7155 * μ₀I/R
+3. Check field uniformity in central region
+4. If results look wrong, debug and fix
+
+**Success criteria:** Numerical results match analytical within 10%
+
+---
+
+### ⬜ Chunk 6: Add convergence study test file (skeleton only)
+**Scope:** Create empty test file with proper structure
+
+**Steps:**
 1. Create `tests/validation/test_convergence.py`
-2. For straight wire problem, run at resolutions [0.02, 0.01, 0.007, 0.005, 0.003]
-3. Compute L2 error at each resolution
-4. Fit log(error) vs log(h) to get convergence rate
-5. For Nedelec order 1: expect rate ~1.0
-6. For Nedelec order 2: expect rate ~2.0
-7. Test both orders
-8. Save convergence plot to `docs/validation/convergence_plot.png`
+2. Add imports (dolfinx, fem_em_solver modules)
+3. Create test class `TestConvergence` with empty methods:
+   - `test_h_refinement_straight_wire()` 
+   - `test_p_refinement_straight_wire()`
+4. Add docstrings explaining what each test will do
+5. Run `python3 -c "import tests.validation.test_convergence"` to verify no import errors
+6. Commit
 
-**Success criteria:** Convergence rate > 0.8 for order 1, > 1.5 for order 2
-**Commit message:** `"Phase 1: h-refinement convergence study for magnetostatics"`
-
-### ⬜ Chunk 5: Phase 1 documentation and cleanup
-**What:** Write up results and clean code for Phase 1 completion.
-
-**How:**
-1. Write `docs/validation/magnetostatics.md` — validation report with:
-   - Problem description and formulation
-   - Mesh details
-   - Results tables (error vs resolution)
-   - Convergence plots
-   - Comparison figures
-2. Ensure all public methods have docstrings
-3. Run full test suite: `pytest tests/ -v`
-4. Ensure all tests pass
-5. Update `PROJECT_PLAN.md` — mark Phase 1 deliverables as complete
-6. Update `README.md` if needed
-
-**Success criteria:** All tests pass, docs written, Phase 1 marked complete
-**Commit message:** `"Phase 1 complete: magnetostatics validated against analytical solutions"`
+**Success criteria:** File exists, imports work, pytest can discover tests
+**Commit message:** "Add convergence study test skeleton"
 
 ---
 
-## Phase 2: Time-Harmonic Maxwell (future — do not start until Phase 1 is done)
+### ⬜ Chunk 7: Implement h-refinement convergence test
+**Scope:** Test error vs mesh size for straight wire problem
 
-### ⬜ Chunk 6: Time-harmonic E-field formulation
-### ⬜ Chunk 7: PEC boundary conditions and plane wave test
-### ⬜ Chunk 8: Dipole antenna validation
-### ⬜ Chunk 9: Cylindrical waveguide modes
-### ⬜ Chunk 10: HFSS comparison infrastructure
+**Steps:**
+1. In `test_convergence.py`, implement `test_h_refinement_straight_wire()`:
+   - Loop over resolutions: [0.02, 0.01, 0.007, 0.005]
+   - For each resolution:
+     a. Generate straight wire mesh
+     b. Solve magnetostatic problem
+     c. Compute B-field at sample points
+     d. Calculate L2 error vs analytical
+   - Store (h, error) pairs
+   - Fit log(error) vs log(h) to get convergence rate
+   
+2. Assert rate > 0.8 (expected for linear elements)
+
+3. Run test in Docker:
+   ```bash
+   pytest tests/validation/test_convergence.py::TestConvergence::test_h_refinement_straight_wire -v
+   ```
+
+4. Fix any errors until test passes
+
+**Success criteria:** Test runs and reports convergence rate > 0.8
+**Commit message:** "Implement h-refinement convergence test"
 
 ---
 
-## How to use this file
+### ⬜ Chunk 8: Implement p-refinement convergence test  
+**Scope:** Test error vs polynomial degree
 
-1. Find the first ⬜ chunk
-2. Read its instructions carefully
-3. Do exactly what it says
-4. When done, change ⬜ to ✅ and add the commit hash and date
-5. Commit and push
-6. Stop — do not start the next chunk in the same session
+**Steps:**
+1. Implement `test_p_refinement_straight_wire()`:
+   - Fixed mesh resolution (e.g., 0.01)
+   - Loop over degrees: [1, 2, 3]
+   - For each degree:
+     a. Create solver with degree=N
+     b. Solve and compute error
+   - Expect error to decrease with higher degree
+   
+2. Assert that degree 2 error < degree 1 error
+
+3. Run and verify in Docker
+
+**Success criteria:** Higher degree gives lower error
+**Commit message:** "Implement p-refinement convergence test"
+
+---
+
+### ⬜ Chunk 9: Document Phase 1 results
+**Scope:** Write validation report
+
+**Steps:**
+1. Create `docs/validation/magnetostatics.md`
+2. Document:
+   - Problem formulations (weak form)
+   - Mesh details for each geometry
+   - Convergence study results table
+   - Comparison with analytical solutions
+3. Include example command outputs
+4. Link to test files
+
+**Success criteria:** Document is complete and readable
+**Commit message:** "Add Phase 1 validation documentation"
+
+---
+
+### ⬜ Chunk 10: Final Phase 1 cleanup
+**Scope:** Ensure everything works end-to-end
+
+**Steps:**
+1. Run all tests in Docker:
+   ```bash
+   pytest tests/ -v --tb=short
+   ```
+   
+2. Verify all pass or document known failures
+
+3. Run all examples:
+   ```bash
+   python3 examples/magnetostatics/01_straight_wire.py
+   python3 examples/magnetostatics/02_circular_loop.py
+   python3 examples/magnetostatics/03_helmholtz_coil.py
+   ```
+
+4. Check git status - everything committed?
+
+5. Update PROJECT_PLAN.md to mark Phase 1 complete
+
+**Success criteria:** All tests run, examples execute, docs complete
+**Commit message:** "Phase 1 complete: magnetostatics validated"
+
+---
+
+## Testing Protocol (STRICT)
+
+**Before marking ANY chunk complete:**
+
+1. **Run the code in Docker:**
+   ```bash
+   cd ~/Development/fem-em-solver/docker
+   docker compose exec fem-em-solver bash
+   cd /workspace
+   export PYTHONPATH=/usr/local/dolfinx-real/lib/python3.10/dist-packages:/usr/local/lib:/workspace/src
+   python3 <test_or_example>
+   ```
+
+2. **Verify it produces expected output:**
+   - No Python exceptions
+   - No hangs/timeouts
+   - Reasonable numerical values
+   - Tests pass (if applicable)
+
+3. **If it fails:**
+   - Read error messages carefully
+   - Fix the issue
+   - Re-run
+   - Repeat until it works
+
+4. **Only then:** Commit and mark chunk complete
+
+**DO NOT** mark chunks complete based on code review alone. They must actually run.
+
+---
+
+## Immediate Next Actions
+
+1. **Chunk 4:** Fix Helmholtz coil mesh (it's broken)
+2. **Chunk 5:** Verify Helmholtz results (after fix)
+3. **Chunks 6-10:** Continue with convergence and documentation
+
+**DO NOT** start Phase 2 until all Phase 1 chunks are verified working.

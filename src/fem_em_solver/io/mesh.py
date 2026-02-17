@@ -271,9 +271,9 @@ class MeshGenerator:
     @staticmethod
     def helmholtz_coil_domain(
         loop_radius: float = 0.05,
-        wire_radius: float = 0.001,
-        domain_radius: float = 0.15,
-        resolution: float = 0.005,
+        wire_radius: float = 0.002,  # Increased from 0.001 for simpler mesh
+        domain_radius: float = 0.12,  # Reduced from 0.15
+        resolution: float = 0.008,    # Coarser mesh
         comm: MPI.Intracomm = MPI.COMM_WORLD,
         rank: int = 0
     ) -> Tuple[dolfinx.mesh.Mesh, dolfinx.mesh.MeshTags, dolfinx.mesh.MeshTags]:
@@ -412,7 +412,8 @@ class MeshGenerator:
             
             # Generate mesh
             gmsh.model.mesh.generate(3)
-            gmsh.model.mesh.optimize("Netgen")
+            # Skip optimization for Helmholtz coil to avoid Gmsh hangs
+            # gmsh.model.mesh.optimize("Netgen")
             
         # Convert to dolfinx mesh
         mesh, cell_tags, facet_tags = gmshio.model_to_mesh(
