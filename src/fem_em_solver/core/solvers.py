@@ -70,7 +70,8 @@ class MagnetostaticSolver:
         self._solved = False
         
     def solve(self, current_density: Optional[Callable] = None, 
-              bc_functions: Optional[List] = None) -> fem.Function:
+              bc_functions: Optional[List] = None,
+              subdomain_id: Optional[int] = None) -> fem.Function:
         """Solve the magnetostatic problem.
         
         Parameters
@@ -80,6 +81,9 @@ class MagnetostaticSolver:
             If None, assumes J = 0 (no sources).
         bc_functions : list, optional
             List of Dirichlet BC functions
+        subdomain_id : int, optional
+            If provided, restricts current density integration to cells
+            with this tag (requires cell_tags in problem).
             
         Returns
         -------
@@ -101,12 +105,29 @@ class MagnetostaticSolver:
         a = inner(mu_inv * curl(A_trial), curl(v)) * dx
         
         # Linear form: L(v) = ∫ J · v dx
-        if current_density is not None:
-            x = ufl.SpatialCoordinate(self.mesh)
-            J = current_density(x)
-            L = inner(J, v) * dx
+        # If subdomain_id provided, restrict to that subdomain using cell_tags
+        if subdomain_id is not None and self.problem.cell_tags is not None:
+            # Create measure restricted to subdomain
+            dx_sub = ufl.Measure(
+                "dx", 
+                domain=self.mesh, 
+                subdomain_data=self.problem.cell_tags,
+                subdomain_id=subdomain_id
+            )
+            if current_density is not None:
+                x = ufl.SpatialCoordinate(self.mesh)
+                J = current_density(x)
+                L = inner(J, v) * dx_sub
+            else:
+                L = inner(fem.Constant(self.mesh, np.zeros(3)), v) * dx_sub
         else:
-            L = inner(fem.Constant(self.mesh, np.zeros(3)), v) * dx
+            # Integrate over whole domain
+            if current_density is not None:
+                x = ufl.SpatialCoordinate(self.mesh)
+                J = current_density(x)
+                L = inner(J, v) * dx
+            else:
+                L = inner(fem.Constant(self.mesh, np.zeros(3)), v) * dx
         
         # Apply boundary conditions
         bcs = []

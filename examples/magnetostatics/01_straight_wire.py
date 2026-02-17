@@ -49,8 +49,8 @@ def main():
     )
     print(f"  Mesh created: {mesh.topology.index_map(3).size_global} cells")
     
-    # Set up problem
-    problem = MagnetostaticProblem(mesh=mesh, mu=MU_0)
+    # Set up problem with cell tags for subdomain integration
+    problem = MagnetostaticProblem(mesh=mesh, cell_tags=cell_tags, mu=MU_0)
     
     # Create solver
     solver = MagnetostaticSolver(problem, degree=1)
@@ -64,10 +64,10 @@ def main():
         """Uniform current density in z-direction."""
         return ufl.as_vector([0.0, 0.0, J_magnitude])
     
-    # Solve
+    # Solve with current restricted to wire subdomain (tag=1)
     print("\nSolving magnetostatic problem...")
-    A = solver.solve(current_density=current_density)
-    print("  Solution computed!")
+    A = solver.solve(current_density=current_density, subdomain_id=1)
+    print("  Solution computed (current restricted to wire volume)!")
     
     # Compute B-field
     print("\nComputing B-field...")
