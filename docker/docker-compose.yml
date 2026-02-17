@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   fem-em-solver:
     build:
@@ -13,7 +11,7 @@ services:
     ports:
       - "8888:8888"  # Jupyter
     environment:
-      - PYTHONPATH=/workspace/src
+      - PYTHONPATH=/usr/local/dolfinx-real/lib/python3.10/dist-packages:/usr/local/lib:/workspace/src
       - MPLBACKEND=Agg
     working_dir: /workspace
     command: /bin/bash

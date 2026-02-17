@@ -9,7 +9,7 @@ description = "Finite Element Method Electromagnetics Solver for MRI Coil Simula
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "Awarru", email = ""}
+    {name = "Awarru"}
 ]
 keywords = ["FEM", "electromagnetics", "MRI", "FEniCSX", "simulation"]
 classifiers = [
