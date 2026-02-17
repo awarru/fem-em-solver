@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  fem-em-solver:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: fem-em-solver:latest
+    container_name: fem-em-solver
+    volumes:
+      - ..:/workspace
+      - fem-em-cache:/root/.cache
+    ports:
+      - "8888:8888"  # Jupyter
+    environment:
+      - PYTHONPATH=/workspace/src
+      - MPLBACKEND=Agg
+    working_dir: /workspace
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        limits:
+          memory: 16G
+        reservations:
+          memory: 4G
+
+volumes:
+  fem-em-cache:

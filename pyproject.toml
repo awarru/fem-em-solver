@@ -1,0 +1,101 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fem-em-solver"
+version = "0.1.0"
+description = "Finite Element Method Electromagnetics Solver for MRI Coil Simulation"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Awarru", email = ""}
+]
+keywords = ["FEM", "electromagnetics", "MRI", "FEniCSX", "simulation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "fenics-dolfinx>=0.7.0",
+    "mpi4py>=3.1.0",
+    "petsc4py>=3.19.0",
+    "slepc4py>=3.19.0",
+    "gmsh>=4.11.0",
+    "pyvista>=0.42.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+    "matplotlib>=3.7.0",
+    "meshio>=5.3.0",
+    "h5py>=3.8.0",
+    "tqdm>=4.65.0",
+    "pydantic>=2.0.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-xdist>=3.3.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.5.0",
+    "flake8>=6.0.0",
+    "pre-commit>=3.3.0",
+]
+docs = [
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.0.0",
+    "mkdocstrings[python]>=0.22.0",
+]
+notebooks = [
+    "jupyter>=1.0.0",
+    "ipywidgets>=8.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/awarru/fem-em-solver"
+Documentation = "https://awarru.github.io/fem-em-solver"
+Repository = "https://github.com/awarru/fem-em-solver"
+Issues = "https://github.com/awarru/fem-em-solver/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "validation: Validation against analytic/HFSS",
+    "slow: Slow tests (skip in quick mode)",
+]
