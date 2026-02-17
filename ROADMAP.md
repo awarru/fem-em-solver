@@ -1,241 +1,324 @@
 # ROADMAP.md — FEM EM Solver Development Roadmap
 
-Each chunk is a single focused task that can be completed and tested in one session.
-**CRITICAL:** Each chunk MUST be tested before marking complete. If it doesn't run, fix it.
+**Principles:**
+- One chunk = ONE specific task (e.g., "create and verify a cube mesh")
+- Each chunk has exact test command and expected output
+- NO chunk is marked complete until test passes
+- If stuck for >30 min, flag via Telegram and move to next chunk
+- Commit after EVERY passing chunk
 
 ---
 
-## Phase 1: Magnetostatics Foundation
+## Current Status
 
-### ✅ Chunk 0: Initial solver structure
-**Status:** Complete and tested in Docker
+### ✅ Chunk 0: Repository structure
+**Status:** COMPLETE
 **Commit:** `9086ecd`
+**Test:** `git log --oneline -1` shows commit
 
-### ✅ Chunk 1: Fix current density restriction to wire subdomain  
-**Status:** Complete
+### ✅ Chunk 1: Current density restriction  
+**Status:** COMPLETE
 **Commit:** `6da3f33`
+**Test:** Code review only (solver API change)
 
-### ✅ Chunk 2: Circular loop mesh and validation
-**Status:** Complete
+### ✅ Chunk 2: Circular loop mesh
+**Status:** COMPLETE  
 **Commit:** `e5a0936`
+**Test:** `python3 -c "from fem_em_solver.io.mesh import MeshGenerator; print('OK')"`
 
-### ⬜ Chunk 3: Helmholtz coil validation
-**Status:** CODE WRITTEN, NOT WORKING
-**Commit:** `030eb48`
-**⚠️ ISSUE FOUND:** Mesh generation hangs/times out
-**Problem:** Two tori fragmentation is too complex for Gmsh
+### ⬜ Chunk 3-6: KNOWN ISSUES (see below)
 
 ---
 
-## Current Priority: Fix Broken Chunks
+## KNOWN ISSUES (Flagged for Review)
 
-### ⬜ Chunk 4: FIX or SKIP Helmholtz coil
-**Status:** Attempted fix, still not working
-**Commit:** `7d5005e`
+### ⬜ ISSUE-1: Helmholtz coil mesh hangs
+**Status:** CODE WRITTEN, DOES NOT WORK
+**File:** `src/fem_em_solver/io/mesh.py::helmholtz_coil_domain()`
+**Problem:** Two tori fragmentation creates 1.6M elements, dolfinx conversion hangs
+**Tested:** 2026-02-17, times out after 120s
+**Options:** 
+1. Use box domain instead of sphere (simpler)
+2. Don't fragment - use single wire volume
+3. Remove Helmholtz from Phase 1 scope
+**Recommendation:** Option 3 - Helmholtz not critical for MRI coil goals
 
-**Problem Analysis:**
-- Two tori fragmentation creates 1.6M element mesh
-- Dolfinx mesh conversion hangs (in `gmshio.model_to_mesh`)
-- Issue is complex topology from fragmentation, not Gmsh itself
-
+### ⬜ ISSUE-2: Convergence test too slow  
+**Status:** TEST SKELETON WRITTEN, SOLVER TOO SLOW
+**File:** `tests/validation/test_convergence.py`
+**Problem:** Straight wire mesh + solve takes >60s per resolution
+**Tested:** 2026-02-17, times out on 2 resolutions
 **Options:**
-1. **SKIP for now** - Move to convergence tests (Chunk 5)
-2. **SIMPLIFY approach** - Use box domain instead of sphere
-3. **SIMPLIFY approach** - Don't fragment, just tag cells by location
-4. **DEBUG** - Investigate dolfinx issue (time-consuming)
+1. Use built-in dolfinx mesh (no Gmsh)
+2. Coarser mesh + fewer resolutions  
+3. Skip convergence tests for now
+**Recommendation:** Option 2 - simplify and retest
 
-**Recommendation: OPTION 1 (SKIP)**
-- Straight wire and circular loop work fine
-- Convergence tests are more valuable than Helmholtz
-- Can revisit Helmholtz later with simpler mesh approach
-- Mark Helmholtz as "known issue" in docs
-
-**If choosing Option 1:**
-1. Update ROADMAP to mark Helmholtz as skipped
-2. Add note in docs about known issue
-3. Move to Chunk 5 (convergence tests)
-
-**Success criteria:** Decision made on how to proceed
-**Commit message:** "Document Helmholtz coil as known issue, proceed to convergence"
+**ACTION REQUIRED:** User to decide on Issues 1 and 2
 
 ---
 
-## Remaining Phase 1 Work (After Fix)
+## Phase 1 Revised: Working Magnetostatics (Small Chunks)
 
-### ✅ Chunk 5: SKIP Helmholtz - Add convergence test skeleton
-**Scope:** Create empty convergence test file
+Goal: Have working, tested magnetostatic solver with basic validation.
 
-**Reason:** Helmholtz coil mesh has known issues (complex fragmentation hangs). Moving to more valuable convergence tests that use working straight wire geometry.
+### ⬜ Chunk 7: Create simple cube mesh with Gmsh
+**Scope:** Use Gmsh Python API to create a cube and export to .msh file
 
-**Steps:**
-1. Create `tests/validation/test_convergence.py`
-2. Add imports
-3. Create empty test methods with docstrings
-4. Verify imports work in Docker
-5. Commit
-
-**Success criteria:** File created, pytest can discover tests
-**Commit message:** "Add convergence study test skeleton"
-**Committed:** `1d13f21` (2026-02-17)
-**Verified:** ✓ Imports work, pytest discovers 3 tests
+**Why:** Learn Gmsh API, establish mesh testing pattern
 
 **Steps:**
-1. Run example and capture output
-2. Check B_z at center matches analytical ~0.7155 * μ₀I/R
-3. Check field uniformity in central region
-4. If results look wrong, debug and fix
+1. Create `tests/mesh/test_cube.py`
+2. Write test that:
+   ```python
+   import gmsh
+   gmsh.initialize()
+   gmsh.model.add("cube")
+   box = gmsh.model.occ.addBox(0, 0, 0, 1, 1, 1)
+   gmsh.model.occ.synchronize()
+   gmsh.model.mesh.generate(3)
+   gmsh.write("/tmp/test_cube.msh")
+   gmsh.finalize()
+   ```
+3. Assert file `/tmp/test_cube.msh` exists and has >100 lines
 
-**Success criteria:** Numerical results match analytical within 10%
+**Test command:**
+```bash
+cd ~/Development/fem-em-solver/docker
+docker compose exec fem-em-solver bash -c '
+  export PYTHONPATH=/usr/local/dolfinx-real/lib/python3.10/dist-packages:/usr/local/lib:/workspace/src
+  cd /workspace
+  python3 -m pytest tests/mesh/test_cube.py -v
+'
+```
+
+**Expected output:**
+```
+tests/mesh/test_cube.py::test_gmsh_cube PASSED
+```
+
+**Success criteria:** Test passes, cube.msh file created
+**Commit message:** "Add Gmsh cube mesh test"
 
 ---
 
-### ⬜ Chunk 6: Add convergence study test file (skeleton only)
-**Scope:** Create empty test file with proper structure
+### ⬜ Chunk 8: Convert cube mesh to dolfinx
+**Scope:** Load .msh file into dolfinx mesh
+
+**Why:** Verify Gmsh → dolfinx pipeline works
 
 **Steps:**
-1. Create `tests/validation/test_convergence.py`
-2. Add imports (dolfinx, fem_em_solver modules)
-3. Create test class `TestConvergence` with empty methods:
-   - `test_h_refinement_straight_wire()` 
-   - `test_p_refinement_straight_wire()`
-4. Add docstrings explaining what each test will do
-5. Run `python3 -c "import tests.validation.test_convergence"` to verify no import errors
-6. Commit
-
-**Success criteria:** File exists, imports work, pytest can discover tests
-**Commit message:** "Add convergence study test skeleton"
-
----
-
-### ⬜ Chunk 7: Implement h-refinement convergence test
-**Scope:** Test error vs mesh size for straight wire problem
-
-**Steps:**
-1. In `test_convergence.py`, implement `test_h_refinement_straight_wire()`:
-   - Loop over resolutions: [0.02, 0.01, 0.007, 0.005]
-   - For each resolution:
-     a. Generate straight wire mesh
-     b. Solve magnetostatic problem
-     c. Compute B-field at sample points
-     d. Calculate L2 error vs analytical
-   - Store (h, error) pairs
-   - Fit log(error) vs log(h) to get convergence rate
+1. Add to `tests/mesh/test_cube.py`:
+   ```python
+   from dolfinx.io import gmshio
+   from mpi4py import MPI
    
-2. Assert rate > 0.8 (expected for linear elements)
-
-3. Run test in Docker:
-   ```bash
-   pytest tests/validation/test_convergence.py::TestConvergence::test_h_refinement_straight_wire -v
+   def test_cube_to_dolfinx():
+       mesh, cell_tags, facet_tags = gmshio.read_from_msh(
+           "/tmp/test_cube.msh", MPI.COMM_WORLD, 0, gdim=3
+       )
+       assert mesh.topology.index_map(3).size_global > 0
    ```
 
-4. Fix any errors until test passes
+**Test command:** Same as Chunk 7
 
-**Success criteria:** Test runs and reports convergence rate > 0.8
-**Commit message:** "Implement h-refinement convergence test"
+**Expected output:**
+```
+tests/mesh/test_cube.py::test_gmsh_cube PASSED
+tests/mesh/test_cube.py::test_cube_to_dolfinx PASSED
+```
 
----
-
-### ⬜ Chunk 8: Implement p-refinement convergence test  
-**Scope:** Test error vs polynomial degree
-
-**Steps:**
-1. Implement `test_p_refinement_straight_wire()`:
-   - Fixed mesh resolution (e.g., 0.01)
-   - Loop over degrees: [1, 2, 3]
-   - For each degree:
-     a. Create solver with degree=N
-     b. Solve and compute error
-   - Expect error to decrease with higher degree
-   
-2. Assert that degree 2 error < degree 1 error
-
-3. Run and verify in Docker
-
-**Success criteria:** Higher degree gives lower error
-**Commit message:** "Implement p-refinement convergence test"
+**Success criteria:** Both tests pass, dolfinx mesh has cells
+**Commit message:** "Add dolfinx mesh conversion test"
 
 ---
 
-### ⬜ Chunk 9: Document Phase 1 results
-**Scope:** Write validation report
+### ⬜ Chunk 9: Solve magnetostatics on cube mesh (no source)
+**Scope:** Run solver on cube with J=0, verify it doesn't crash
+
+**Why:** Test solver works with simple dolfinx mesh
 
 **Steps:**
-1. Create `docs/validation/magnetostatics.md`
-2. Document:
-   - Problem formulations (weak form)
-   - Mesh details for each geometry
-   - Convergence study results table
-   - Comparison with analytical solutions
-3. Include example command outputs
-4. Link to test files
+1. Create `tests/solver/test_cube_solver.py`
+2. Use `MeshGenerator.create_simple_box()` to make mesh
+3. Create MagnetostaticProblem with no current
+4. Call solver.solve() 
+5. Verify solver._solved is True
 
-**Success criteria:** Document is complete and readable
-**Commit message:** "Add Phase 1 validation documentation"
+**Test command:**
+```bash
+python3 -m pytest tests/solver/test_cube_solver.py -v
+```
+
+**Expected output:**
+```
+tests/solver/test_cube_solver.py::test_solve_no_source PASSED
+```
+
+**Success criteria:** Solver completes without error
+**Commit message:** "Test solver on simple cube mesh"
 
 ---
 
-### ⬜ Chunk 10: Final Phase 1 cleanup
-**Scope:** Ensure everything works end-to-end
+### ⬜ Chunk 10: Solve with uniform current on cube
+**Scope:** Add constant J to cube, solve, check B-field is reasonable
 
 **Steps:**
-1. Run all tests in Docker:
+1. Create cube mesh
+2. Define uniform J = [0, 0, 1]
+3. Solve
+4. Compute B-field
+5. Check B-field is not all zeros (has some magnitude)
+
+**Test command:**
+```bash
+python3 -m pytest tests/solver/test_cube_with_current.py -v
+```
+
+**Expected output:**
+```
+tests/solver/test_cube_with_current.py::test_uniform_current PASSED
+```
+
+**Success criteria:** B-field computed and has non-zero values
+**Commit message:** "Test solver with uniform current"
+
+---
+
+### ⬜ Chunk 11: Document what works
+**Scope:** Write docs showing verified working features
+
+**Steps:**
+1. Create `docs/status.md`
+2. List working features:
+   - Repository structure
+   - Docker setup
+   - Straight wire mesh generation (Gmsh)
+   - Circular loop mesh generation (Gmsh)
+   - Straight wire validation test
+   - Circular loop validation test
+   - Cube mesh (built-in and Gmsh)
+   - Solver on simple meshes
+3. List known issues:
+   - Helmholtz coil mesh too complex
+   - Convergence tests too slow
+4. Add example commands that work
+
+**Test:** Manual review
+
+**Success criteria:** Document exists and is accurate
+**Commit message:** "Add project status documentation"
+
+---
+
+### ⬜ Chunk 12: Clean up broken code
+**Scope:** Remove or disable code that doesn't work
+
+**Files to address:**
+1. `examples/magnetostatics/03_helmholtz_coil.py` - move to `examples/broken/`
+2. `tests/validation/test_convergence.py` - mark all tests as skip with reason
+3. Add comments explaining why
+
+**Test:**
+```bash
+python3 -m pytest tests/ -v 2>&1 | grep -E "(PASSED|FAILED|SKIPPED)"
+```
+
+**Expected:** No FAILED, broken tests show as SKIPPED
+
+**Success criteria:** Clean test output, broken code isolated
+**Commit message:** "Isolate broken code, document known issues"
+
+---
+
+### ⬜ Chunk 13: Final Phase 1 verification
+**Scope:** Run everything, confirm working state
+
+**Steps:**
+1. Run all tests:
    ```bash
-   pytest tests/ -v --tb=short
+   python3 -m pytest tests/ -v --tb=short 2>&1 | tail -20
    ```
-   
-2. Verify all pass or document known failures
-
-3. Run all examples:
+2. Run working examples:
    ```bash
    python3 examples/magnetostatics/01_straight_wire.py
    python3 examples/magnetostatics/02_circular_loop.py
-   python3 examples/magnetostatics/03_helmholtz_coil.py
+   ```
+3. Verify imports:
+   ```bash
+   python3 -c "import fem_em_solver; print('OK')"
    ```
 
-4. Check git status - everything committed?
+**Success criteria:**
+- All tests pass or skip cleanly (no failures)
+- Examples run without error
+- Package imports correctly
 
-5. Update PROJECT_PLAN.md to mark Phase 1 complete
-
-**Success criteria:** All tests run, examples execute, docs complete
-**Commit message:** "Phase 1 complete: magnetostatics validated"
+**Commit message:** "Phase 1 verified: working magnetostatics foundation"
 
 ---
 
-## Testing Protocol (STRICT)
+## Phase 2 Planning (Post-Phase 1)
+
+After Phase 1 is verified working:
+
+### ⬜ Chunk 14: Design time-harmonic formulation
+**Scope:** Write math documentation for E-field formulation
+
+### ⬜ Chunk 15: Implement complex material properties
+**Scope:** Add support for ε = ε' - jε''
+
+### ⬜ Chunk 16: Add PEC boundary conditions
+**Scope:** Implement n×E = 0 boundary
+
+... (more chunks as needed)
+
+---
+
+## Testing Protocol (REQUIRED)
 
 **Before marking ANY chunk complete:**
 
-1. **Run the code in Docker:**
-   ```bash
-   cd ~/Development/fem-em-solver/docker
-   docker compose exec fem-em-solver bash
-   cd /workspace
-   export PYTHONPATH=/usr/local/dolfinx-real/lib/python3.10/dist-packages:/usr/local/lib:/workspace/src
-   python3 <test_or_example>
-   ```
+1. **Run exact test command from chunk**
+2. **Verify output matches "Expected output"**
+3. **If output differs:**
+   - Read error carefully
+   - Fix code
+   - Re-run test
+   - Repeat until pass
+4. **If stuck for >30 min:**
+   - DO NOT mark chunk complete
+   - Add note to chunk: "BLOCKED: [reason]"
+   - Move to next chunk
+   - Send Telegram message flagging issue
+5. **Once test passes:**
+   - Commit
+   - Mark chunk ✅ with commit hash
+   - Move to next chunk
 
-2. **Verify it produces expected output:**
-   - No Python exceptions
-   - No hangs/timeouts
-   - Reasonable numerical values
-   - Tests pass (if applicable)
-
-3. **If it fails:**
-   - Read error messages carefully
-   - Fix the issue
-   - Re-run
-   - Repeat until it works
-
-4. **Only then:** Commit and mark chunk complete
-
-**DO NOT** mark chunks complete based on code review alone. They must actually run.
+**NO EXCEPTIONS.** If a chunk takes multiple sessions, that's fine. Don't fake completion.
 
 ---
 
-## Immediate Next Actions
+## Immediate Priority
 
-1. **Chunk 4:** Fix Helmholtz coil mesh (it's broken)
-2. **Chunk 5:** Verify Helmholtz results (after fix)
-3. **Chunks 6-10:** Continue with convergence and documentation
+**Next chunk to work on:** Chunk 7 (Gmsh cube mesh)
 
-**DO NOT** start Phase 2 until all Phase 1 chunks are verified working.
+**Why:** Establishes working Gmsh → dolfinx pipeline for future mesh work
+
+**Blocked on:** Nothing
+
+**Estimated time:** 15-30 minutes
+
+**Ready to start:** Yes
+
+---
+
+## User Decision Needed
+
+Please reply with decisions on:
+
+1. **Helmholtz coil:** Keep trying to fix, or remove from Phase 1?
+2. **Convergence tests:** Simplify and retry, or skip for now?
+
+Once decided, I'll update ROADMAP and proceed with Chunk 7.
