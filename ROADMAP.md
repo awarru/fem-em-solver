@@ -37,7 +37,7 @@ This causes incorrect results because J should be zero outside the wire.
 **Commit message:** `"Phase 1: Restrict current density to wire subdomain using cell_tags"`
 **Committed:** `6da3f33` (2026-02-17)
 
-### ⬜ Chunk 2: Circular loop mesh and validation
+### ✅ Chunk 2: Circular loop mesh and validation
 **What:** Add mesh generation for a circular current loop and validate B_z on axis.
 
 **How:**
@@ -56,6 +56,7 @@ This causes incorrect results because J should be zero outside the wire.
 
 **Success criteria:** On-axis B_z matches analytical solution within 10%
 **Commit message:** `"Phase 1: Circular loop mesh generation and on-axis validation"`
+**Committed:** `e5a0936` (2026-02-17)
 
 ### ⬜ Chunk 3: Helmholtz coil validation
 **What:** Two loops separated by one radius. Test field uniformity in center.
