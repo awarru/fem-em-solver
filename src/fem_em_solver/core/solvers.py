@@ -26,6 +26,7 @@ from dataclasses import dataclass
 import dolfinx
 import ufl
 from dolfinx import fem, mesh, io
+from dolfinx.fem.petsc import LinearProblem
 from ufl import curl, inner, dx, TrialFunction, TestFunction
 from mpi4py import MPI
 import gmsh
@@ -135,7 +136,7 @@ class MagnetostaticSolver:
             bcs = bc_functions
             
         # Solve
-        problem = fem.petsc.LinearProblem(
+        problem = LinearProblem(
             a, L, 
             bcs=bcs,
             petsc_options={"ksp_type": "preonly", "pc_type": "lu"}

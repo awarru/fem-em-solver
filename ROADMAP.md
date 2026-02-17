@@ -62,7 +62,7 @@ Each chunk is a single focused task that can be completed and tested in one sess
 
 ## Remaining Phase 1 Work (After Fix)
 
-### ⬜ Chunk 5: SKIP Helmholtz - Add convergence test skeleton
+### ✅ Chunk 5: SKIP Helmholtz - Add convergence test skeleton
 **Scope:** Create empty convergence test file
 
 **Reason:** Helmholtz coil mesh has known issues (complex fragmentation hangs). Moving to more valuable convergence tests that use working straight wire geometry.
@@ -76,6 +76,8 @@ Each chunk is a single focused task that can be completed and tested in one sess
 
 **Success criteria:** File created, pytest can discover tests
 **Commit message:** "Add convergence study test skeleton"
+**Committed:** `1d13f21` (2026-02-17)
+**Verified:** ✓ Imports work, pytest discovers 3 tests
 
 **Steps:**
 1. Run example and capture output
