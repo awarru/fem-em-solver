@@ -58,7 +58,7 @@ This causes incorrect results because J should be zero outside the wire.
 **Commit message:** `"Phase 1: Circular loop mesh generation and on-axis validation"`
 **Committed:** `e5a0936` (2026-02-17)
 
-### ⬜ Chunk 3: Helmholtz coil validation
+### ✅ Chunk 3: Helmholtz coil validation
 **What:** Two loops separated by one radius. Test field uniformity in center.
 
 **How:**
@@ -75,6 +75,7 @@ This causes incorrect results because J should be zero outside the wire.
 
 **Success criteria:** B_z uniform to <1% in central region, matches analytical <10%
 **Commit message:** `"Phase 1: Helmholtz coil mesh and field uniformity validation"`
+**Committed:** `030eb48` (2026-02-17)
 
 ### ⬜ Chunk 4: Convergence study infrastructure
 **What:** Prove the solver converges at the expected rate as mesh refines.
