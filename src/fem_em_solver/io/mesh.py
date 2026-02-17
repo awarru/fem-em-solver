@@ -148,6 +148,127 @@ class MeshGenerator:
         return mesh, cell_tags, facet_tags
     
     @staticmethod
+    def circular_loop_domain(
+        loop_radius: float = 0.05,
+        wire_radius: float = 0.001,
+        domain_radius: float = 0.15,
+        resolution: float = 0.005,
+        comm: MPI.Intracomm = MPI.COMM_WORLD,
+        rank: int = 0
+    ) -> Tuple[dolfinx.mesh.Mesh, dolfinx.mesh.MeshTags, dolfinx.mesh.MeshTags]:
+        """Generate mesh for circular current loop in spherical domain.
+        
+        Creates a torus (ring) for the wire surrounded by a spherical air domain.
+        The loop lies in the xy-plane centered at origin.
+        
+        Parameters
+        ----------
+        loop_radius : float
+            Major radius of loop (distance from center to wire center) [m]
+        wire_radius : float
+            Minor radius of wire cross-section [m]
+        domain_radius : float
+            Radius of surrounding spherical domain [m]
+        resolution : float
+            Characteristic mesh size [m]
+        comm : MPI.Intracomm
+            MPI communicator
+        rank : int
+            Rank for Gmsh model (usually 0)
+            
+        Returns
+        -------
+        mesh : dolfinx.mesh.Mesh
+            The generated mesh
+        cell_tags : dolfinx.mesh.MeshTags
+            Cell tags for subdomains (wire=1, air=2)
+        facet_tags : dolfinx.mesh.MeshTags
+            Facet tags for boundaries
+        """
+        if comm.rank == rank:
+            # Initialize Gmsh
+            gmsh.initialize()
+            gmsh.model.add("circular_loop")
+            
+            # Create wire as torus in xy-plane
+            # addTorus(x, y, z, major_radius, minor_radius)
+            wire_tag = gmsh.model.occ.addTorus(0, 0, 0, loop_radius, wire_radius)
+            
+            # Create surrounding spherical domain
+            domain_tag = gmsh.model.occ.addSphere(0, 0, 0, domain_radius)
+            
+            # Fragment to get separate volumes
+            ov, ovv = gmsh.model.occ.fragment(
+                [(3, domain_tag)],
+                [(3, wire_tag)]
+            )
+            gmsh.model.occ.synchronize()
+            
+            # Get volumes and tag them
+            volumes = gmsh.model.getEntities(dim=3)
+            wire_volume = None
+            air_volume = None
+            
+            for vol in volumes:
+                bbox = gmsh.model.getBoundingBox(vol[0], vol[1])
+                x_min, y_min, z_min, x_max, y_max, z_max = bbox
+                
+                # Compute bounding box dimensions
+                dx = x_max - x_min
+                dy = y_max - y_min
+                dz = z_max - z_min
+                
+                # Wire has smaller bounding box
+                max_dim = max(dx, dy, dz)
+                if max_dim < 4 * loop_radius:  # Wire is smaller
+                    wire_volume = vol[1]
+                else:
+                    air_volume = vol[1]
+            
+            # Add physical groups
+            if wire_volume:
+                gmsh.model.addPhysicalGroup(3, [wire_volume], tag=1)
+                gmsh.model.setPhysicalName(3, 1, "wire")
+            
+            if air_volume:
+                gmsh.model.addPhysicalGroup(3, [air_volume], tag=2)
+                gmsh.model.setPhysicalName(3, 2, "air")
+            
+            # Tag boundaries
+            surfaces = gmsh.model.getEntities(dim=2)
+            boundary_surfaces = []
+            
+            for surf in surfaces:
+                bbox = gmsh.model.getBoundingBox(surf[0], surf[1])
+                x_min, y_min, z_min, x_max, y_max, z_max = bbox
+                
+                # Check if on outer spherical boundary
+                r_max = np.sqrt(x_max**2 + y_max**2 + z_max**2)
+                if abs(r_max - domain_radius) < resolution:
+                    boundary_surfaces.append(surf[1])
+            
+            if boundary_surfaces:
+                gmsh.model.addPhysicalGroup(2, boundary_surfaces, tag=1)
+                gmsh.model.setPhysicalName(2, 1, "outer_boundary")
+            
+            # Set mesh size
+            gmsh.model.mesh.setSize(gmsh.model.getEntities(0), resolution)
+            
+            # Generate mesh
+            gmsh.model.mesh.generate(3)
+            gmsh.model.mesh.optimize("Netgen")
+            
+        # Convert to dolfinx mesh
+        mesh, cell_tags, facet_tags = gmshio.model_to_mesh(
+            gmsh.model, comm, rank, gdim=3
+        )
+        
+        if comm.rank == rank:
+            gmsh.finalize()
+        
+        return mesh, cell_tags, facet_tags
+    
+    @staticmethod
     def rectangular_domain(
         bounds: Tuple[float, float, float, float, float, float],
         resolution: float,
