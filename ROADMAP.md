@@ -29,52 +29,53 @@ Each chunk is a single focused task that can be completed and tested in one sess
 
 ## Current Priority: Fix Broken Chunks
 
-### ⬜ Chunk 4: FIX Helmholtz coil mesh generation
-**Scope:** Make Helmholtz coil actually run without hanging
+### ⬜ Chunk 4: FIX or SKIP Helmholtz coil
+**Status:** Attempted fix, still not working
+**Commit:** `7d5005e`
 
 **Problem Analysis:**
-- Current implementation creates two tori and fragments them with domain
-- Gmsh mesh.optimize("Netgen") hangs on complex topology
-- Need simpler approach
+- Two tori fragmentation creates 1.6M element mesh
+- Dolfinx mesh conversion hangs (in `gmshio.model_to_mesh`)
+- Issue is complex topology from fragmentation, not Gmsh itself
 
-**Fix Options:**
-1. Remove mesh.optimize() call (may produce lower quality mesh)
-2. Use boolean union for wires first, then fragment with domain
-3. Simplify geometry (larger wire radius, coarser mesh)
-4. Use different meshing algorithm
+**Options:**
+1. **SKIP for now** - Move to convergence tests (Chunk 5)
+2. **SIMPLIFY approach** - Use box domain instead of sphere
+3. **SIMPLIFY approach** - Don't fragment, just tag cells by location
+4. **DEBUG** - Investigate dolfinx issue (time-consuming)
 
-**Steps:**
-1. Try Option 1 first (simplest):
-   - Edit `src/fem_em_solver/io/mesh.py`
-   - Comment out `gmsh.model.mesh.optimize("Netgen")` in helmholtz_coil_domain()
-   
-2. Test in Docker:
-   ```bash
-   cd ~/Development/fem-em-solver/docker
-   docker compose exec fem-em-solver bash
-   cd /workspace
-   export PYTHONPATH=/usr/local/dolfinx-real/lib/python3.10/dist-packages:/usr/local/lib:/workspace/src
-   timeout 60 python3 examples/magnetostatics/03_helmholtz_coil.py
-   ```
+**Recommendation: OPTION 1 (SKIP)**
+- Straight wire and circular loop work fine
+- Convergence tests are more valuable than Helmholtz
+- Can revisit Helmholtz later with simpler mesh approach
+- Mark Helmholtz as "known issue" in docs
 
-3. If that doesn't work, try Option 2:
-   - Create both tori
-   - Use `gmsh.model.occ.fuse()` to merge them into one object
-   - Then fragment with domain
-   
-4. Repeat test until it completes in <60 seconds
+**If choosing Option 1:**
+1. Update ROADMAP to mark Helmholtz as skipped
+2. Add note in docs about known issue
+3. Move to Chunk 5 (convergence tests)
 
-5. Once working, commit fix
-
-**Success criteria:** Helmholtz example runs to completion in under 60 seconds
-**Commit message:** "Fix Helmholtz coil mesh generation - prevent hang"
+**Success criteria:** Decision made on how to proceed
+**Commit message:** "Document Helmholtz coil as known issue, proceed to convergence"
 
 ---
 
 ## Remaining Phase 1 Work (After Fix)
 
-### ⬜ Chunk 5: VERIFY Helmholtz coil results
-**Scope:** Run and check output is physically reasonable
+### ⬜ Chunk 5: SKIP Helmholtz - Add convergence test skeleton
+**Scope:** Create empty convergence test file
+
+**Reason:** Helmholtz coil mesh has known issues (complex fragmentation hangs). Moving to more valuable convergence tests that use working straight wire geometry.
+
+**Steps:**
+1. Create `tests/validation/test_convergence.py`
+2. Add imports
+3. Create empty test methods with docstrings
+4. Verify imports work in Docker
+5. Commit
+
+**Success criteria:** File created, pytest can discover tests
+**Commit message:** "Add convergence study test skeleton"
 
 **Steps:**
 1. Run example and capture output
