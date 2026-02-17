@@ -1,0 +1,226 @@
+"""Mesh generation utilities for EM simulations."""
+
+from typing import Optional, Tuple, List
+import numpy as np
+import gmsh
+from mpi4py import MPI
+import dolfinx
+from dolfinx.io import gmshio
+
+
+class MeshGenerator:
+    """Generate meshes for common geometries using Gmsh."""
+    
+    @staticmethod
+    def straight_wire_domain(
+        wire_length: float = 1.0,
+        wire_radius: float = 0.001,
+        domain_radius: float = 0.1,
+        resolution: float = 0.005,
+        comm: MPI.Intracomm = MPI.COMM_WORLD,
+        rank: int = 0
+    ) -> Tuple[dolfinx.mesh.Mesh, dolfinx.mesh.MeshTags, dolfinx.mesh.MeshTags]:
+        """Generate mesh for straight wire in cylindrical domain.
+        
+        Creates a cylindrical domain with a thin wire along the z-axis.
+        Useful for validating against the analytical solution for an
+        infinite straight wire.
+        
+        Parameters
+        ----------
+        wire_length : float
+            Length of wire [m]
+        wire_radius : float
+            Radius of wire [m] (should be small for thin wire approximation)
+        domain_radius : float
+            Radius of surrounding cylindrical domain [m]
+        resolution : float
+            Characteristic mesh size [m]
+        comm : MPI.Intracomm
+            MPI communicator
+        rank : int
+            Rank for Gmsh model (usually 0)
+            
+        Returns
+        -------
+        mesh : dolfinx.mesh.Mesh
+            The generated mesh
+        cell_tags : dolfinx.mesh.MeshTags
+            Cell tags for subdomains (wire, surrounding)
+        facet_tags : dolfinx.mesh.MeshTags
+            Facet tags for boundaries
+        """
+        if comm.rank == rank:
+            # Initialize Gmsh
+            gmsh.initialize()
+            gmsh.model.add("straight_wire")
+            
+            # Create wire (cylinder along z-axis)
+            wire_tag = gmsh.model.occ.addCylinder(
+                0, 0, -wire_length/2,  # center of bottom face
+                0, 0, wire_length,      # axis direction and height
+                wire_radius
+            )
+            
+            # Create surrounding domain (hollow cylinder)
+            domain_tag = gmsh.model.occ.addCylinder(
+                0, 0, -wire_length/2,
+                0, 0, wire_length,
+                domain_radius
+            )
+            
+            # Cut wire out of domain to create separate volumes
+            # Actually, we want both as separate volumes, so we fragment
+            ov, ovv = gmsh.model.occ.fragment(
+                [(3, domain_tag)],
+                [(3, wire_tag)]
+            )
+            gmsh.model.occ.synchronize()
+            
+            # Get volumes
+            volumes = gmsh.model.getEntities(dim=3)
+            wire_volume = None
+            domain_volume = None
+            
+            # Tag volumes based on their bounding box
+            for vol in volumes:
+                bbox = gmsh.model.getBoundingBox(vol[0], vol[1])
+                # Check if this is the wire (small radius)
+                x_min, y_min, z_min, x_max, y_max, z_max = bbox
+                r_max = np.sqrt(max(x_max**2, y_max**2))
+                if r_max < 2 * wire_radius:
+                    wire_volume = vol[1]
+                else:
+                    domain_volume = vol[1]
+            
+            # Add physical groups
+            if wire_volume:
+                gmsh.model.addPhysicalGroup(3, [wire_volume], tag=1)
+                gmsh.model.setPhysicalName(3, 1, "wire")
+            
+            if domain_volume:
+                gmsh.model.addPhysicalGroup(3, [domain_volume], tag=2)
+                gmsh.model.setPhysicalName(3, 2, "domain")
+            
+            # Tag boundaries
+            surfaces = gmsh.model.getEntities(dim=2)
+            boundary_surfaces = []
+            wire_surfaces = []
+            
+            for surf in surfaces:
+                bbox = gmsh.model.getBoundingBox(surf[0], surf[1])
+                x_min, y_min, z_min, x_max, y_max, z_max = bbox
+                r_max = np.sqrt(max(x_max**2, y_max**2))
+                
+                # Cylindrical boundary of domain
+                if abs(r_max - domain_radius) < resolution:
+                    boundary_surfaces.append(surf[1])
+                # Wire surface
+                elif r_max < 2 * wire_radius:
+                    wire_surfaces.append(surf[1])
+            
+            if boundary_surfaces:
+                gmsh.model.addPhysicalGroup(2, boundary_surfaces, tag=1)
+                gmsh.model.setPhysicalName(2, 1, "boundary")
+            
+            if wire_surfaces:
+                gmsh.model.addPhysicalGroup(2, wire_surfaces, tag=2)
+                gmsh.model.setPhysicalName(2, 2, "wire_surface")
+            
+            # Set mesh size
+            gmsh.model.mesh.setSize(gmsh.model.getEntities(0), resolution)
+            
+            # Generate mesh
+            gmsh.model.mesh.generate(3)
+            gmsh.model.mesh.optimize("Netgen")
+            
+            # Save for debugging (optional)
+            # gmsh.write("straight_wire.msh")
+            
+        # Convert to dolfinx mesh
+        mesh, cell_tags, facet_tags = gmshio.model_to_mesh(
+            gmsh.model, comm, rank, gdim=3
+        )
+        
+        if comm.rank == rank:
+            gmsh.finalize()
+        
+        return mesh, cell_tags, facet_tags
+    
+    @staticmethod
+    def rectangular_domain(
+        bounds: Tuple[float, float, float, float, float, float],
+        resolution: float,
+        comm: MPI.Intracomm = MPI.COMM_WORLD,
+        rank: int = 0
+    ) -> dolfinx.mesh.Mesh:
+        """Generate simple rectangular domain.
+        
+        Parameters
+        ----------
+        bounds : tuple
+            (xmin, xmax, ymin, ymax, zmin, zmax)
+        resolution : float
+            Mesh size
+        comm : MPI.Intracomm
+            MPI communicator
+        rank : int
+            Rank for Gmsh
+            
+        Returns
+        -------
+        mesh : dolfinx.mesh.Mesh
+            The generated mesh
+        """
+        if comm.rank == rank:
+            gmsh.initialize()
+            gmsh.model.add("rectangular")
+            
+            xmin, xmax, ymin, ymax, zmin, zmax = bounds
+            
+            # Create box
+            box = gmsh.model.occ.addBox(xmin, ymin, zmin, 
+                                         xmax-xmin, ymax-ymin, zmax-zmin)
+            gmsh.model.occ.synchronize()
+            
+            gmsh.model.addPhysicalGroup(3, [box], tag=1)
+            
+            # Set mesh size
+            gmsh.model.mesh.setSize(gmsh.model.getEntities(0), resolution)
+            gmsh.model.mesh.generate(3)
+        
+        mesh, _, _ = gmshio.model_to_mesh(gmsh.model, comm, rank, gdim=3)
+        
+        if comm.rank == rank:
+            gmsh.finalize()
+        
+        return mesh
+    
+    @staticmethod
+    def create_simple_box(
+        L: float = 1.0,
+        n: int = 10,
+        comm: MPI.Intracomm = MPI.COMM_WORLD
+    ) -> dolfinx.mesh.Mesh:
+        """Create simple box mesh using dolfinx built-in generator.
+        
+        Parameters
+        ----------
+        L : float
+            Box half-length (domain is [-L, L]³)
+        n : int
+            Number of cells in each direction
+        comm : MPI.Intracomm
+            MPI communicator
+            
+        Returns
+        -------
+        mesh : dolfinx.mesh.Mesh
+            Box mesh
+        """
+        from dolfinx.mesh import create_box, CellType
+        
+        domain = [(-L, -L, -L), (L, L, L)]
+        mesh = create_box(comm, domain, [n, n, n], CellType.tetrahedron)
+        
+        return mesh
