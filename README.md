@@ -22,9 +22,18 @@ A finite element method (FEM) solver for electromagnetic simulations of MRI coil
 #### Option 1: Using Docker (Recommended)
 
 ```bash
-docker-compose up -d
-docker exec -it fem-em-solver bash
+# Build and start the container
+cd docker
+docker compose up -d
+
+# Enter the container
+docker compose exec fem-em-solver bash
+
+# Or using docker exec directly:
+# docker exec -it fem-em-solver bash
 ```
+
+**Note:** Modern Docker uses `docker compose` (space). If you have an older version, use `docker-compose` (hyphen) instead.
 
 #### Option 2: Conda Environment
 
