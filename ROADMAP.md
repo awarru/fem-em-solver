@@ -16,7 +16,7 @@ to the next one. The heartbeat system reads this file to know what to do next.
 - Created validation test structure and example script
 - **Committed:** `9086ecd` (2026-02-17)
 
-### ⬜ Chunk 1: Fix current density restriction to wire subdomain
+### ✅ Chunk 1: Fix current density restriction to wire subdomain
 **What:** Current density J is applied to the whole mesh domain, not just the wire volume.
 This causes incorrect results because J should be zero outside the wire.
 
@@ -35,6 +35,7 @@ This causes incorrect results because J should be zero outside the wire.
 
 **Success criteria:** Validation test passes with relative L2 error < 10%
 **Commit message:** `"Phase 1: Restrict current density to wire subdomain using cell_tags"`
+**Committed:** `6da3f33` (2026-02-17)
 
 ### ⬜ Chunk 2: Circular loop mesh and validation
 **What:** Add mesh generation for a circular current loop and validate B_z on axis.
