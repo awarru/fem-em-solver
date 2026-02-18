@@ -60,6 +60,7 @@ site/
 # Large result files
 results/
 output/
+paraview_output/
 *.pkl
 *.npy
 *.npz
