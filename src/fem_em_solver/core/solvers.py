@@ -116,8 +116,8 @@ class MagnetostaticSolver:
         if subdomain_id is not None and self.problem.cell_tags is not None:
             # Create measure restricted to subdomain
             dx_sub = ufl.Measure(
-                "dx", 
-                domain=self.mesh, 
+                "dx",
+                domain=self.mesh,
                 subdomain_data=self.problem.cell_tags,
                 subdomain_id=subdomain_id
             )

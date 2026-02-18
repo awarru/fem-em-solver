@@ -1,11 +1,14 @@
 FROM dolfinx/dolfinx:v0.7.2
 
+# Install h5py from source to match system HDF5
+# This prevents version mismatch errors
+RUN pip install --no-cache-dir --no-binary=h5py h5py
+
 # Install additional dependencies
 RUN pip install --no-cache-dir \
     gmsh \
     pyvista \
     meshio \
-    h5py \
     tqdm \
     pydantic \
     pyyaml \

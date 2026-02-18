@@ -8,11 +8,15 @@ in the central region.
 
 import numpy as np
 from mpi4py import MPI
+from pathlib import Path
 
 from fem_em_solver.core.solvers import MagnetostaticSolver, MagnetostaticProblem
 from fem_em_solver.io.mesh import MeshGenerator
 from fem_em_solver.utils.analytical import AnalyticalSolutions, ErrorMetrics
 from fem_em_solver.utils.constants import MU_0
+
+# Import dolfinx I/O for ParaView output
+from dolfinx import io, fem
 
 
 def main():
@@ -23,12 +27,12 @@ def main():
     print("Example: Helmholtz coil magnetic field")
     print("=" * 60)
     
-    # Problem parameters
+    # Problem parameters (optimized for faster meshing)
     current = 1.0              # Current in each loop [A]
     loop_radius = 0.05         # Loop radius [m] (5 cm)
-    wire_radius = 0.001        # Wire cross-section [m] (1 mm)
-    domain_radius = 0.15       # Domain radius [m]
-    resolution = 0.005         # Mesh resolution [m]
+    wire_radius = 0.002        # Wire cross-section [m] (2 mm, increased for faster meshing)
+    domain_radius = 0.12       # Domain radius [m] (reduced from 0.15)
+    resolution = 0.008         # Mesh resolution [m] (coarser: 8mm vs 5mm)
     
     separation = loop_radius   # Helmholtz condition
     
@@ -79,8 +83,8 @@ def main():
     B = solver.compute_b_field()
     
     # Evaluate along z-axis
-    n_points = 50
-    z_eval = np.linspace(-0.1, 0.1, n_points)
+    n_points = 40  # Reduced from 50 for faster evaluation
+    z_eval = np.linspace(-0.08, 0.08, n_points)  # Adjusted for smaller domain
     
     points = np.zeros((n_points, 3))
     points[:, 2] = z_eval  # z positions along axis
@@ -123,8 +127,78 @@ def main():
         print(f"    Mean B_z: {mean_B:.6e} T")
         print(f"    Std B_z: {std_B:.6e} T")
         print(f"    Coefficient of variation: {cv:.4%}")
-    
-    # Save results
+
+    # =========================================================================
+    # Save results for ParaView visualization
+    # =========================================================================
+    print("\n" + "=" * 60)
+    print("Saving results for ParaView visualization...")
+    print("=" * 60)
+
+    # Create output directory
+    output_dir = Path("paraview_output")
+    output_dir.mkdir(exist_ok=True)
+
+    # Method 1: XDMF format (traditional, widely compatible)
+    # Note: XDMF only supports Lagrange elements, so we need to interpolate
+    print("\n  Writing XDMF files...")
+
+    # Save the mesh with cell tags for visualization
+    with io.XDMFFile(comm, output_dir / "helmholtz_coil_mesh.xdmf", "w") as xdmf:
+        xdmf.write_mesh(mesh)
+        # Also write cell tags to visualize regions
+        if cell_tags is not None:
+            mesh.topology.create_connectivity(3, 3)
+            xdmf.write_meshtags(cell_tags, mesh.geometry)
+        print("    ✓ Mesh saved to helmholtz_coil_mesh.xdmf (with cell tags)")
+
+    # Create Lagrange function space for visualization
+    V_lag = fem.functionspace(mesh, ("Lagrange", 1, (3,)))
+
+    # Interpolate A to Lagrange space
+    A_lag = fem.Function(V_lag, name="A")
+    A_lag.interpolate(A)
+
+    with io.XDMFFile(comm, output_dir / "helmholtz_coil_A.xdmf", "w") as xdmf:
+        xdmf.write_mesh(mesh)
+        # Write cell tags for filtering in ParaView
+        if cell_tags is not None:
+            xdmf.write_meshtags(cell_tags, mesh.geometry)
+        xdmf.write_function(A_lag)
+        print("    ✓ Vector potential A saved to helmholtz_coil_A.xdmf (with cell tags)")
+
+    # Interpolate B to Lagrange space
+    B_lag = fem.Function(V_lag, name="B")
+    B_lag.interpolate(B)
+
+    with io.XDMFFile(comm, output_dir / "helmholtz_coil_B.xdmf", "w") as xdmf:
+        xdmf.write_mesh(mesh)
+        # Write cell tags so we can filter in ParaView
+        if cell_tags is not None:
+            xdmf.write_meshtags(cell_tags, mesh.geometry)
+        xdmf.write_function(B_lag)
+        print("    ✓ Magnetic field B saved to helmholtz_coil_B.xdmf (with cell tags for filtering)")
+
+    # Method 2: VTX format (modern, supports higher-order elements)
+    print("\n  Writing VTX files...")
+    try:
+        vtx_A = io.VTXWriter(comm, output_dir / "helmholtz_coil_A.bp", [A], engine="BP4")
+        vtx_A.write(0.0)
+        vtx_A.close()
+        print("    ✓ Vector potential A saved to helmholtz_coil_A.bp/")
+
+        vtx_B = io.VTXWriter(comm, output_dir / "helmholtz_coil_B.bp", [B], engine="BP4")
+        vtx_B.write(0.0)
+        vtx_B.close()
+        print("    ✓ Magnetic field B saved to helmholtz_coil_B.bp/")
+    except Exception as e:
+        print(f"    ⚠ VTX output failed (ADIOS2 may not be available): {e}")
+
+    print("\n  ✓ ParaView files saved to paraview_output/")
+    print("    Open helmholtz_coil_B.xdmf in ParaView to visualize")
+    print("    Tip: The highly uniform field in the center is the key feature!")
+
+    # Save results (text format)
     if comm.rank == 0:
         print("\n  Saving results...")
         data = np.column_stack([z_eval, B_num_z, B_ana_z, 
