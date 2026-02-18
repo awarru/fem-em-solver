@@ -22,7 +22,7 @@
 ### ✅ Chunk 2: Circular loop mesh
 **Status:** COMPLETE | **Commit:** `e5a0936`
 
-### ⬜ Chunk 3+: Path to Helmholtz (see below)
+### ⬜ Chunk 6+: Path to Helmholtz (see below)
 
 ---
 
@@ -98,7 +98,9 @@ SUCCESS: Cylindrical domain mesh generated
 
 ---
 
-### ⬜ Chunk 5: Solve magnetostatics on cylinder mesh
+### ✅ Chunk 5: Solve magnetostatics on cylinder mesh
+**Status:** COMPLETE | **Commit:** `542030a` | **Date:** 2026-02-18
+
 **Scope:** Use solver on cylindrical domain with current in inner cylinder
 
 **Why:** Verify solver works with multi-volume mesh from Chunk 4
@@ -108,13 +110,17 @@ SUCCESS: Cylindrical domain mesh generated
 python3 -m pytest tests/solver/test_cylinder.py -v
 ```
 
-**Test file:** `tests/solver/test_cylinder.py` that:
-1. Creates cylindrical mesh
-2. Sets up problem with current in inner volume
-3. Solves
-4. Checks B-field is computed
+**Test Results:**
+```
+tests/solver/test_cylinder.py::test_cylinder_solver_computes_nonzero_b_field PASSED
+```
 
-**Success criteria:** Test passes, B-field non-zero
+**Notes:**
+- Added `tests/solver/test_cylinder.py` per chunk requirements (mesh → solve → B-field checks)
+- Solver needed gauge regularization to avoid non-finite values from curl-curl nullspace
+- Added `gauge_penalty` term in `MagnetostaticSolver.solve()` (default `1e-3`) so B-field is finite and non-zero
+
+**Success criteria:** ✅ Test passes, B-field non-zero
 **Commit message:** "Test solver on cylindrical domain"
 
 ---
@@ -265,11 +271,11 @@ Goal: Birdcage, TEM, array coils
 
 ## Immediate Next Action
 
-**Chunk 3:** Verify circular loop example runs
+**Chunk 6:** Create two-cylinder mesh (no fragmentation)
 
-**Why:** Confirm current code works before adding complexity
+**Why:** Extend from validated cylinder solve to two-source geometry
 
-**Estimated time:** 5 minutes
+**Estimated time:** 15-25 minutes
 
 **Blocked:** No
 
