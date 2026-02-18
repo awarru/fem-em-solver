@@ -23,7 +23,7 @@
 **Status:** COMPLETE | **Commit:** `e5a0936`
 
 ### ✅ Chunk 6: Two-cylinder mesh prototype
-**Status:** COMPLETE | **Commit:** `PENDING` | **Date:** 2026-02-18
+**Status:** COMPLETE | **Commit:** `f6a4b03` | **Date:** 2026-02-18
 
 ### ⬜ Chunk 7+: Path to Helmholtz (see below)
 
@@ -129,7 +129,7 @@ tests/solver/test_cylinder.py::test_cylinder_solver_computes_nonzero_b_field PAS
 ---
 
 ### ✅ Chunk 6: Create two-cylinder mesh (no fragmentation)
-**Status:** COMPLETE | **Commit:** `PENDING` | **Date:** 2026-02-18
+**Status:** COMPLETE | **Commit:** `f6a4b03` | **Date:** 2026-02-18
 
 **Scope:** Two cylinders side-by-side, no boolean operations
 
