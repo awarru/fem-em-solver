@@ -22,7 +22,10 @@
 ### ✅ Chunk 2: Circular loop mesh
 **Status:** COMPLETE | **Commit:** `e5a0936`
 
-### ⬜ Chunk 6+: Path to Helmholtz (see below)
+### ✅ Chunk 6: Two-cylinder mesh prototype
+**Status:** COMPLETE | **Commit:** `PENDING` | **Date:** 2026-02-18
+
+### ⬜ Chunk 7+: Path to Helmholtz (see below)
 
 ---
 
@@ -125,7 +128,9 @@ tests/solver/test_cylinder.py::test_cylinder_solver_computes_nonzero_b_field PAS
 
 ---
 
-### ⬜ Chunk 6: Create two-cylinder mesh (no fragmentation)
+### ✅ Chunk 6: Create two-cylinder mesh (no fragmentation)
+**Status:** COMPLETE | **Commit:** `PENDING` | **Date:** 2026-02-18
+
 **Scope:** Two cylinders side-by-side, no boolean operations
 
 **Why:** Simpler approach than torus fragmentation for Helmholtz
@@ -150,9 +155,20 @@ print(f'Tags: {ct.values}')
 "
 ```
 
+**Test Results (Docker):**
+```
+Cells: 816
+Tags: [ ... 1 ... 2 ... 3 ... ]
+```
+
 **Expected:** Two tagged volumes + domain
 
-**Success criteria:** Mesh has 3 volumes, properly tagged
+**Notes:**
+- Added `MeshGenerator.two_cylinder_domain()` in `src/fem_em_solver/io/mesh.py`
+- Physical volume tags verified present for cylinder_1=1, cylinder_2=2, domain=3
+- No boolean/fragment operations used in geometry construction
+
+**Success criteria:** ✅ Mesh has 3 volumes, properly tagged
 **Commit message:** "Add two-cylinder mesh for Helmholtz prototype"
 
 ---
@@ -271,9 +287,9 @@ Goal: Birdcage, TEM, array coils
 
 ## Immediate Next Action
 
-**Chunk 6:** Create two-cylinder mesh (no fragmentation)
+**Chunk 7:** Solve on two-cylinder mesh with currents
 
-**Why:** Extend from validated cylinder solve to two-source geometry
+**Why:** Validate two-source solve behavior before moving to torus geometry
 
 **Estimated time:** 15-25 minutes
 

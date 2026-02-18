@@ -633,3 +633,112 @@ class MeshGenerator:
             gmsh.finalize()
         
         return mesh, cell_tags, facet_tags
+
+    @staticmethod
+    def two_cylinder_domain(
+        separation: float = 0.05,
+        radius: float = 0.01,
+        length: float = 0.1,
+        resolution: float = 0.02,
+        comm: MPI.Intracomm = MPI.COMM_WORLD,
+        rank: int = 0
+    ) -> Tuple[dolfinx.mesh.Mesh, dolfinx.mesh.MeshTags, dolfinx.mesh.MeshTags]:
+        """Generate mesh with two side-by-side cylinders inside a box domain.
+
+        This intentionally avoids boolean operations/fragmentation and keeps
+        all three volumes explicitly tagged.
+
+        Parameters
+        ----------
+        separation : float
+            Center-to-center distance between the two cylinders [m]
+        radius : float
+            Radius of each cylinder [m]
+        length : float
+            Cylinder length along z-axis [m]
+        resolution : float
+            Characteristic mesh size [m]
+        comm : MPI.Intracomm
+            MPI communicator
+        rank : int
+            Rank for Gmsh model (usually 0)
+
+        Returns
+        -------
+        mesh : dolfinx.mesh.Mesh
+            The generated mesh
+        cell_tags : dolfinx.mesh.MeshTags
+            Cell tags for subdomains (cylinder_1=1, cylinder_2=2, domain=3)
+        facet_tags : dolfinx.mesh.MeshTags
+            Facet tags for boundaries
+        """
+        if comm.rank == rank:
+            gmsh.initialize()
+            gmsh.model.add("two_cylinder_domain")
+
+            x_offset = separation / 2
+
+            cylinder_1 = gmsh.model.occ.addCylinder(
+                -x_offset, 0, -length / 2,
+                0, 0, length,
+                radius
+            )
+            cylinder_2 = gmsh.model.occ.addCylinder(
+                x_offset, 0, -length / 2,
+                0, 0, length,
+                radius
+            )
+
+            box_half_x = x_offset + 2.0 * radius
+            box_half_y = 2.0 * radius
+            domain = gmsh.model.occ.addBox(
+                -box_half_x,
+                -box_half_y,
+                -length / 2,
+                2.0 * box_half_x,
+                2.0 * box_half_y,
+                length,
+            )
+
+            gmsh.model.occ.synchronize()
+
+            gmsh.model.addPhysicalGroup(3, [cylinder_1], tag=1)
+            gmsh.model.setPhysicalName(3, 1, "cylinder_1")
+
+            gmsh.model.addPhysicalGroup(3, [cylinder_2], tag=2)
+            gmsh.model.setPhysicalName(3, 2, "cylinder_2")
+
+            gmsh.model.addPhysicalGroup(3, [domain], tag=3)
+            gmsh.model.setPhysicalName(3, 3, "domain")
+
+            # Tag all box boundary surfaces as outer boundary
+            boundary_surfaces = []
+            x_tol = box_half_x + resolution
+            y_tol = box_half_y + resolution
+            z_tol = (length / 2) + resolution
+
+            for dim, surf in gmsh.model.getEntities(dim=2):
+                x_min, y_min, z_min, x_max, y_max, z_max = gmsh.model.getBoundingBox(dim, surf)
+                if (
+                    abs(abs(x_min) - box_half_x) < x_tol or abs(abs(x_max) - box_half_x) < x_tol
+                    or abs(abs(y_min) - box_half_y) < y_tol or abs(abs(y_max) - box_half_y) < y_tol
+                    or abs(abs(z_min) - (length / 2)) < z_tol or abs(abs(z_max) - (length / 2)) < z_tol
+                ):
+                    boundary_surfaces.append(surf)
+
+            if boundary_surfaces:
+                gmsh.model.addPhysicalGroup(2, boundary_surfaces, tag=1)
+                gmsh.model.setPhysicalName(2, 1, "outer_boundary")
+
+            gmsh.model.mesh.setSize(gmsh.model.getEntities(0), resolution)
+            gmsh.model.mesh.generate(3)
+            gmsh.model.mesh.optimize("Netgen")
+
+        mesh, cell_tags, facet_tags = gmshio.model_to_mesh(
+            gmsh.model, comm, rank, gdim=3
+        )
+
+        if comm.rank == rank:
+            gmsh.finalize()
+
+        return mesh, cell_tags, facet_tags
