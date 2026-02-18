@@ -502,3 +502,134 @@ class MeshGenerator:
         mesh = create_box(comm, domain, [n, n, n], CellType.tetrahedron)
         
         return mesh
+    
+    @staticmethod
+    def cylindrical_domain(
+        inner_radius: float = 0.01,
+        outer_radius: float = 0.1,
+        length: float = 0.2,
+        resolution: float = 0.02,
+        comm: MPI.Intracomm = MPI.COMM_WORLD,
+        rank: int = 0
+    ) -> Tuple[dolfinx.mesh.Mesh, dolfinx.mesh.MeshTags, dolfinx.mesh.MeshTags]:
+        """Generate mesh with cylindrical inner volume inside cylindrical domain.
+        
+        Creates two concentric cylinders along the z-axis. Useful for practicing
+        multi-volume meshing and for problems with cylindrical symmetry.
+        
+        Parameters
+        ----------
+        inner_radius : float
+            Radius of inner cylinder [m]
+        outer_radius : float
+            Radius of outer cylinder [m]
+        length : float
+            Length of cylinders along z-axis [m]
+        resolution : float
+            Characteristic mesh size [m]
+        comm : MPI.Intracomm
+            MPI communicator
+        rank : int
+            Rank for Gmsh model (usually 0)
+            
+        Returns
+        -------
+        mesh : dolfinx.mesh.Mesh
+            The generated mesh
+        cell_tags : dolfinx.mesh.MeshTags
+            Cell tags for subdomains (inner=1, outer=2)
+        facet_tags : dolfinx.mesh.MeshTags
+            Facet tags for boundaries
+        """
+        if comm.rank == rank:
+            # Initialize Gmsh
+            gmsh.initialize()
+            gmsh.model.add("cylindrical_domain")
+            
+            # Create inner cylinder along z-axis
+            inner_tag = gmsh.model.occ.addCylinder(
+                0, 0, -length/2,  # center of bottom face
+                0, 0, length,      # axis direction and height
+                inner_radius
+            )
+            
+            # Create outer cylinder
+            outer_tag = gmsh.model.occ.addCylinder(
+                0, 0, -length/2,
+                0, 0, length,
+                outer_radius
+            )
+            
+            # Fragment to create separate volumes (inner and outer region)
+            ov, ovv = gmsh.model.occ.fragment(
+                [(3, outer_tag)],
+                [(3, inner_tag)]
+            )
+            gmsh.model.occ.synchronize()
+            
+            # Get volumes and tag them
+            volumes = gmsh.model.getEntities(dim=3)
+            inner_volume = None
+            outer_volume = None
+            
+            for vol in volumes:
+                bbox = gmsh.model.getBoundingBox(vol[0], vol[1])
+                x_min, y_min, z_min, x_max, y_max, z_max = bbox
+                
+                # Check if this is the inner cylinder by radius
+                r_max = np.sqrt(max(x_max**2, y_max**2))
+                if r_max < (inner_radius + outer_radius) / 2:
+                    inner_volume = vol[1]
+                else:
+                    outer_volume = vol[1]
+            
+            # Add physical groups
+            if inner_volume:
+                gmsh.model.addPhysicalGroup(3, [inner_volume], tag=1)
+                gmsh.model.setPhysicalName(3, 1, "inner")
+            
+            if outer_volume:
+                gmsh.model.addPhysicalGroup(3, [outer_volume], tag=2)
+                gmsh.model.setPhysicalName(3, 2, "outer")
+            
+            # Tag boundaries
+            surfaces = gmsh.model.getEntities(dim=2)
+            outer_boundary_surfaces = []
+            inner_boundary_surfaces = []
+            
+            for surf in surfaces:
+                bbox = gmsh.model.getBoundingBox(surf[0], surf[1])
+                x_min, y_min, z_min, x_max, y_max, z_max = bbox
+                r_max = np.sqrt(max(x_max**2, y_max**2))
+                
+                # Outer cylindrical boundary
+                if abs(r_max - outer_radius) < resolution:
+                    outer_boundary_surfaces.append(surf[1])
+                # Inner cylinder surface
+                elif abs(r_max - inner_radius) < resolution:
+                    inner_boundary_surfaces.append(surf[1])
+            
+            if outer_boundary_surfaces:
+                gmsh.model.addPhysicalGroup(2, outer_boundary_surfaces, tag=1)
+                gmsh.model.setPhysicalName(2, 1, "outer_boundary")
+            
+            if inner_boundary_surfaces:
+                gmsh.model.addPhysicalGroup(2, inner_boundary_surfaces, tag=2)
+                gmsh.model.setPhysicalName(2, 2, "inner_boundary")
+            
+            # Set mesh size
+            gmsh.model.mesh.setSize(gmsh.model.getEntities(0), resolution)
+            
+            # Generate mesh
+            gmsh.model.mesh.generate(3)
+            gmsh.model.mesh.optimize("Netgen")
+            
+        # Convert to dolfinx mesh
+        mesh, cell_tags, facet_tags = gmshio.model_to_mesh(
+            gmsh.model, comm, rank, gdim=3
+        )
+        
+        if comm.rank == rank:
+            gmsh.finalize()
+        
+        return mesh, cell_tags, facet_tags
