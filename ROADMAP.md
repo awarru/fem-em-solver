@@ -25,7 +25,7 @@
 ### ✅ Chunk 6: Two-cylinder mesh prototype
 **Status:** COMPLETE | **Commit:** `f6a4b03` | **Date:** 2026-02-18
 
-### ⬜ Chunk 7+: Path to Helmholtz (see below)
+### ⬜ Chunk 8+: Path to Helmholtz (see below)
 
 ---
 
@@ -173,7 +173,9 @@ Tags: [ ... 1 ... 2 ... 3 ... ]
 
 ---
 
-### ⬜ Chunk 7: Solve on two-cylinder mesh with currents
+### ✅ Chunk 7: Solve on two-cylinder mesh with currents
+**Status:** COMPLETE | **Commit:** `490266a` | **Date:** 2026-02-18
+
 **Scope:** Current in both cylinders, solve for B-field
 
 **Why:** Test two-source problem (prototype for Helmholtz)
@@ -183,7 +185,17 @@ Tags: [ ... 1 ... 2 ... 3 ... ]
 - Solve
 - Check B-field along centerline
 
-**Success criteria:** B-field computed, roughly constant in center
+**Test Results (Docker):**
+```
+tests/solver/test_two_cylinder.py::test_two_cylinder_solver_centerline_field_is_roughly_constant PASSED
+```
+
+**Notes:**
+- Added `tests/solver/test_two_cylinder.py` to validate two-source solve behavior.
+- Implemented source term as one current density expression active in both cylinders.
+- Centerline "roughly constant" criterion uses coefficient of variation threshold `CV < 0.75`.
+
+**Success criteria:** ✅ B-field computed, roughly constant in center
 **Commit message:** "Test solver with two current sources"
 
 ---
@@ -287,9 +299,9 @@ Goal: Birdcage, TEM, array coils
 
 ## Immediate Next Action
 
-**Chunk 7:** Solve on two-cylinder mesh with currents
+**Chunk 8:** Convert two-cylinder to two-loop (torus)
 
-**Why:** Validate two-source solve behavior before moving to torus geometry
+**Why:** Transition from prototype two-source cylinders to coil-representative torus geometry
 
 **Estimated time:** 15-25 minutes
 
