@@ -72,7 +72,8 @@ class MagnetostaticSolver:
         
     def solve(self, current_density: Optional[Callable] = None, 
               bc_functions: Optional[List] = None,
-              subdomain_id: Optional[int] = None) -> fem.Function:
+              subdomain_id: Optional[int] = None,
+              gauge_penalty: float = 1e-3) -> fem.Function:
         """Solve the magnetostatic problem.
         
         Parameters
@@ -85,6 +86,9 @@ class MagnetostaticSolver:
         subdomain_id : int, optional
             If provided, restricts current density integration to cells
             with this tag (requires cell_tags in problem).
+        gauge_penalty : float, optional
+            Small regularization term added to remove the nullspace in
+            pure curl-curl problems (default: 1e-3).
             
         Returns
         -------
@@ -103,7 +107,9 @@ class MagnetostaticSolver:
         mu_inv = 1.0 / mu
         
         # Bilinear form: a(A, v) = ∫ μ⁻¹ (∇ × A) · (∇ × v) dx
-        a = inner(mu_inv * curl(A_trial), curl(v)) * dx
+        # Add tiny gauge regularization to remove nullspace.
+        gauge = fem.Constant(self.mesh, gauge_penalty)
+        a = inner(mu_inv * curl(A_trial), curl(v)) * dx + gauge * inner(A_trial, v) * dx
         
         # Linear form: L(v) = ∫ J · v dx
         # If subdomain_id provided, restrict to that subdomain using cell_tags
