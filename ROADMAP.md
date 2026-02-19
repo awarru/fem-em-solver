@@ -271,7 +271,7 @@ tests/validation/test_helmholtz_v2.py::test_helmholtz_field_uniformity_two_torus
 ---
 
 ### ✅ Chunk 10: Document Phase 1 completion
-**Status:** COMPLETE | **Commit:** `HASH_PLACEHOLDER` | **Date:** 2026-02-19
+**Status:** COMPLETE | **Commit:** `4e8a143` | **Date:** 2026-02-19
 
 **Scope:** Write docs showing working Helmholtz validation
 
