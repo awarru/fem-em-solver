@@ -25,7 +25,7 @@
 ### ✅ Chunk 6: Two-cylinder mesh prototype
 **Status:** COMPLETE | **Commit:** `f6a4b03` | **Date:** 2026-02-18
 
-### ⬜ Chunk 8+: Path to Helmholtz (see below)
+### ⬜ Chunk 9+: Path to Helmholtz (see below)
 
 ---
 
@@ -200,7 +200,9 @@ tests/solver/test_two_cylinder.py::test_two_cylinder_solver_centerline_field_is_
 
 ---
 
-### ⬜ Chunk 8: Convert two-cylinder to two-loop (torus)
+### ✅ Chunk 8: Convert two-cylinder to two-loop (torus)
+**Status:** COMPLETE | **Commit:** `72ba772` | **Date:** 2026-02-19
+
 **Scope:** Replace cylinders with tori, same non-fragmenting approach
 
 **Why:** Tori are the correct geometry for coils
@@ -212,9 +214,25 @@ tests/solver/test_two_cylinder.py::test_two_cylinder_solver_centerline_field_is_
 - NO boolean operations between them
 - Just place them in domain and tag cells by location
 
-**Test:** Similar to Chunk 7 but with tori
+**Test command (Docker):**
+```bash
+python3 -m pytest tests/solver/test_two_torus.py -v
+```
 
-**Success criteria:** Mesh generates in <60s, has 2 wire volumes
+**Test Results (Docker):**
+```
+tests/solver/test_two_torus.py::test_two_torus_mesh_generates_with_two_wire_volumes PASSED
+```
+
+**Expected output:** Test passes and verifies tags for wire_1=1, wire_2=2, domain=3
+
+**Notes:**
+- Added `MeshGenerator.two_torus_domain()` in `src/fem_em_solver/io/mesh.py`
+- Two torus volumes are created with `addTorus()` at z=±0.025
+- No boolean/fragment operations used between torus/domain volumes
+- Test runtime was <60s in Docker
+
+**Success criteria:** ✅ Mesh generates in <60s, has 2 wire volumes
 **Commit message:** "Add two-torus mesh (Helmholtz geometry)"
 
 ---
@@ -299,11 +317,11 @@ Goal: Birdcage, TEM, array coils
 
 ## Immediate Next Action
 
-**Chunk 8:** Convert two-cylinder to two-loop (torus)
+**Chunk 9:** Validate Helmholtz field uniformity
 
-**Why:** Transition from prototype two-source cylinders to coil-representative torus geometry
+**Why:** Verify two-torus Helmholtz configuration produces <1% center-region field variation
 
-**Estimated time:** 15-25 minutes
+**Estimated time:** 20-35 minutes
 
 **Blocked:** No
 
