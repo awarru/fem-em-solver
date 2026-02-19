@@ -26,7 +26,7 @@
 **Status:** COMPLETE | **Commit:** `f6a4b03` | **Date:** 2026-02-18
 
 ### ✅ Chunk 9: Validate Helmholtz field uniformity
-**Status:** COMPLETE | **Commit:** `[this commit]` | **Date:** 2026-02-19
+**Status:** COMPLETE | **Commit:** `eb05f82` | **Date:** 2026-02-19
 
 ### ⬜ Chunk 10+: Remaining work (see below)
 
@@ -241,7 +241,7 @@ tests/solver/test_two_torus.py::test_two_torus_mesh_generates_with_two_wire_volu
 ---
 
 ### ✅ Chunk 9: Validate Helmholtz field uniformity
-**Status:** COMPLETE | **Commit:** `[this commit]` | **Date:** 2026-02-19
+**Status:** COMPLETE | **Commit:** `eb05f82` | **Date:** 2026-02-19
 
 **Scope:** Run solver on two-torus mesh, check field uniformity
 
