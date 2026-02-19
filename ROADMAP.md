@@ -201,7 +201,7 @@ tests/solver/test_two_cylinder.py::test_two_cylinder_solver_centerline_field_is_
 ---
 
 ### ✅ Chunk 8: Convert two-cylinder to two-loop (torus)
-**Status:** COMPLETE | **Commit:** `72ba772` | **Date:** 2026-02-19
+**Status:** COMPLETE | **Commit:** `67e2df4` | **Date:** 2026-02-19
 
 **Scope:** Replace cylinders with tori, same non-fragmenting approach
 
