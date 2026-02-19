@@ -25,7 +25,10 @@
 ### ✅ Chunk 6: Two-cylinder mesh prototype
 **Status:** COMPLETE | **Commit:** `f6a4b03` | **Date:** 2026-02-18
 
-### ⬜ Chunk 9+: Path to Helmholtz (see below)
+### ✅ Chunk 9: Validate Helmholtz field uniformity
+**Status:** COMPLETE | **Commit:** `[this commit]` | **Date:** 2026-02-19
+
+### ⬜ Chunk 10+: Remaining work (see below)
 
 ---
 
@@ -237,18 +240,32 @@ tests/solver/test_two_torus.py::test_two_torus_mesh_generates_with_two_wire_volu
 
 ---
 
-### ⬜ Chunk 9: Validate Helmholtz field uniformity
+### ✅ Chunk 9: Validate Helmholtz field uniformity
+**Status:** COMPLETE | **Commit:** `[this commit]` | **Date:** 2026-02-19
+
 **Scope:** Run solver on two-torus mesh, check field uniformity
 
 **Why:** Verify Helmholtz condition produces uniform field
 
-**Test:** `tests/validation/test_helmholtz_v2.py`
-- Generate two-torus mesh (Helmholtz spacing)
-- Current in both loops
-- Evaluate B_z along axis
-- Check coefficient of variation in center < 1%
+**Test command (Docker):**
+```bash
+python3 -m pytest tests/validation/test_helmholtz_v2.py -v
+```
 
-**Success criteria:** Field uniform to <1% in central region
+**Test Results (Docker):**
+```
+tests/validation/test_helmholtz_v2.py::test_helmholtz_field_uniformity_two_torus PASSED
+```
+
+**Expected output:** Test passes and verifies center-region coefficient of variation is <1%
+
+**Notes:**
+- Added `tests/validation/test_helmholtz_v2.py`
+- Mesh uses Helmholtz spacing (`separation = major_radius`)
+- Current is modeled in both loops with azimuthal direction around the z-axis
+- Axis evaluation uses mesh cell lookup (`dolfinx.geometry`) before `Function.eval` for stable point sampling
+
+**Success criteria:** ✅ Field uniform to <1% in central region
 **Commit message:** "Validate Helmholtz coil field uniformity"
 
 ---
@@ -317,11 +334,11 @@ Goal: Birdcage, TEM, array coils
 
 ## Immediate Next Action
 
-**Chunk 9:** Validate Helmholtz field uniformity
+**Chunk 10:** Document Phase 1 completion
 
-**Why:** Verify two-torus Helmholtz configuration produces <1% center-region field variation
+**Why:** Record validated Helmholtz results in project docs
 
-**Estimated time:** 20-35 minutes
+**Estimated time:** 15-25 minutes
 
 **Blocked:** No
 
