@@ -1,373 +1,451 @@
-# ROADMAP.md — FEM EM Solver Development Roadmap
+# ROADMAP.md — FEM-EM Solver (Agent-Executable Chunks)
 
-**Principles:**
-- One chunk = ONE specific task that can be tested
-- Each chunk has exact test command and expected output
-- NO chunk marked complete until test passes
-- If stuck for >30 min, flag via Telegram and move to next chunk
-- Commit after EVERY passing chunk
+## Mission
+Build a **reliable MRI-oriented EM solver workflow** that can:
+1. Mesh a coil + phantom configuration (gelled saline phantom inside an MRI coil)
+2. Solve for magnetic and electric fields in the phantom region
+3. Export results that are easy to inspect and validate
+4. Generate lumped-port S-parameters for downstream circuit tuning workflows
 
-**Phase 1 Goal:** Helmholtz coil validation (working, tested)
-
----
-
-## Current Status
-
-### ✅ Chunk 0: Repository structure
-**Status:** COMPLETE | **Commit:** `9086ecd`
-
-### ✅ Chunk 1: Current density restriction  
-**Status:** COMPLETE | **Commit:** `6da3f33`
-
-### ✅ Chunk 2: Circular loop mesh
-**Status:** COMPLETE | **Commit:** `e5a0936`
-
-### ✅ Chunk 6: Two-cylinder mesh prototype
-**Status:** COMPLETE | **Commit:** `f6a4b03` | **Date:** 2026-02-18
-
-### ✅ Chunk 9: Validate Helmholtz field uniformity
-**Status:** COMPLETE | **Commit:** `eb05f82` | **Date:** 2026-02-19
-
-### ⬜ Chunk 11+: Remaining work (see below)
+This roadmap is optimized for an automated coding agent working in ~30-minute chunks.
 
 ---
 
-## Phase 1: Path to Helmholtz Coil Validation
+## Ground Rules (Read First)
 
-The Helmholtz coil requires two loops that don't cause mesh fragmentation issues. We'll build up to it incrementally.
+### 1) Follow the straight-wire example standard
+Use `examples/magnetostatics/01_straight_wire.py` as the quality template:
+- Clear diagnostics and printouts
+- Robust point-evaluation workflow (cell lookup before `eval`)
+- Practical ParaView outputs
+- Explicit numerical sanity checks
+- Reproducible test commands
+
+### 2) Definition of Done for every chunk
+A chunk is complete only if:
+- Code changes are committed
+- The exact test command in that chunk runs
+- Output matches the chunk’s expected signal (not just "no crash")
+
+### 3) When blocked
+If blocked >30 min:
+- Commit partial work to a branch-safe state (or stash in notes)
+- Mark chunk as BLOCKED with reason
+- Move to next chunk
+
+### 4) Keep chunks practical
+Small, testable, and likely to succeed in one agent run.
+
+### 5) MPI and resource constraints
+All tests must run within constrained resources and use MPI:
+- **Use `mpiexec -n 2`** (2 cores) for all test commands
+- **Memory limit:** 4GB RAM maximum
+- **Problem sizes:** Keep meshes coarse (resolution ≥ 0.01m, cell counts < 50k)
+- **Timeouts:** Tests should complete in < 60 seconds
+- If a test cannot meet these constraints, mark BLOCKED and request human guidance
 
 ---
 
-### ✅ Chunk 3: Verify circular loop example runs end-to-end
-**Status:** COMPLETE | **Commit:** `c388132` | **Date:** 2026-02-18
+## Status Legend
+- ⬜ Not started
+- 🟡 In progress / partial
+- ✅ Complete
+- 🚫 Blocked (needs human)
 
-**Scope:** Run the existing circular loop example in Docker and confirm it produces output
+---
 
-**Why:** Establish baseline that current code works before adding complexity
+## Phase A — Stabilize Core Infrastructure (before new physics)
+
+### ✅ A0 — Baseline straight-wire quality reference
+Keep straight-wire behavior as golden standard for diagnostics/evaluation/export.
+
+### ✅ A1 — Add shared field-evaluation utility (2026-02-20, COMMIT_HASH)
+**Goal:** Remove duplicated fragile point-evaluation logic from examples/tests.
+
+**Agent tasks:**
+- Add utility module (e.g. `post/evaluation.py`) that:
+  - locates containing cells for points
+  - evaluates vector field robustly in parallel
+  - returns values + mask for invalid points
+- Refactor straight-wire example to use this utility (no behavior change expected).
 
 **Test command:**
 ```bash
 cd ~/Development/fem-em-solver/docker
-docker compose exec fem-em-solver bash -c '
-  export PYTHONPATH=/usr/local/dolfinx-real/lib/python3.10/dist-packages:/usr/local/lib:/workspace/src
-  cd /workspace
-  timeout 60 python3 examples/magnetostatics/02_circular_loop.py 2>&1 | tail -20
-'
+docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/magnetostatics/01_straight_wire.py'
 ```
 
-**Results:**
-- ✅ Mesh generation works correctly (197k cells generated for circular loop)
-- ✅ Example code runs without errors
-- ⚠️ Default mesh resolution requires ~6GB RAM for linear solver
-- ✅ Verified with coarser mesh (46k cells) - solver completes successfully
-- ⚠️ 60s timeout insufficient for default mesh optimization (needs ~120s)
+**Expected signal:**
+- Example runs end-to-end
+- Same style diagnostics printed
+- Plot/output files still generated
 
-**Notes:**
-- Code is correct and functional
-- Resource constraints in test environment (memory limit ~500MB, need ~6GB)
-- Helmholtz coil mesh generator already skips optimization to avoid this issue
-- For production use, either increase memory or use coarser resolution (0.01+ instead of 0.005)
+**Human verification (YOU):**
+- Quickly open output in ParaView and confirm visualization still works.
 
-**Success criteria:** Example code verified working (mesh + solver functional)
-**Commit message:** "Verify circular loop example runs in Docker"
+### ⬜ A2 — Add shared ParaView export helper
+**Goal:** Standardize exports (mesh tags + fields together) across examples.
 
----
-
-### ✅ Chunk 4: Create cylindrical domain mesh
-**Status:** COMPLETE | **Commit:** `1ea036e` | **Date:** 2026-02-18
-
-**Scope:** Create mesh with cylinder inside box (simpler than Helmholtz)
-
-**Why:** Practice multi-volume meshing without torus complexity
-
-**Steps:**
-1. ✅ Add `cylindrical_domain()` to `mesh.py`
-2. ✅ Small cylinder (tag=1) inside larger cylinder (tag=2)
-3. ✅ Test creates mesh and verifies cells exist
-
-**Test Results:**
-```
-Mesh cells: 5717
-Inner cells: 295
-Outer cells: 5422
-SUCCESS: Cylindrical domain mesh generated
-```
-
-**Notes:**
-- Mesh generates successfully with concentric cylinders
-- Proper cell tagging (inner=1, outer=2)
-- Netgen optimization completes without issues
-- Ready for solver testing in Chunk 5
-
-**Success criteria:** ✅ Mesh generates, has cells, no error
-**Commit message:** "Add cylindrical domain mesh generator"
-
----
-
-### ✅ Chunk 5: Solve magnetostatics on cylinder mesh
-**Status:** COMPLETE | **Commit:** `542030a` | **Date:** 2026-02-18
-
-**Scope:** Use solver on cylindrical domain with current in inner cylinder
-
-**Why:** Verify solver works with multi-volume mesh from Chunk 4
+**Agent tasks:**
+- Implement/reinforce helper for combined XDMF output with tags + selected fields.
+- Use helper in straight-wire and one coil example.
 
 **Test command:**
 ```bash
-python3 -m pytest tests/solver/test_cylinder.py -v
+docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/magnetostatics/01_straight_wire.py && ls -1 paraview_output'
 ```
 
-**Test Results:**
-```
-tests/solver/test_cylinder.py::test_cylinder_solver_computes_nonzero_b_field PASSED
-```
+**Expected signal:**
+- Combined output file exists and can be opened
+- No regression in existing exports
 
-**Notes:**
-- Added `tests/solver/test_cylinder.py` per chunk requirements (mesh → solve → B-field checks)
-- Solver needed gauge regularization to avoid non-finite values from curl-curl nullspace
-- Added `gauge_penalty` term in `MagnetostaticSolver.solve()` (default `1e-3`) so B-field is finite and non-zero
-
-**Success criteria:** ✅ Test passes, B-field non-zero
-**Commit message:** "Test solver on cylindrical domain"
+**Human verification (YOU):**
+- Confirm you can threshold phantom/air/coil tags in ParaView.
 
 ---
 
-### ✅ Chunk 6: Create two-cylinder mesh (no fragmentation)
-**Status:** COMPLETE | **Commit:** `f6a4b03` | **Date:** 2026-02-18
+## Phase B — Coil + Phantom Geometry Pipeline
 
-**Scope:** Two cylinders side-by-side, no boolean operations
+### ⬜ B1 — Add phantom-ready mesh generator (coil + cylindrical phantom + air box)
+**Goal:** Create a robust geometry function for a first MRI-like test model.
 
-**Why:** Simpler approach than torus fragmentation for Helmholtz
+**Constraints:**
+- Mesh must generate with ≤ 4GB RAM
+- Target: < 50k cells total (use resolution ≥ 0.01m)
+- Must work with mpiexec -n 2
 
-**Mesh design:**
-- Cylinder 1: at x=-0.025, radius=0.01
-- Cylinder 2: at x=+0.025, radius=0.01  
-- Domain: box containing both
-- All separate volumes (no fragment/Boolean)
+**Agent tasks:**
+- Add mesh generator function (new method) for:
+  - two-loop (or two-torus) coil conductors
+  - cylindrical phantom volume centered in coil region
+  - surrounding air/domain volume
+- Ensure clean physical tags for at least:
+  - coil_1, coil_2, phantom, air
+- Use coarse resolution (0.01-0.02m) to stay within memory limits
 
 **Test command:**
 ```bash
-python3 -c "
-from fem_em_solver.io.mesh import MeshGenerator
-from mpi4py import MPI
-mesh, ct, ft = MeshGenerator.two_cylinder_domain(
-    separation=0.05, radius=0.01, length=0.1, resolution=0.02,
-    comm=MPI.COMM_WORLD
-)
-print(f'Cells: {mesh.topology.index_map(3).size_global}')
-print(f'Tags: {ct.values}')
-"
+docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/mesh/test_coil_phantom_mesh.py -v'
 ```
 
-**Test Results (Docker):**
-```
-Cells: 816
-Tags: [ ... 1 ... 2 ... 3 ... ]
-```
+**Expected signal:**
+- Test confirms mesh generation and required tags exist
 
-**Expected:** Two tagged volumes + domain
+**Human verification (YOU):**
+- Inspect mesh visually once; verify phantom is actually inside coil region.
 
-**Notes:**
-- Added `MeshGenerator.two_cylinder_domain()` in `src/fem_em_solver/io/mesh.py`
-- Physical volume tags verified present for cylinder_1=1, cylinder_2=2, domain=3
-- No boolean/fragment operations used in geometry construction
+### ⬜ B2 — Harden mesh QA checks
+**Goal:** Catch bad geometry early.
 
-**Success criteria:** ✅ Mesh has 3 volumes, properly tagged
-**Commit message:** "Add two-cylinder mesh for Helmholtz prototype"
+**Agent tasks:**
+- Add test helpers that assert:
+  - nonzero cell count per required tag
+  - phantom volume is not empty
+  - coil and phantom volumes are distinct
+- Add quick mesh summary print utility (counts by tag)
 
----
-
-### ✅ Chunk 7: Solve on two-cylinder mesh with currents
-**Status:** COMPLETE | **Commit:** `490266a` | **Date:** 2026-02-18
-
-**Scope:** Current in both cylinders, solve for B-field
-
-**Why:** Test two-source problem (prototype for Helmholtz)
-
-**Test:** `tests/solver/test_two_cylinder.py`
-- Current in both cylinders (same direction)
-- Solve
-- Check B-field along centerline
-
-**Test Results (Docker):**
-```
-tests/solver/test_two_cylinder.py::test_two_cylinder_solver_centerline_field_is_roughly_constant PASSED
-```
-
-**Notes:**
-- Added `tests/solver/test_two_cylinder.py` to validate two-source solve behavior.
-- Implemented source term as one current density expression active in both cylinders.
-- Centerline "roughly constant" criterion uses coefficient of variation threshold `CV < 0.75`.
-
-**Success criteria:** ✅ B-field computed, roughly constant in center
-**Commit message:** "Test solver with two current sources"
-
----
-
-### ✅ Chunk 8: Convert two-cylinder to two-loop (torus)
-**Status:** COMPLETE | **Commit:** `67e2df4` | **Date:** 2026-02-19
-
-**Scope:** Replace cylinders with tori, same non-fragmenting approach
-
-**Why:** Tori are the correct geometry for coils
-
-**Mesh design:**
-- Torus 1: at z=-0.025
-- Torus 2: at z=+0.025
-- Use `gmsh.model.occ.addTorus()` for each
-- NO boolean operations between them
-- Just place them in domain and tag cells by location
-
-**Test command (Docker):**
+**Test command:**
 ```bash
-python3 -m pytest tests/solver/test_two_torus.py -v
+docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/mesh/test_mesh_tag_integrity.py -v'
 ```
 
-**Test Results (Docker):**
-```
-tests/solver/test_two_torus.py::test_two_torus_mesh_generates_with_two_wire_volumes PASSED
-```
-
-**Expected output:** Test passes and verifies tags for wire_1=1, wire_2=2, domain=3
-
-**Notes:**
-- Added `MeshGenerator.two_torus_domain()` in `src/fem_em_solver/io/mesh.py`
-- Two torus volumes are created with `addTorus()` at z=±0.025
-- No boolean/fragment operations used between torus/domain volumes
-- Test runtime was <60s in Docker
-
-**Success criteria:** ✅ Mesh generates in <60s, has 2 wire volumes
-**Commit message:** "Add two-torus mesh (Helmholtz geometry)"
+**Expected signal:**
+- Deterministic pass/fail with clear failure messages
 
 ---
 
-### ✅ Chunk 9: Validate Helmholtz field uniformity
-**Status:** COMPLETE | **Commit:** `eb05f82` | **Date:** 2026-02-19
+## Phase C — Magnetostatics on Coil + Phantom
 
-**Scope:** Run solver on two-torus mesh, check field uniformity
+### ⬜ C1 — Solve B-field on coil+phantom model
+**Goal:** Reliable magnetostatic solve with source current in coil subdomains only.
 
-**Why:** Verify Helmholtz condition produces uniform field
+**Agent tasks:**
+- Build a test that:
+  - assigns current to coil tags only
+  - solves for A and computes B
+  - checks finite + nontrivial B in phantom sample points
+- Keep gauge stabilization behavior explicit and configurable
 
-**Test command (Docker):**
+**Test command:**
 ```bash
-python3 -m pytest tests/validation/test_helmholtz_v2.py -v
+docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver/test_coil_phantom_magnetostatics.py -v'
 ```
 
-**Test Results (Docker):**
-```
-tests/validation/test_helmholtz_v2.py::test_helmholtz_field_uniformity_two_torus PASSED
-```
+**Expected signal:**
+- Test passes
+- B-field in phantom is finite and not near-zero everywhere
 
-**Expected output:** Test passes and verifies center-region coefficient of variation is <1%
+**Human verification (YOU):**
+- Spot-check one centerline/profile plot looks physically plausible.
 
-**Notes:**
-- Added `tests/validation/test_helmholtz_v2.py`
-- Mesh uses Helmholtz spacing (`separation = major_radius`)
-- Current is modeled in both loops with azimuthal direction around the z-axis
-- Axis evaluation uses mesh cell lookup (`dolfinx.geometry`) before `Function.eval` for stable point sampling
+### ⬜ C2 — Add sanity validation metrics
+**Goal:** Prevent silently wrong fields.
 
-**Success criteria:** ✅ Field uniform to <1% in central region
-**Commit message:** "Validate Helmholtz coil field uniformity"
+**Agent tasks:**
+- Add simple metrics in tests/examples:
+  - min/max/mean |B| in phantom
+  - centerline smoothness check
+  - optional symmetry check for symmetric setups
 
----
-
-### ✅ Chunk 10: Document Phase 1 completion
-**Status:** COMPLETE | **Commit:** `4e8a143` | **Date:** 2026-02-19
-
-**Scope:** Write docs showing working Helmholtz validation
-
-**Files:**
-- `docs/validation/helmholtz.md` - Helmholtz coil results
-- `docs/status.md` - Updated project status
-
-**Test command (Docker):**
+**Test command:**
 ```bash
-docker compose exec fem-em-solver bash -c 'cd /workspace && test -f docs/validation/helmholtz.md && test -f docs/status.md && echo "SUCCESS: docs exist"'
+docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/validation/test_coil_phantom_bfield_metrics.py -v'
 ```
 
-**Test Results (Docker):**
+**Expected signal:**
+- Threshold-based checks pass with printed metric values
+
+---
+
+## Phase D — Time-Harmonic E-field in Phantom (first practical version)
+
+### ⬜ D1 — Introduce minimal frequency-domain solve scaffold
+**Goal:** Add a narrow, testable path to compute E-field in phantom.
+
+**Agent tasks:**
+- Add a minimal time-harmonic module/API path (keep scope tight)
+- Accept frequency + material properties
+- Return an E-field object usable for sampling/export
+
+**Test command:**
+```bash
+docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver/test_time_harmonic_smoke.py -v'
 ```
-SUCCESS: docs exist
+
+**Expected signal:**
+- Smoke test runs and returns finite E-field values
+
+**Human verification (YOU):**
+- If numerics look unstable, tune formulation choices manually.
+
+### ⬜ D2 — Add gelled saline phantom material model (MVP)
+**Goal:** Support phantom electrical properties needed for E-field estimates.
+
+**Agent tasks:**
+- Add material container for phantom with at least:
+  - conductivity `sigma`
+  - relative permittivity `epsilon_r`
+  - frequency parameter
+- Wire model into time-harmonic path for phantom-tagged cells
+
+**Test command:**
+```bash
+docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/materials/test_phantom_material_model.py -v'
 ```
 
-**Expected output:** `SUCCESS: docs exist`
+**Expected signal:**
+- Material assignment tests pass and are used in solve pipeline
 
-**Notes:**
-- Added `docs/validation/helmholtz.md` with Helmholtz setup, command, and pass criteria summary
-- Added `docs/status.md` to mark Phase 1 complete and outline next planned chunks
-- No issues discovered; current roadmap for remaining chunks does not need adjustment
+### ⬜ D3 — E and B field extraction inside phantom
+**Goal:** Compute both E and B metrics specifically in phantom region.
 
-**Success criteria:** ✅ Docs exist and are accurate
-**Commit message:** "Phase 1 complete: Helmholtz coil validated"
+**Agent tasks:**
+- Add post-processing helpers to sample/export inside phantom tag
+- Compute summary stats for |E| and |B| in phantom
 
----
+**Test command:**
+```bash
+docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/post/test_phantom_field_metrics.py -v'
+```
 
-## Chunks Beyond Phase 1 (Future)
+**Expected signal:**
+- Tests confirm finite E/B values in phantom and export files created
 
-### Phase 2: Time-Harmonic Maxwell
-Goal: E-field formulation for frequency-domain problems
-
-**Chunk 11:** Complex number support in solver
-**Chunk 12:** E-field weak form implementation  
-**Chunk 13:** Plane wave validation test
-**Chunk 14:** Dipole antenna validation
-... (more as needed)
-
-### Phase 3: Material Models
-Goal: Gelled saline phantoms, biological tissues
-
-**Chunk 20:** Complex permittivity model
-**Chunk 21:** Frequency-dependent properties
-**Chunk 22:** Phantom geometry (sphere, cylinder)
-... (more as needed)
-
-### Phase 4: Coil Models
-Goal: Birdcage, TEM, array coils
-
-**Chunk 30:** Multi-port excitation
-**Chunk 31:** Birdcage coil mesh
-**Chunk 32:** TEM coil mesh
-... (more as needed)
+**Human verification (YOU):**
+- Validate magnitude order-of-growth vs expectation for your coil current/frequency.
 
 ---
 
-## Testing Protocol (REQUIRED)
+## Phase E — Lumped Ports + S-Parameter Pipeline (Birdcage-oriented)
 
-**Before marking chunk complete:**
+### ⬜ E1 — Define lumped port data model and tagging contract
+**Goal:** Introduce explicit, testable representation of lumped ports between birdcage legs.
 
-1. Run exact test command from chunk
-2. Verify output matches "Expected output"
-3. If differs:
-   - Read error carefully
-   - Fix code  
-   - Re-run test
-   - Repeat until pass
-4. If stuck >30 min:
-   - Add note: "BLOCKED: [reason]"
-   - Move to next chunk
-   - Send Telegram message
-5. Once passes: Commit and mark ✅
+**Agent tasks:**
+- Add port schema/data class (e.g. `PortDefinition`) with at least:
+  - `port_id`, `positive_tag`, `negative_tag`
+  - feed direction / orientation metadata
+  - optional reference impedance (`Z0`, default 50Ω)
+- Define mesh tagging contract for port faces/edges (documented constants).
+- Add validation helper that checks required port tags exist.
 
-**No exceptions.**
+**Test command:**
+```bash
+docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/ports/test_port_definition.py -v'
+```
+
+**Expected signal:**
+- Port definition and tag validation tests pass.
+
+### ⬜ E2 — Add minimal birdcage-like test geometry with port tags
+**Goal:** Create a lightweight geometry fixture that supports multiple lumped ports without blowing memory.
+
+**Agent tasks:**
+- Add a coarse "birdcage-like" geometry fixture (small cell count, not full production detail):
+  - ring + simplified legs
+  - explicit port regions between adjacent legs
+- Ensure tags exist for: conductor, air, phantom (optional coarse), and each port.
+
+**Constraints:**
+- Keep mesh under 50k cells and runnable under 4GB RAM.
+
+**Test command:**
+```bash
+docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/mesh/test_birdcage_port_tags.py -v'
+```
+
+**Expected signal:**
+- Test verifies all expected port tags and core regions exist.
+
+**Human verification (YOU):**
+- Visual check that each port sits between intended leg pair.
+
+### ⬜ E3 — Implement port excitation hook (single-port solve)
+**Goal:** Excite one lumped port at a time in frequency-domain solve.
+
+**Agent tasks:**
+- Add API to run a single-port excitation case:
+  - one driven port, others terminated (initial simple termination model)
+- Return per-port voltage/current estimates needed for S-parameter assembly.
+- Keep implementation simple and explicit; prioritize deterministic behavior over sophistication.
+
+**Test command:**
+```bash
+docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver/test_single_port_excitation.py -v'
+```
+
+**Expected signal:**
+- Test passes with finite voltage/current results for driven + passive ports.
+
+### ⬜ E4 — Build N-port sweep and S-parameter assembly
+**Goal:** Generate an S-matrix by sweeping driven port index.
+
+**Agent tasks:**
+- Add routine: for N ports, run N excitations and assemble NxN S-matrix.
+- Include basic checks:
+  - matrix shape correct
+  - finite complex entries
+  - diagonal reflection terms present
+- Keep frequency list short/coarse for resource limits.
+
+**Test command:**
+```bash
+docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/ports/test_sparameter_assembly.py -v'
+```
+
+**Expected signal:**
+- S-matrix tests pass and produce deterministic dimensions/outputs.
+
+**Human verification (YOU):**
+- Sanity-check S11/S21 trends against expectations for your geometry.
+
+### ⬜ E5 — Export S-parameters for external circuit tuning workflow
+**Goal:** Make solver output directly usable in separate tuning/circuit tools.
+
+**Agent tasks:**
+- Add export to at least Touchstone `.sNp` (and optional CSV companion).
+- Include metadata in filename/header (frequency points, Z0, port ordering).
+- Add tiny loader/roundtrip test to ensure exported file is parseable.
+
+**Test command:**
+```bash
+docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/io/test_touchstone_export.py -v'
+```
+
+**Expected signal:**
+- `.sNp` file written and reloaded successfully in test.
+
+### ⬜ E6 — Add "human calibration" checklist for port model assumptions
+**Goal:** Explicitly call out assumptions agent cannot reliably tune alone.
+
+**Agent tasks:**
+- Add doc section/file describing what human should calibrate:
+  - port placement realism
+  - termination assumptions
+  - Z0 choices and normalization
+  - comparison vs known/bench measurements
+- Add quick checklist for interpreting suspicious S-parameter results.
+
+**Test command:**
+```bash
+docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/ports/human_port_calibration_checklist.md && echo OK'
+```
+
+**Expected signal:**
+- Checklist file exists and is actionable.
 
 ---
 
-## Immediate Next Action
+## Phase F — End-to-End Example + Documentation
 
-**Chunk 11:** Complex number support in solver
+### ⬜ F1 — New example: MRI coil with gelled saline phantom
+**Goal:** One runnable script demonstrating end-to-end workflow.
 
-**Why:** Start Phase 2 (time-harmonic Maxwell foundation)
+**Agent tasks:**
+- Add example script (e.g. `examples/mri/01_coil_phantom_fields.py`) that:
+  - builds mesh
+  - applies materials
+  - solves fields
+  - prints phantom metrics
+  - exports ParaView files
 
-**Estimated time:** TBD
+**Test command:**
+```bash
+docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/mri/01_coil_phantom_fields.py'
+```
 
-**Blocked:** No
+**Expected signal:**
+- Script finishes and writes output files
+- Console shows phantom E/B summaries
 
-**Ready:** Yes (at next heartbeat)
+### ⬜ F2 — Add “human test checklist” doc
+**Goal:** Make it obvious what you should manually validate.
+
+**Agent tasks:**
+- Create `docs/testing_manual_checklist.md` with:
+  - visual mesh checks
+  - field sanity checks
+  - known failure symptoms
+  - suggested parameter tweaks when unstable
+
+**Test command:**
+```bash
+docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/testing_manual_checklist.md && echo OK'
+```
+
+**Expected signal:**
+- Checklist file exists and is readable
 
 ---
 
-## User Notes
+## What You Should Personally Test/Fix (Human-in-the-loop)
 
-- Helmholtz kept as Phase 1 goal
-- Path goes: circle → cylinder → two-cylinder → two-torus
-- Each step builds on previous, testable
-- If any chunk fails, we can reassess path
+These are intentionally marked as human checkpoints because agent debugging is limited:
+
+1. **Mesh realism checks**
+   - Coil physically surrounds phantom as intended
+   - No accidental overlap/void artifacts
+2. **Field plausibility checks**
+   - Phantom |B| and |E| magnitudes in expected range
+   - No obvious nonphysical spikes from bad sampling/BCs
+3. **Stability tuning**
+   - Gauge penalty, solver options, mesh resolution tradeoffs
+4. **Physics assumptions**
+   - Material values and frequency choice match your MRI use case
+
+---
+
+## Agent Execution Template (for cron job prompt)
+For each run:
+1. Find first ⬜ chunk
+2. Implement only that chunk
+3. Run exact chunk test command
+4. If pass: mark ✅ with commit hash/date
+5. If fail repeatedly: mark 🚫 BLOCKED with concise reason and move on
+
+---
+
+## Immediate Next Chunk
+**A2 — Add shared ParaView export helper**
+
+Reason: with evaluation logic centralized, standardizing combined tag+field export is the next highest-leverage infrastructure step for reliable visual validation.

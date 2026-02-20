@@ -15,6 +15,7 @@ from fem_em_solver.core.solvers import MagnetostaticSolver, MagnetostaticProblem
 from fem_em_solver.io.mesh import MeshGenerator
 from fem_em_solver.utils.analytical import AnalyticalSolutions, ErrorMetrics
 from fem_em_solver.utils.constants import MU_0
+from fem_em_solver.post import evaluate_vector_field_parallel
 
 # Import dolfinx I/O for ParaView output
 from dolfinx import io, fem
@@ -32,7 +33,7 @@ def main():
     current = 1.0              # Current [A]
     wire_length = 0.3          # Wire length [m]
     domain_radius = 0.04       # Domain radius [m] (4 cm)
-    resolution = 0.002         # Mesh resolution [m] (6mm - finer for better accuracy)
+    resolution = 0.01          # Mesh resolution [m] (coarse, cron-safe runtime)
     wire_radius = 0.003       # Wire radius [m] (1.5 mm)
     
     print(f"\nParameters:")
@@ -119,51 +120,13 @@ def main():
     print(f"  First 3 points: {points[:3]}")
     print(f"  Last 3 points: {points[-3:]}")
 
-    # Find which cells contain the evaluation points (required for correct evaluation)
-    # In parallel, each rank only evaluates points in its local mesh partition
-    from dolfinx import geometry
-    bb_tree = geometry.bb_tree(mesh, mesh.topology.dim)
+    # Evaluate points robustly across MPI partitions
+    B_num, valid_mask = evaluate_vector_field_parallel(B_lag, points, comm=comm)
 
-    # Find cell candidates for each point (returns adjacency list)
-    cell_candidates = geometry.compute_collisions_points(bb_tree, points)
-
-    # Extract points and cells that are in this rank's partition
-    local_points_idx = []
-    local_cells = []
-    for i in range(n_points):
-        candidates = cell_candidates.links(i)
-        if len(candidates) > 0:
-            local_points_idx.append(i)
-            local_cells.append(candidates[0])
-
-    local_points_idx = np.array(local_points_idx, dtype=np.int32)
-    local_cells = np.array(local_cells, dtype=np.int32)
-
-    if len(local_points_idx) > 0:
-        local_points = points[local_points_idx]
-        print(f"\n  DEBUG - Rank {comm.rank}: Evaluating {len(local_points_idx)} of {n_points} points")
-
-        # Evaluate B-field at local points
-        B_local = B_lag.eval(local_points, local_cells)
-    else:
-        print(f"\n  DEBUG - Rank {comm.rank}: No points in local partition")
-        B_local = np.array([]).reshape(0, 3)
-
-    # Gather results from all ranks to rank 0
-    all_B_local = comm.gather(B_local, root=0)
-    all_points_idx = comm.gather(local_points_idx, root=0)
-
-    # Reconstruct full B_num array on rank 0
-    if comm.rank == 0:
-        B_num = np.zeros((n_points, 3))
-        for rank_B, rank_idx in zip(all_B_local, all_points_idx):
-            if len(rank_idx) > 0:
-                B_num[rank_idx] = rank_B
-    else:
-        B_num = None
-
-    # Broadcast result to all ranks for further processing
-    B_num = comm.bcast(B_num, root=0)
+    invalid_count = np.count_nonzero(~valid_mask)
+    print(f"\n  DEBUG - Valid evaluation points: {np.count_nonzero(valid_mask)}/{n_points}")
+    if invalid_count > 0:
+        print(f"  WARNING: {invalid_count} points were outside mesh partitions")
     print(f"\n  DEBUG - Numerical B-field evaluation:")
     print(f"  B_num shape: {B_num.shape}, dtype: {B_num.dtype}")
     print(f"  First point: B = ({B_num[0,0]:.6e}, {B_num[0,1]:.6e}, {B_num[0,2]:.6e}) T")
