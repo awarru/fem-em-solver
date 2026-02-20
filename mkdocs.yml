@@ -1,0 +1,24 @@
+site_name: FEM Electromagnetics Solver
+site_description: MRI-focused FEM EM solver documentation
+repo_url: https://github.com/awarru/fem-em-solver
+repo_name: awarru/fem-em-solver
+
+theme:
+  name: material
+
+nav:
+  - Home: index.md
+  - Project Status: status.md
+  - Validation:
+      - Helmholtz Coil: validation/helmholtz.md
+  - Testing:
+      - Pending Manual Tests: testing/pending-tests.md
+      - Test Results Log: testing/test-results.md
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+
+plugins:
+  - search

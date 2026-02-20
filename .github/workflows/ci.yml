@@ -78,7 +78,7 @@ jobs:
     
     - name: Install dependencies
       run: |
-        pip install mkdocs mkdocs-material mkdocstrings[python]
+        pip install "mkdocs<2" mkdocs-material "mkdocstrings[python]"
     
     - name: Build documentation
       run: mkdocs build --strict
