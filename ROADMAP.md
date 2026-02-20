@@ -83,7 +83,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 **Human verification (YOU):**
 - Quickly open output in ParaView and confirm visualization still works.
 
-### ⬜ A2 — Add shared ParaView export helper
+### ✅ A2 — Add shared ParaView export helper (2026-02-20, ff6bc8c)
 **Goal:** Standardize exports (mesh tags + fields together) across examples.
 
 **Agent tasks:**
