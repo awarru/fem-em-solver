@@ -21,11 +21,12 @@ Use `examples/magnetostatics/01_straight_wire.py` as the quality template:
 - Explicit numerical sanity checks
 - Reproducible test commands
 
-### 2) Definition of Done for every chunk
-A chunk is complete only if:
+### 2) Definition of Done for every chunk (VPS-safe mode)
+A chunk is complete when:
 - Code changes are committed
-- The exact test command in that chunk runs
-- Output matches the chunk’s expected signal (not just "no crash")
+- A **manual test note** is added with exact command + expected signal
+- Agent does **not** run heavy FEM tests during cron cycles
+- Chunk is marked `🧪 AWAITING-HUMAN-TEST` until you run and report results
 
 ### 3) When blocked
 If blocked >30 min:
@@ -37,18 +38,26 @@ If blocked >30 min:
 Small, testable, and likely to succeed in one agent run.
 
 ### 5) MPI and resource constraints
-All tests must run within constrained resources and use MPI:
-- **Use `mpiexec -n 2`** (2 cores) for all test commands
+When you run tests manually, use constrained resources:
+- **Use `mpiexec -n 2`** (2 cores)
 - **Memory limit:** 4GB RAM maximum
 - **Problem sizes:** Keep meshes coarse (resolution ≥ 0.01m, cell counts < 50k)
-- **Timeouts:** Tests should complete in < 60 seconds
-- If a test cannot meet these constraints, mark BLOCKED and request human guidance
+
+### 6) Cron execution policy (critical)
+During cron cycles, agent should:
+- Implement code + docs only
+- **Not run heavy FEM/mesh/solver tests**
+- Write test instructions to `docs/testing/pending-tests.md`
+- Provide a logging command using `scripts/testing/run_and_log.sh`
+- Mark chunk `🧪 AWAITING-HUMAN-TEST` with command and expected signal
+- Wait for your reported results before marking fully complete
 
 ---
 
 ## Status Legend
 - ⬜ Not started
 - 🟡 In progress / partial
+- 🧪 AWAITING-HUMAN-TEST
 - ✅ Complete
 - 🚫 Blocked (needs human)
 
@@ -69,7 +78,7 @@ Keep straight-wire behavior as golden standard for diagnostics/evaluation/export
   - returns values + mask for invalid points
 - Refactor straight-wire example to use this utility (no behavior change expected).
 
-**Test command:**
+**Human test command (run manually):**
 ```bash
 cd ~/Development/fem-em-solver/docker
 docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/magnetostatics/01_straight_wire.py'
@@ -90,7 +99,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 - Implement/reinforce helper for combined XDMF output with tags + selected fields.
 - Use helper in straight-wire and one coil example.
 
-**Test command:**
+**Human test command (run manually):**
 ```bash
 docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/magnetostatics/01_straight_wire.py && ls -1 paraview_output'
 ```
@@ -123,7 +132,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
   - coil_1, coil_2, phantom, air
 - Use coarse resolution (0.01-0.02m) to stay within memory limits
 
-**Test command:**
+**Human test command (run manually):**
 ```bash
 docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/mesh/test_coil_phantom_mesh.py -v'
 ```
@@ -134,7 +143,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 **Human verification (YOU):**
 - Inspect mesh visually once; verify phantom is actually inside coil region.
 
-### ⬜ B2 — Harden mesh QA checks
+### 🧪 B2 — Harden mesh QA checks
 **Goal:** Catch bad geometry early.
 
 **Agent tasks:**
@@ -144,7 +153,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
   - coil and phantom volumes are distinct
 - Add quick mesh summary print utility (counts by tag)
 
-**Test command:**
+**Human test command (run manually):**
 ```bash
 docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/mesh/test_mesh_tag_integrity.py -v'
 ```
@@ -166,7 +175,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
   - checks finite + nontrivial B in phantom sample points
 - Keep gauge stabilization behavior explicit and configurable
 
-**Test command:**
+**Human test command (run manually):**
 ```bash
 docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver/test_coil_phantom_magnetostatics.py -v'
 ```
@@ -187,7 +196,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
   - centerline smoothness check
   - optional symmetry check for symmetric setups
 
-**Test command:**
+**Human test command (run manually):**
 ```bash
 docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/validation/test_coil_phantom_bfield_metrics.py -v'
 ```
@@ -207,7 +216,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 - Accept frequency + material properties
 - Return an E-field object usable for sampling/export
 
-**Test command:**
+**Human test command (run manually):**
 ```bash
 docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver/test_time_harmonic_smoke.py -v'
 ```
@@ -228,7 +237,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
   - frequency parameter
 - Wire model into time-harmonic path for phantom-tagged cells
 
-**Test command:**
+**Human test command (run manually):**
 ```bash
 docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/materials/test_phantom_material_model.py -v'
 ```
@@ -243,7 +252,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 - Add post-processing helpers to sample/export inside phantom tag
 - Compute summary stats for |E| and |B| in phantom
 
-**Test command:**
+**Human test command (run manually):**
 ```bash
 docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/post/test_phantom_field_metrics.py -v'
 ```
@@ -269,7 +278,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 - Define mesh tagging contract for port faces/edges (documented constants).
 - Add validation helper that checks required port tags exist.
 
-**Test command:**
+**Human test command (run manually):**
 ```bash
 docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/ports/test_port_definition.py -v'
 ```
@@ -289,7 +298,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 **Constraints:**
 - Keep mesh under 50k cells and runnable under 4GB RAM.
 
-**Test command:**
+**Human test command (run manually):**
 ```bash
 docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/mesh/test_birdcage_port_tags.py -v'
 ```
@@ -309,7 +318,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 - Return per-port voltage/current estimates needed for S-parameter assembly.
 - Keep implementation simple and explicit; prioritize deterministic behavior over sophistication.
 
-**Test command:**
+**Human test command (run manually):**
 ```bash
 docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver/test_single_port_excitation.py -v'
 ```
@@ -328,7 +337,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
   - diagonal reflection terms present
 - Keep frequency list short/coarse for resource limits.
 
-**Test command:**
+**Human test command (run manually):**
 ```bash
 docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/ports/test_sparameter_assembly.py -v'
 ```
@@ -347,7 +356,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 - Include metadata in filename/header (frequency points, Z0, port ordering).
 - Add tiny loader/roundtrip test to ensure exported file is parseable.
 
-**Test command:**
+**Human test command (run manually):**
 ```bash
 docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/io/test_touchstone_export.py -v'
 ```
@@ -366,7 +375,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
   - comparison vs known/bench measurements
 - Add quick checklist for interpreting suspicious S-parameter results.
 
-**Test command:**
+**Human test command (run manually):**
 ```bash
 docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/ports/human_port_calibration_checklist.md && echo OK'
 ```
@@ -389,7 +398,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/ports/
   - prints phantom metrics
   - exports ParaView files
 
-**Test command:**
+**Human test command (run manually):**
 ```bash
 docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/mri/01_coil_phantom_fields.py'
 ```
@@ -408,7 +417,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
   - known failure symptoms
   - suggested parameter tweaks when unstable
 
-**Test command:**
+**Human test command (run manually):**
 ```bash
 docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/testing_manual_checklist.md && echo OK'
 ```
@@ -437,11 +446,19 @@ These are intentionally marked as human checkpoints because agent debugging is l
 
 ## Agent Execution Template (for cron job prompt)
 For each run:
-1. Find first ⬜ chunk
+1. Find first ⬜ chunk (or 🧪 AWAITING-HUMAN-TEST chunk if you provided results)
 2. Implement only that chunk
-3. Run exact chunk test command
-4. If pass: mark ✅ with commit hash/date
-5. If fail repeatedly: mark 🚫 BLOCKED with concise reason and move on
+3. Do **not** run heavy FEM tests in cron mode
+4. Append/update `docs/testing/pending-tests.md` with:
+   - chunk id
+   - manual test command (wrapped with `scripts/testing/run_and_log.sh`)
+   - expected signal
+   - files changed / commit hash
+5. Human runs tests; results auto-log to:
+   - `docs/testing/test-results.md` (index)
+   - `docs/testing/logs/*.log` (full output)
+6. Mark chunk as `🧪 AWAITING-HUMAN-TEST`
+7. After you report test results, agent updates chunk to ✅ or 🚫 BLOCKED
 
 ---
 
