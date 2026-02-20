@@ -819,3 +819,105 @@ class MeshGenerator:
             gmsh.finalize()
 
         return mesh, cell_tags, facet_tags
+
+    @staticmethod
+    def coil_phantom_domain(
+        coil_major_radius: float = 0.08,
+        coil_minor_radius: float = 0.01,
+        coil_separation: float = 0.08,
+        phantom_radius: float = 0.04,
+        phantom_height: float = 0.10,
+        air_padding: float = 0.04,
+        resolution: float = 0.015,
+        comm: MPI.Intracomm = MPI.COMM_WORLD,
+        rank: int = 0,
+    ) -> Tuple[dolfinx.mesh.Mesh, dolfinx.mesh.MeshTags, dolfinx.mesh.MeshTags]:
+        """Generate a coarse two-coil + cylindrical phantom + air mesh.
+
+        Cell tags:
+        - 1: coil_1
+        - 2: coil_2
+        - 3: phantom
+        - 4: air
+        """
+        if comm.rank == rank:
+            gmsh.initialize()
+            gmsh.model.add("coil_phantom_domain")
+
+            z_offset = coil_separation / 2
+            coil_1 = gmsh.model.occ.addTorus(0, 0, -z_offset, coil_major_radius, coil_minor_radius)
+            coil_2 = gmsh.model.occ.addTorus(0, 0, z_offset, coil_major_radius, coil_minor_radius)
+            phantom = gmsh.model.occ.addCylinder(
+                0, 0, -phantom_height / 2,
+                0, 0, phantom_height,
+                phantom_radius,
+            )
+
+            radial_extent = max(coil_major_radius + coil_minor_radius, phantom_radius)
+            z_extent = max(z_offset + coil_minor_radius, phantom_height / 2)
+            air = gmsh.model.occ.addBox(
+                -(radial_extent + air_padding),
+                -(radial_extent + air_padding),
+                -(z_extent + air_padding),
+                2 * (radial_extent + air_padding),
+                2 * (radial_extent + air_padding),
+                2 * (z_extent + air_padding),
+            )
+
+            gmsh.model.occ.fragment(
+                [(3, air)],
+                [(3, coil_1), (3, coil_2), (3, phantom)],
+            )
+            gmsh.model.occ.synchronize()
+
+            volumes = gmsh.model.getEntities(dim=3)
+            masses = {tag: gmsh.model.occ.getMass(3, tag) for _, tag in volumes}
+            air_tag = max(masses, key=masses.get)
+
+            remaining = [tag for _, tag in volumes if tag != air_tag]
+            z_centers = {
+                tag: gmsh.model.occ.getCenterOfMass(3, tag)[2]
+                for tag in remaining
+            }
+
+            coil_1_tag = min(remaining, key=lambda tag: z_centers[tag])
+            coil_2_tag = max(remaining, key=lambda tag: z_centers[tag])
+            phantom_tag = [tag for tag in remaining if tag not in (coil_1_tag, coil_2_tag)][0]
+
+            gmsh.model.addPhysicalGroup(3, [coil_1_tag], tag=1)
+            gmsh.model.setPhysicalName(3, 1, "coil_1")
+            gmsh.model.addPhysicalGroup(3, [coil_2_tag], tag=2)
+            gmsh.model.setPhysicalName(3, 2, "coil_2")
+            gmsh.model.addPhysicalGroup(3, [phantom_tag], tag=3)
+            gmsh.model.setPhysicalName(3, 3, "phantom")
+            gmsh.model.addPhysicalGroup(3, [air_tag], tag=4)
+            gmsh.model.setPhysicalName(3, 4, "air")
+
+            outer_boundary_surfaces = []
+            box_half_x = radial_extent + air_padding
+            box_half_z = z_extent + air_padding
+            for dim, surf in gmsh.model.getEntities(dim=2):
+                x_min, y_min, z_min, x_max, y_max, z_max = gmsh.model.getBoundingBox(dim, surf)
+                if (
+                    abs(abs(x_min) - box_half_x) < resolution or abs(abs(x_max) - box_half_x) < resolution
+                    or abs(abs(y_min) - box_half_x) < resolution or abs(abs(y_max) - box_half_x) < resolution
+                    or abs(abs(z_min) - box_half_z) < resolution or abs(abs(z_max) - box_half_z) < resolution
+                ):
+                    outer_boundary_surfaces.append(surf)
+
+            if outer_boundary_surfaces:
+                gmsh.model.addPhysicalGroup(2, outer_boundary_surfaces, tag=1)
+                gmsh.model.setPhysicalName(2, 1, "outer_boundary")
+
+            gmsh.model.mesh.setSize(gmsh.model.getEntities(0), resolution)
+            gmsh.model.mesh.generate(3)
+            gmsh.model.mesh.optimize("Netgen")
+
+        mesh, cell_tags, facet_tags = gmshio.model_to_mesh(
+            gmsh.model, comm, rank, gdim=3
+        )
+
+        if comm.rank == rank:
+            gmsh.finalize()
+
+        return mesh, cell_tags, facet_tags
