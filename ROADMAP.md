@@ -59,7 +59,7 @@ All tests must run within constrained resources and use MPI:
 ### ✅ A0 — Baseline straight-wire quality reference
 Keep straight-wire behavior as golden standard for diagnostics/evaluation/export.
 
-### ✅ A1 — Add shared field-evaluation utility (2026-02-20, COMMIT_HASH)
+### ✅ A1 — Add shared field-evaluation utility (2026-02-20, c01afde)
 **Goal:** Remove duplicated fragile point-evaluation logic from examples/tests.
 
 **Agent tasks:**
