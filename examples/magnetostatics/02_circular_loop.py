@@ -13,6 +13,7 @@ from fem_em_solver.core.solvers import MagnetostaticSolver, MagnetostaticProblem
 from fem_em_solver.io.mesh import MeshGenerator
 from fem_em_solver.utils.analytical import AnalyticalSolutions, ErrorMetrics
 from fem_em_solver.utils.constants import MU_0
+from fem_em_solver.io.paraview_utils import write_combined_paraview_output
 
 # Import dolfinx I/O for ParaView output
 from dolfinx import io, fem
@@ -124,45 +125,33 @@ def main():
     output_dir = Path("paraview_output")
     output_dir.mkdir(exist_ok=True)
 
-    # Method 1: XDMF format (traditional, widely compatible)
-    # Note: XDMF only supports Lagrange elements, so we need to interpolate
-    print("\n  Writing XDMF files...")
-
-    # Save the mesh with cell tags for visualization
-    with io.XDMFFile(comm, output_dir / "circular_loop_mesh.xdmf", "w") as xdmf:
-        xdmf.write_mesh(mesh)
-        # Also write cell tags to visualize regions
-        if cell_tags is not None:
-            mesh.topology.create_connectivity(3, 3)
-            xdmf.write_meshtags(cell_tags, mesh.geometry)
-        print("    ✓ Mesh saved to circular_loop_mesh.xdmf (with cell tags)")
+    # Standardized XDMF exports (individual + combined tag/field output)
+    print("\n  Writing XDMF files (traditional + combined)...")
 
     # Create Lagrange function space for visualization
     V_lag = fem.functionspace(mesh, ("Lagrange", 1, (3,)))
 
-    # Interpolate A to Lagrange space
+    # Interpolate A and B to Lagrange space
     A_lag = fem.Function(V_lag, name="A")
     A_lag.interpolate(A)
-
-    with io.XDMFFile(comm, output_dir / "circular_loop_A.xdmf", "w") as xdmf:
-        xdmf.write_mesh(mesh)
-        # Write cell tags for filtering in ParaView
-        if cell_tags is not None:
-            xdmf.write_meshtags(cell_tags, mesh.geometry)
-        xdmf.write_function(A_lag)
-        print("    ✓ Vector potential A saved to circular_loop_A.xdmf (with cell tags)")
-
-    # Interpolate B to Lagrange space
     B_lag = fem.Function(V_lag, name="B")
     B_lag.interpolate(B)
 
-    with io.XDMFFile(comm, output_dir / "circular_loop_B.xdmf", "w") as xdmf:
-        xdmf.write_mesh(mesh)
-        # Write cell tags so we can filter in ParaView
-        if cell_tags is not None:
-            xdmf.write_meshtags(cell_tags, mesh.geometry)
-        xdmf.write_function(B_lag)
-        print("    ✓ Magnetic field B saved to circular_loop_B.xdmf (with cell tags for filtering)")
+    written_files = write_combined_paraview_output(
+        output_dir=output_dir,
+        basename="circular_loop",
+        mesh=mesh,
+        cell_tags=cell_tags,
+        fields={
+            "A": (A, A_lag),
+            "B": (B, B_lag),
+        },
+        comm=comm,
+    )
+    if comm.rank == 0:
+        print("    ✓ Standardized XDMF export complete")
+        if "combined" in written_files:
+            print(f"    ✓ Combined file saved to {written_files['combined'].name}")
 
     # Method 2: VTX format (modern, supports higher-order elements)
     print("\n  Writing VTX files...")

@@ -16,6 +16,7 @@ from fem_em_solver.io.mesh import MeshGenerator
 from fem_em_solver.utils.analytical import AnalyticalSolutions, ErrorMetrics
 from fem_em_solver.utils.constants import MU_0
 from fem_em_solver.post import evaluate_vector_field_parallel
+from fem_em_solver.io.paraview_utils import write_combined_paraview_output
 
 # Import dolfinx I/O for ParaView output
 from dolfinx import io, fem
@@ -209,60 +210,34 @@ def main():
     output_dir = Path("paraview_output")
     output_dir.mkdir(exist_ok=True)
 
-    # Method 1: XDMF format (traditional, widely compatible)
-    # This creates .xdmf (XML descriptor) and .h5 (HDF5 data) files
-    # Note: XDMF only supports Lagrange elements, so we need to interpolate
-    print("\n  Writing XDMF files (traditional format)...")
-
-    # Save the mesh with cell tags for visualization
-    with io.XDMFFile(comm, output_dir / "straight_wire_mesh.xdmf", "w") as xdmf:
-        xdmf.write_mesh(mesh)
-        # Also write cell tags to visualize regions
-        if cell_tags is not None:
-            mesh.topology.create_connectivity(3, 3)
-            xdmf.write_meshtags(cell_tags, mesh.geometry)
-        print("    ✓ Mesh saved to straight_wire_mesh.xdmf (with cell tags)")
+    # Standardized XDMF exports (individual + combined tag/field output)
+    print("\n  Writing XDMF files (traditional + combined)...")
 
     # V_lag and B_lag already created earlier for evaluation
     # Interpolate A to Lagrange space
     A_lag = fem.Function(V_lag, name="A")
     A_lag.interpolate(A)
 
-    with io.XDMFFile(comm, output_dir / "straight_wire_A.xdmf", "w") as xdmf:
-        xdmf.write_mesh(mesh)
-        # Write cell tags for filtering in ParaView
-        if cell_tags is not None:
-            xdmf.write_meshtags(cell_tags, mesh.geometry)
-        xdmf.write_function(A_lag)
-        print("    ✓ Vector potential A saved to straight_wire_A.xdmf (with cell tags)")
-
-    # B_lag already created earlier - no need to recreate
-
-    with io.XDMFFile(comm, output_dir / "straight_wire_B.xdmf", "w") as xdmf:
-        xdmf.write_mesh(mesh)
-        # Write cell tags so we can filter in ParaView
-        if cell_tags is not None:
-            xdmf.write_meshtags(cell_tags, mesh.geometry)
-        xdmf.write_function(B_lag)
-        print("    ✓ Magnetic field B saved to straight_wire_B.xdmf (with cell tags for filtering)")
-
-    # Method 2: Combined XDMF with tags and fields on same grid
-    print("\n  Writing combined XDMF file (RECOMMENDED for ParaView)...")
     try:
-        from fem_em_solver.io.paraview_utils import write_xdmf_with_tags
-        combined_file, _ = write_xdmf_with_tags(
-            output_dir / "straight_wire_combined",
-            mesh,
-            cell_tags,
-            {"B": B_lag, "A": A_lag},
-            comm=comm
+        written_files = write_combined_paraview_output(
+            output_dir=output_dir,
+            basename="straight_wire",
+            mesh=mesh,
+            cell_tags=cell_tags,
+            fields={
+                "A": (A, A_lag),
+                "B": (B, B_lag),
+            },
+            comm=comm,
         )
-        if combined_file:
-            print(f"    ✓ Combined file saved to {combined_file.name}")
-            print("    This file has BOTH cell tags and fields on the same grid!")
+        if comm.rank == 0:
+            print("    ✓ Standardized XDMF export complete")
+            if "combined" in written_files:
+                print(f"    ✓ Combined file saved to {written_files['combined'].name}")
+                print("    This file has BOTH cell tags and fields on the same grid!")
     except Exception as e:
         import traceback
-        print(f"    ⚠ Combined XDMF failed: {e}")
+        print(f"    ⚠ XDMF export failed: {e}")
         print("\n  Full traceback:")
         traceback.print_exc()
 
