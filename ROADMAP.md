@@ -106,7 +106,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 
 ## Phase B — Coil + Phantom Geometry Pipeline
 
-### ⬜ B1 — Add phantom-ready mesh generator (coil + cylindrical phantom + air box)
+### ✅ B1 — Add phantom-ready mesh generator (coil + cylindrical phantom + air box) (2026-02-20, 9de1bf8)
 **Goal:** Create a robust geometry function for a first MRI-like test model.
 
 **Constraints:**
