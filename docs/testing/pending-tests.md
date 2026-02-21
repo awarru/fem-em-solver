@@ -90,3 +90,24 @@ Logs are automatically written to:
 - Expected pass signal:
   - Pytest reports `tests/solver/test_time_harmonic_smoke.py::test_time_harmonic_smoke_returns_finite_e_field_values PASSED`
   - Test output prints `time-harmonic smoke diagnostics` with finite non-zero `|E_imag|` min/max/mean
+
+## D2 — Add gelled saline phantom material model (MVP) (🧪 AWAITING-HUMAN-TEST)
+
+- Commit: `e2f6ac09fa2bff8de352713661d6ea7f2532929d`
+- Files changed:
+  - `ROADMAP.md`
+  - `docs/testing/pending-tests.md`
+  - `src/fem_em_solver/__init__.py`
+  - `src/fem_em_solver/core/__init__.py`
+  - `src/fem_em_solver/core/time_harmonic.py`
+  - `src/fem_em_solver/materials/__init__.py`
+  - `src/fem_em_solver/materials/phantom.py`
+  - `tests/materials/test_phantom_material_model.py`
+- Manual test command:
+  ```bash
+  scripts/testing/run_and_log.sh D2 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/materials/test_phantom_material_model.py -v'"
+  ```
+- Expected pass signal:
+  - Pytest reports `tests/materials/test_phantom_material_model.py::test_gelled_saline_material_container_frequency_term_is_finite PASSED`
+  - Pytest reports `tests/materials/test_phantom_material_model.py::test_phantom_material_assignment_and_time_harmonic_pipeline_wiring PASSED`
+  - Test output has no `ValueError` related to phantom tag assignment or frequency mismatch

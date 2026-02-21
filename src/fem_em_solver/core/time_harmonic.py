@@ -9,6 +9,7 @@ import numpy as np
 import dolfinx
 from dolfinx import fem
 
+from ..materials import GelledSalinePhantomMaterial
 from ..utils.constants import EPSILON_0, MU_0
 from .solvers import MagnetostaticProblem, MagnetostaticSolver
 
@@ -31,6 +32,8 @@ class TimeHarmonicProblem:
     material: HomogeneousMaterial
     cell_tags: Optional[dolfinx.mesh.MeshTags] = None
     facet_tags: Optional[dolfinx.mesh.MeshTags] = None
+    phantom_material: Optional[GelledSalinePhantomMaterial] = None
+    phantom_tag: int = 3
 
 
 @dataclass
@@ -40,10 +43,59 @@ class TimeHarmonicFields:
     e_real: fem.Function
     e_imag: fem.Function
     frequency_hz: float
+    sigma_field: Optional[fem.Function] = None
+    epsilon_r_field: Optional[fem.Function] = None
 
     @property
     def omega(self) -> float:
         return float(2.0 * np.pi * self.frequency_hz)
+
+
+def build_material_fields(
+    mesh: dolfinx.mesh.Mesh,
+    default_material: HomogeneousMaterial,
+    *,
+    cell_tags: Optional[dolfinx.mesh.MeshTags] = None,
+    phantom_material: Optional[GelledSalinePhantomMaterial] = None,
+    phantom_tag: int = 3,
+) -> tuple[fem.Function, fem.Function]:
+    """Build DG0 material property fields with optional phantom-tag override.
+
+    Returns
+    -------
+    sigma_field, epsilon_r_field
+        DG0 scalar fields assigned cell-wise across the mesh.
+    """
+
+    q0 = fem.functionspace(mesh, ("DG", 0))
+    sigma_field = fem.Function(q0, name="sigma")
+    epsilon_r_field = fem.Function(q0, name="epsilon_r")
+
+    sigma_values = sigma_field.x.array
+    epsilon_values = epsilon_r_field.x.array
+
+    sigma_values[:] = float(default_material.sigma)
+    epsilon_values[:] = float(default_material.epsilon_r)
+
+    if phantom_material is not None:
+        phantom_material.validate()
+        if cell_tags is None:
+            raise ValueError("phantom_material requires problem.cell_tags to assign phantom-tagged cells")
+
+        phantom_cells = cell_tags.indices[cell_tags.values == int(phantom_tag)]
+        if phantom_cells.size == 0:
+            raise ValueError(
+                f"phantom_material requested but no cells found for phantom_tag={phantom_tag}"
+            )
+
+        for cell in phantom_cells:
+            dofs = q0.dofmap.cell_dofs(int(cell))
+            sigma_values[dofs] = float(phantom_material.sigma)
+            epsilon_values[dofs] = float(phantom_material.epsilon_r)
+
+    sigma_field.x.scatter_forward()
+    epsilon_r_field.x.scatter_forward()
+    return sigma_field, epsilon_r_field
 
 
 class TimeHarmonicSolver:
@@ -83,6 +135,20 @@ class TimeHarmonicSolver:
         if material.mu_r <= 0:
             raise ValueError("material.mu_r must be positive")
 
+        if self.problem.phantom_material is not None:
+            if abs(self.problem.phantom_material.frequency_hz - self.problem.frequency_hz) > 1e-9:
+                raise ValueError(
+                    "phantom_material.frequency_hz must match TimeHarmonicProblem.frequency_hz"
+                )
+
+        sigma_field, epsilon_r_field = build_material_fields(
+            self.mesh,
+            material,
+            cell_tags=self.problem.cell_tags,
+            phantom_material=self.problem.phantom_material,
+            phantom_tag=self.problem.phantom_tag,
+        )
+
         mu = material.mu_r * MU_0
 
         mag_problem = MagnetostaticProblem(
@@ -112,14 +178,16 @@ class TimeHarmonicSolver:
         e_imag_expr = fem.Expression(-omega * a_dg, dg.element.interpolation_points())
         e_imag.interpolate(e_imag_expr)
 
-        # Keep this explicit so future chunks can plug in conductivity/
-        # displacement-current terms without API churn.
-        _ = material.sigma + omega * EPSILON_0 * material.epsilon_r
+        # Explicitly evaluate the material-response proxy so phantom-tagged material
+        # assignment is wired into the solve pipeline for diagnostics/future formulation.
+        _ = sigma_field.x.array + omega * EPSILON_0 * epsilon_r_field.x.array
 
         self._fields = TimeHarmonicFields(
             e_real=e_real,
             e_imag=e_imag,
             frequency_hz=self.problem.frequency_hz,
+            sigma_field=sigma_field,
+            epsilon_r_field=epsilon_r_field,
         )
         return self._fields
 

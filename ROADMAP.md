@@ -80,7 +80,6 @@ Keep straight-wire behavior as golden standard for diagnostics/evaluation/export
 
 **Human test command (run manually):**
 ```bash
-cd ~/Development/fem-em-solver/docker
 docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/magnetostatics/01_straight_wire.py'
 ```
 
@@ -227,7 +226,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 **Human verification (YOU):**
 - If numerics look unstable, tune formulation choices manually.
 
-### ⬜ D2 — Add gelled saline phantom material model (MVP)
+### 🧪 D2 — Add gelled saline phantom material model (MVP)
 **Goal:** Support phantom electrical properties needed for E-field estimates.
 
 **Agent tasks:**
@@ -463,6 +462,6 @@ For each run:
 ---
 
 ## Immediate Next Chunk
-**D2 — Add gelled saline phantom material model (MVP)**
+**D3 — E and B field extraction inside phantom**
 
-Reason: D1 introduced a minimal frequency-domain scaffold; next step is wiring explicit phantom material properties into that solve path.
+Reason: D2 material container + phantom-tag assignment are now wired into the time-harmonic path; next is phantom-specific E/B metric extraction/export.

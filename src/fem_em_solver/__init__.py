@@ -15,7 +15,9 @@ from .core import (
     TimeHarmonicFields,
     TimeHarmonicProblem,
     TimeHarmonicSolver,
+    build_material_fields,
 )
+from .materials import GelledSalinePhantomMaterial
 
 __all__ = [
     "MagnetostaticProblem",
@@ -24,4 +26,6 @@ __all__ = [
     "TimeHarmonicFields",
     "TimeHarmonicProblem",
     "TimeHarmonicSolver",
+    "build_material_fields",
+    "GelledSalinePhantomMaterial",
 ]

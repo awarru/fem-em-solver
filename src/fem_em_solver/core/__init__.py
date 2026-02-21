@@ -6,6 +6,7 @@ from .time_harmonic import (
     TimeHarmonicFields,
     TimeHarmonicProblem,
     TimeHarmonicSolver,
+    build_material_fields,
 )
 
 __all__ = [
@@ -15,4 +16,5 @@ __all__ = [
     "TimeHarmonicFields",
     "TimeHarmonicProblem",
     "TimeHarmonicSolver",
+    "build_material_fields",
 ]
