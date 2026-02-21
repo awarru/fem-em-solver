@@ -510,6 +510,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#d2-add-gelled-saline-phantom-material-model-mvp-awaiting-human-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        D2 — Add gelled saline phantom material model (MVP) (🧪 AWAITING-HUMAN-TEST)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -624,6 +635,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#d2-add-gelled-saline-phantom-material-model-mvp-awaiting-human-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        D2 — Add gelled saline phantom material model (MVP) (🧪 AWAITING-HUMAN-TEST)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -722,6 +744,26 @@
 <li>Expected pass signal:</li>
 <li>Pytest reports <code>tests/solver/test_time_harmonic_smoke.py::test_time_harmonic_smoke_returns_finite_e_field_values PASSED</code></li>
 <li>Test output prints <code>time-harmonic smoke diagnostics</code> with finite non-zero <code>|E_imag|</code> min/max/mean</li>
+</ul>
+<h2 id="d2-add-gelled-saline-phantom-material-model-mvp-awaiting-human-test">D2 — Add gelled saline phantom material model (MVP) (🧪 AWAITING-HUMAN-TEST)<a class="headerlink" href="#d2-add-gelled-saline-phantom-material-model-mvp-awaiting-human-test" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Commit: <code>c03f461e73a70c7fc8dd83291c4cf6531bd5b1c6</code></li>
+<li>Files changed:</li>
+<li><code>ROADMAP.md</code></li>
+<li><code>docs/testing/pending-tests.md</code></li>
+<li><code>src/fem_em_solver/__init__.py</code></li>
+<li><code>src/fem_em_solver/core/__init__.py</code></li>
+<li><code>src/fem_em_solver/core/time_harmonic.py</code></li>
+<li><code>src/fem_em_solver/materials/__init__.py</code></li>
+<li><code>src/fem_em_solver/materials/phantom.py</code></li>
+<li><code>tests/materials/test_phantom_material_model.py</code></li>
+<li>Manual test command:
+  <code>bash
+  scripts/testing/run_and_log.sh D2 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/materials/test_phantom_material_model.py -v'"</code></li>
+<li>Expected pass signal:</li>
+<li>Pytest reports <code>tests/materials/test_phantom_material_model.py::test_gelled_saline_material_container_frequency_term_is_finite PASSED</code></li>
+<li>Pytest reports <code>tests/materials/test_phantom_material_model.py::test_phantom_material_assignment_and_time_harmonic_pipeline_wiring PASSED</code></li>
+<li>Test output has no <code>ValueError</code> related to phantom tag assignment or frequency mismatch</li>
 </ul>
 
 
