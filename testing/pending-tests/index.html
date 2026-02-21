@@ -477,6 +477,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#c1-solve-b-field-on-coilphantom-model-awaiting-human-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C1 — Solve B-field on coil+phantom model (🧪 AWAITING-HUMAN-TEST)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -558,6 +569,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#c1-solve-b-field-on-coilphantom-model-awaiting-human-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C1 — Solve B-field on coil+phantom model (🧪 AWAITING-HUMAN-TEST)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -609,6 +631,21 @@
 <li>Expected pass signal:</li>
 <li>Pytest reports <code>tests/mesh/test_mesh_tag_integrity.py::test_coil_phantom_mesh_tag_integrity PASSED</code></li>
 <li>Log contains a mesh QA summary line with non-zero counts for <code>coil_1</code>, <code>coil_2</code>, <code>phantom</code>, and <code>air</code></li>
+</ul>
+<hr />
+<h2 id="c1-solve-b-field-on-coilphantom-model-awaiting-human-test">C1 — Solve B-field on coil+phantom model (🧪 AWAITING-HUMAN-TEST)<a class="headerlink" href="#c1-solve-b-field-on-coilphantom-model-awaiting-human-test" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Commit: <code>09eb248f6e5ee161234d8a799692c75a63262efb</code></li>
+<li>Files changed:</li>
+<li><code>ROADMAP.md</code></li>
+<li><code>src/fem_em_solver/core/solvers.py</code></li>
+<li><code>tests/solver/test_coil_phantom_magnetostatics.py</code></li>
+<li>Manual test command:
+  <code>bash
+  scripts/testing/run_and_log.sh C1 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver/test_coil_phantom_magnetostatics.py -v'"</code></li>
+<li>Expected pass signal:</li>
+<li>Pytest reports <code>tests/solver/test_coil_phantom_magnetostatics.py::test_coil_phantom_magnetostatics_bfield_is_finite_and_nontrivial_in_phantom PASSED</code></li>
+<li>Test output prints <code>coil+phantom B-field diagnostics</code> with finite non-zero phantom <code>|B|</code> min/max/mean</li>
 </ul>
 
 
