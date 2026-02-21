@@ -8,8 +8,20 @@ __version__ = "0.1.0"
 __author__ = "Awarru"
 
 # Core imports
-from .core.solvers import MagnetostaticSolver
+from .core import (
+    HomogeneousMaterial,
+    MagnetostaticProblem,
+    MagnetostaticSolver,
+    TimeHarmonicFields,
+    TimeHarmonicProblem,
+    TimeHarmonicSolver,
+)
 
 __all__ = [
+    "MagnetostaticProblem",
     "MagnetostaticSolver",
+    "HomogeneousMaterial",
+    "TimeHarmonicFields",
+    "TimeHarmonicProblem",
+    "TimeHarmonicSolver",
 ]

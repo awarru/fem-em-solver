@@ -208,7 +208,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 
 ## Phase D — Time-Harmonic E-field in Phantom (first practical version)
 
-### ⬜ D1 — Introduce minimal frequency-domain solve scaffold
+### 🧪 D1 — Introduce minimal frequency-domain solve scaffold
 **Goal:** Add a narrow, testable path to compute E-field in phantom.
 
 **Agent tasks:**
@@ -463,6 +463,6 @@ For each run:
 ---
 
 ## Immediate Next Chunk
-**A2 — Add shared ParaView export helper**
+**D2 — Add gelled saline phantom material model (MVP)**
 
-Reason: with evaluation logic centralized, standardizing combined tag+field export is the next highest-leverage infrastructure step for reliable visual validation.
+Reason: D1 introduced a minimal frequency-domain scaffold; next step is wiring explicit phantom material properties into that solve path.
