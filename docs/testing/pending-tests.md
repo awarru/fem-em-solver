@@ -37,3 +37,20 @@ Logs are automatically written to:
 - Expected pass signal:
   - Pytest reports `tests/mesh/test_mesh_tag_integrity.py::test_coil_phantom_mesh_tag_integrity PASSED`
   - Log contains a mesh QA summary line with non-zero counts for `coil_1`, `coil_2`, `phantom`, and `air`
+
+---
+
+## C1 — Solve B-field on coil+phantom model (🧪 AWAITING-HUMAN-TEST)
+
+- Commit: `706f49bb65936d8fbfd4609756373f3ca6a46f28`
+- Files changed:
+  - `ROADMAP.md`
+  - `src/fem_em_solver/core/solvers.py`
+  - `tests/solver/test_coil_phantom_magnetostatics.py`
+- Manual test command:
+  ```bash
+  scripts/testing/run_and_log.sh C1 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver/test_coil_phantom_magnetostatics.py -v'"
+  ```
+- Expected pass signal:
+  - Pytest reports `tests/solver/test_coil_phantom_magnetostatics.py::test_coil_phantom_magnetostatics_bfield_is_finite_and_nontrivial_in_phantom PASSED`
+  - Test output prints `coil+phantom B-field diagnostics` with finite non-zero phantom `|B|` min/max/mean

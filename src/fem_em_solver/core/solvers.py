@@ -19,7 +19,7 @@ Boundary conditions:
     - Natural: (∇ × A) × n = 0 (magnetic insulation)
 """
 
-from typing import Optional, Callable, Union, List
+from typing import Optional, Callable, Union, List, Sequence
 import numpy as np
 from dataclasses import dataclass
 
@@ -73,6 +73,7 @@ class MagnetostaticSolver:
     def solve(self, current_density: Optional[Callable] = None, 
               bc_functions: Optional[List] = None,
               subdomain_id: Optional[int] = None,
+              subdomain_ids: Optional[Sequence[int]] = None,
               gauge_penalty: float = 1e-3) -> fem.Function:
         """Solve the magnetostatic problem.
         
@@ -86,6 +87,10 @@ class MagnetostaticSolver:
         subdomain_id : int, optional
             If provided, restricts current density integration to cells
             with this tag (requires cell_tags in problem).
+        subdomain_ids : Sequence[int], optional
+            If provided, restricts current density integration to the union
+            of these cell tags (requires cell_tags in problem).
+            Mutually exclusive with ``subdomain_id``.
         gauge_penalty : float, optional
             Small regularization term added to remove the nullspace in
             pure curl-curl problems (default: 1e-3).
@@ -112,29 +117,35 @@ class MagnetostaticSolver:
         a = inner(mu_inv * curl(A_trial), curl(v)) * dx + gauge * inner(A_trial, v) * dx
         
         # Linear form: L(v) = ∫ J · v dx
-        # If subdomain_id provided, restrict to that subdomain using cell_tags
-        if subdomain_id is not None and self.problem.cell_tags is not None:
-            # Create measure restricted to subdomain
-            dx_sub = ufl.Measure(
-                "dx",
-                domain=self.mesh,
-                subdomain_data=self.problem.cell_tags,
-                subdomain_id=subdomain_id
-            )
-            if current_density is not None:
-                x = ufl.SpatialCoordinate(self.mesh)
-                J = current_density(x)
-                L = inner(J, v) * dx_sub
-            else:
-                L = inner(fem.Constant(self.mesh, np.zeros(3)), v) * dx_sub
+        if subdomain_id is not None and subdomain_ids is not None:
+            raise ValueError("Use either subdomain_id or subdomain_ids, not both")
+
+        if subdomain_ids is None and subdomain_id is not None:
+            subdomain_ids = [subdomain_id]
+
+        if current_density is not None:
+            x = ufl.SpatialCoordinate(self.mesh)
+            J = current_density(x)
+        else:
+            J = fem.Constant(self.mesh, np.zeros(3))
+
+        # If subdomain ids are provided, restrict integration to their union
+        if subdomain_ids is not None:
+            if self.problem.cell_tags is None:
+                raise ValueError("subdomain_id(s) requested but problem.cell_tags is None")
+
+            L = 0
+            for tag in subdomain_ids:
+                dx_sub = ufl.Measure(
+                    "dx",
+                    domain=self.mesh,
+                    subdomain_data=self.problem.cell_tags,
+                    subdomain_id=int(tag),
+                )
+                L += inner(J, v) * dx_sub
         else:
             # Integrate over whole domain
-            if current_density is not None:
-                x = ufl.SpatialCoordinate(self.mesh)
-                J = current_density(x)
-                L = inner(J, v) * dx
-            else:
-                L = inner(fem.Constant(self.mesh, np.zeros(3)), v) * dx
+            L = inner(J, v) * dx
         
         # Apply boundary conditions
         bcs = []
