@@ -488,6 +488,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#c2-add-sanity-validation-metrics-awaiting-human-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C2 — Add sanity validation metrics (🧪 AWAITING-HUMAN-TEST)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -580,6 +591,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#c2-add-sanity-validation-metrics-awaiting-human-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C2 — Add sanity validation metrics (🧪 AWAITING-HUMAN-TEST)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -646,6 +668,21 @@
 <li>Expected pass signal:</li>
 <li>Pytest reports <code>tests/solver/test_coil_phantom_magnetostatics.py::test_coil_phantom_magnetostatics_bfield_is_finite_and_nontrivial_in_phantom PASSED</code></li>
 <li>Test output prints <code>coil+phantom B-field diagnostics</code> with finite non-zero phantom <code>|B|</code> min/max/mean</li>
+</ul>
+<hr />
+<h2 id="c2-add-sanity-validation-metrics-awaiting-human-test">C2 — Add sanity validation metrics (🧪 AWAITING-HUMAN-TEST)<a class="headerlink" href="#c2-add-sanity-validation-metrics-awaiting-human-test" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Commit: <code>7ac10f166e283ff7b6f15e20323b6402a4a49d65</code></li>
+<li>Files changed:</li>
+<li><code>ROADMAP.md</code></li>
+<li><code>docs/testing/pending-tests.md</code></li>
+<li><code>tests/validation/test_coil_phantom_bfield_metrics.py</code></li>
+<li>Manual test command:
+  <code>bash
+  scripts/testing/run_and_log.sh C2 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/validation/test_coil_phantom_bfield_metrics.py -v'"</code></li>
+<li>Expected pass signal:</li>
+<li>Pytest reports <code>tests/validation/test_coil_phantom_bfield_metrics.py::test_coil_phantom_bfield_metrics_are_finite_smooth_and_symmetric PASSED</code></li>
+<li>Test output prints <code>coil+phantom B-field metrics</code> with finite <code>|B|</code> min/max/mean and bounded smoothness/symmetry diagnostics</li>
 </ul>
 
 
