@@ -42,7 +42,7 @@ Logs are automatically written to:
 
 ## C1 — Solve B-field on coil+phantom model (🧪 AWAITING-HUMAN-TEST)
 
-- Commit: `706f49bb65936d8fbfd4609756373f3ca6a46f28`
+- Commit: `09eb248f6e5ee161234d8a799692c75a63262efb`
 - Files changed:
   - `ROADMAP.md`
   - `src/fem_em_solver/core/solvers.py`
