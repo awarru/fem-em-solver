@@ -71,3 +71,22 @@ Logs are automatically written to:
 - Expected pass signal:
   - Pytest reports `tests/validation/test_coil_phantom_bfield_metrics.py::test_coil_phantom_bfield_metrics_are_finite_smooth_and_symmetric PASSED`
   - Test output prints `coil+phantom B-field metrics` with finite `|B|` min/max/mean and bounded smoothness/symmetry diagnostics
+
+---
+
+## D1 — Introduce minimal frequency-domain solve scaffold (🧪 AWAITING-HUMAN-TEST)
+
+- Commit: `1b2186e0d87e1db87503ce273193fd94635fcde3`
+- Files changed:
+  - `ROADMAP.md`
+  - `src/fem_em_solver/__init__.py`
+  - `src/fem_em_solver/core/__init__.py`
+  - `src/fem_em_solver/core/time_harmonic.py`
+  - `tests/solver/test_time_harmonic_smoke.py`
+- Manual test command:
+  ```bash
+  scripts/testing/run_and_log.sh D1 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver/test_time_harmonic_smoke.py -v'"
+  ```
+- Expected pass signal:
+  - Pytest reports `tests/solver/test_time_harmonic_smoke.py::test_time_harmonic_smoke_returns_finite_e_field_values PASSED`
+  - Test output prints `time-harmonic smoke diagnostics` with finite non-zero `|E_imag|` min/max/mean
