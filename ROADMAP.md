@@ -187,7 +187,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 **Human verification (YOU):**
 - Spot-check one centerline/profile plot looks physically plausible.
 
-### ⬜ C2 — Add sanity validation metrics
+### 🧪 C2 — Add sanity validation metrics
 **Goal:** Prevent silently wrong fields.
 
 **Agent tasks:**

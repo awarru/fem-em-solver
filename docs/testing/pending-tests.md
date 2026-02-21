@@ -54,3 +54,20 @@ Logs are automatically written to:
 - Expected pass signal:
   - Pytest reports `tests/solver/test_coil_phantom_magnetostatics.py::test_coil_phantom_magnetostatics_bfield_is_finite_and_nontrivial_in_phantom PASSED`
   - Test output prints `coil+phantom B-field diagnostics` with finite non-zero phantom `|B|` min/max/mean
+
+---
+
+## C2 — Add sanity validation metrics (🧪 AWAITING-HUMAN-TEST)
+
+- Commit: `d5c87e1f1f7ba27b04cb37dd19e909e6ee8d3696`
+- Files changed:
+  - `ROADMAP.md`
+  - `docs/testing/pending-tests.md`
+  - `tests/validation/test_coil_phantom_bfield_metrics.py`
+- Manual test command:
+  ```bash
+  scripts/testing/run_and_log.sh C2 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/validation/test_coil_phantom_bfield_metrics.py -v'"
+  ```
+- Expected pass signal:
+  - Pytest reports `tests/validation/test_coil_phantom_bfield_metrics.py::test_coil_phantom_bfield_metrics_are_finite_smooth_and_symmetric PASSED`
+  - Test output prints `coil+phantom B-field metrics` with finite `|B|` min/max/mean and bounded smoothness/symmetry diagnostics
