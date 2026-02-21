@@ -93,7 +93,7 @@ Logs are automatically written to:
 
 ## D2 — Add gelled saline phantom material model (MVP) (🧪 AWAITING-HUMAN-TEST)
 
-- Commit: `e2f6ac09fa2bff8de352713661d6ea7f2532929d`
+- Commit: `c03f461e73a70c7fc8dd83291c4cf6531bd5b1c6`
 - Files changed:
   - `ROADMAP.md`
   - `docs/testing/pending-tests.md`
