@@ -145,3 +145,18 @@ Logs are automatically written to:
 - Expected pass signal:
   - Pytest reports `tests/ports/test_port_definition.py` tests all `PASSED`
   - Log has no `ValueError` except inside expected `pytest.raises(...)` checks for invalid inputs
+
+## E2 — Add minimal birdcage-like test geometry with port tags (🧪 AWAITING-HUMAN-TEST)
+
+- Commit: `fd85b2ba40d84eede3dcce8cfb46c3a1feac1879`
+- Files changed:
+  - `ROADMAP.md`
+  - `src/fem_em_solver/io/mesh.py`
+  - `tests/mesh/test_birdcage_port_tags.py`
+- Manual test command:
+  ```bash
+  scripts/testing/run_and_log.sh E2 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/mesh/test_birdcage_port_tags.py -v'"
+  ```
+- Expected pass signal:
+  - Pytest reports `tests/mesh/test_birdcage_port_tags.py::test_birdcage_like_mesh_has_core_and_port_tags PASSED`
+  - Test output prints `[birdcage-mesh]` tag summary including non-zero counts for `conductor`, `air`, `phantom`, and `port_P1`..`port_P4`
