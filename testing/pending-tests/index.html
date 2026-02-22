@@ -554,6 +554,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#e3-implement-port-excitation-hook-single-port-solve-awaiting-human-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E3 — Implement port excitation hook (single-port solve) (🧪 AWAITING-HUMAN-TEST)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -706,6 +717,17 @@
     <span class="md-ellipsis">
       
         E2 — Add minimal birdcage-like test geometry with port tags (🧪 AWAITING-HUMAN-TEST)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#e3-implement-port-excitation-hook-single-port-solve-awaiting-human-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E3 — Implement port excitation hook (single-port solve) (🧪 AWAITING-HUMAN-TEST)
       
     </span>
   </a>
@@ -876,6 +898,23 @@
 <li>Expected pass signal:</li>
 <li>Pytest reports <code>tests/mesh/test_birdcage_port_tags.py::test_birdcage_like_mesh_has_core_and_port_tags PASSED</code></li>
 <li>Test output prints <code>[birdcage-mesh]</code> tag summary including non-zero counts for <code>conductor</code>, <code>air</code>, <code>phantom</code>, and <code>port_P1</code>..<code>port_P4</code></li>
+</ul>
+<h2 id="e3-implement-port-excitation-hook-single-port-solve-awaiting-human-test">E3 — Implement port excitation hook (single-port solve) (🧪 AWAITING-HUMAN-TEST)<a class="headerlink" href="#e3-implement-port-excitation-hook-single-port-solve-awaiting-human-test" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Commit: <code>1d6fdc1839f1205e6e9ee740fece5ed66ad7dbed</code></li>
+<li>Files changed:</li>
+<li><code>ROADMAP.md</code></li>
+<li><code>src/fem_em_solver/__init__.py</code></li>
+<li><code>src/fem_em_solver/ports/__init__.py</code></li>
+<li><code>src/fem_em_solver/ports/excitation.py</code></li>
+<li><code>tests/solver/test_single_port_excitation.py</code></li>
+<li>Manual test command:
+  <code>bash
+  scripts/testing/run_and_log.sh E3 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver/test_single_port_excitation.py -v'"</code></li>
+<li>Expected pass signal:</li>
+<li>Pytest reports <code>tests/solver/test_single_port_excitation.py::test_single_port_excitation_returns_finite_estimates PASSED</code></li>
+<li>Pytest reports <code>tests/solver/test_single_port_excitation.py::test_single_port_excitation_rejects_missing_required_tags PASSED</code></li>
+<li>Test output prints <code>single-port excitation diagnostics</code> with finite voltage/current estimates for driven and passive ports</li>
 </ul>
 
 
