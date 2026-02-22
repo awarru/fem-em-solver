@@ -12,6 +12,11 @@ from .definitions import (
     required_port_tags,
     validate_required_port_tags_exist,
 )
+from .excitation import (
+    PortVoltageCurrentEstimate,
+    SinglePortExcitationResult,
+    run_single_port_excitation_case,
+)
 
 __all__ = [
     "DEFAULT_REFERENCE_IMPEDANCE_OHM",
@@ -24,4 +29,7 @@ __all__ = [
     "PortDefinition",
     "required_port_tags",
     "validate_required_port_tags_exist",
+    "PortVoltageCurrentEstimate",
+    "SinglePortExcitationResult",
+    "run_single_port_excitation_case",
 ]

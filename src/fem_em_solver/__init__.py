@@ -18,7 +18,13 @@ from .core import (
     build_material_fields,
 )
 from .materials import GelledSalinePhantomMaterial
-from .ports import PortDefinition, validate_required_port_tags_exist
+from .ports import (
+    PortDefinition,
+    PortVoltageCurrentEstimate,
+    SinglePortExcitationResult,
+    run_single_port_excitation_case,
+    validate_required_port_tags_exist,
+)
 
 __all__ = [
     "MagnetostaticProblem",
@@ -30,5 +36,8 @@ __all__ = [
     "build_material_fields",
     "GelledSalinePhantomMaterial",
     "PortDefinition",
+    "PortVoltageCurrentEstimate",
+    "SinglePortExcitationResult",
+    "run_single_port_excitation_case",
     "validate_required_port_tags_exist",
 ]

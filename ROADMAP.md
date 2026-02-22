@@ -308,7 +308,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 **Human verification (YOU):**
 - Visual check that each port sits between intended leg pair.
 
-### ⬜ E3 — Implement port excitation hook (single-port solve)
+### 🧪 E3 — Implement port excitation hook (single-port solve)
 **Goal:** Excite one lumped port at a time in frequency-domain solve.
 
 **Agent tasks:**
