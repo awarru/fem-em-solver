@@ -244,7 +244,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 **Expected signal:**
 - Material assignment tests pass and are used in solve pipeline
 
-### ⬜ D3 — E and B field extraction inside phantom
+### 🧪 D3 — E and B field extraction inside phantom
 **Goal:** Compute both E and B metrics specifically in phantom region.
 
 **Agent tasks:**
