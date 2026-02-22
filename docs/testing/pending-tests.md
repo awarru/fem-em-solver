@@ -128,3 +128,20 @@ Logs are automatically written to:
   - Pytest reports `tests/post/test_phantom_field_metrics.py::test_phantom_field_metrics_and_exports_are_finite PASSED`
   - Test output prints `phantom E/B diagnostics` with finite non-zero phantom `|E|` and `|B|` min/max/mean
   - Log shows exported files `d3_test_phantom_E_samples.csv`, `d3_test_phantom_B_samples.csv`, and `d3_test_phantom_metrics.json`
+
+## E1 — Define lumped port data model and tagging contract (🧪 AWAITING-HUMAN-TEST)
+
+- Commit: `c4234cb73b889e52a8f76f9ee66f8a93d9dc7756`
+- Files changed:
+  - `ROADMAP.md`
+  - `src/fem_em_solver/__init__.py`
+  - `src/fem_em_solver/ports/__init__.py`
+  - `src/fem_em_solver/ports/definitions.py`
+  - `tests/ports/test_port_definition.py`
+- Manual test command:
+  ```bash
+  scripts/testing/run_and_log.sh E1 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/ports/test_port_definition.py -v'"
+  ```
+- Expected pass signal:
+  - Pytest reports `tests/ports/test_port_definition.py` tests all `PASSED`
+  - Log has no `ValueError` except inside expected `pytest.raises(...)` checks for invalid inputs
