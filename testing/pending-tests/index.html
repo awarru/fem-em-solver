@@ -543,6 +543,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#e2-add-minimal-birdcage-like-test-geometry-with-port-tags-awaiting-human-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E2 — Add minimal birdcage-like test geometry with port tags (🧪 AWAITING-HUMAN-TEST)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -684,6 +695,17 @@
     <span class="md-ellipsis">
       
         E1 — Define lumped port data model and tagging contract (🧪 AWAITING-HUMAN-TEST)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#e2-add-minimal-birdcage-like-test-geometry-with-port-tags-awaiting-human-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E2 — Add minimal birdcage-like test geometry with port tags (🧪 AWAITING-HUMAN-TEST)
       
     </span>
   </a>
@@ -840,6 +862,20 @@
 <li>Expected pass signal:</li>
 <li>Pytest reports <code>tests/ports/test_port_definition.py</code> tests all <code>PASSED</code></li>
 <li>Log has no <code>ValueError</code> except inside expected <code>pytest.raises(...)</code> checks for invalid inputs</li>
+</ul>
+<h2 id="e2-add-minimal-birdcage-like-test-geometry-with-port-tags-awaiting-human-test">E2 — Add minimal birdcage-like test geometry with port tags (🧪 AWAITING-HUMAN-TEST)<a class="headerlink" href="#e2-add-minimal-birdcage-like-test-geometry-with-port-tags-awaiting-human-test" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Commit: <code>fd85b2ba40d84eede3dcce8cfb46c3a1feac1879</code></li>
+<li>Files changed:</li>
+<li><code>ROADMAP.md</code></li>
+<li><code>src/fem_em_solver/io/mesh.py</code></li>
+<li><code>tests/mesh/test_birdcage_port_tags.py</code></li>
+<li>Manual test command:
+  <code>bash
+  scripts/testing/run_and_log.sh E2 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/mesh/test_birdcage_port_tags.py -v'"</code></li>
+<li>Expected pass signal:</li>
+<li>Pytest reports <code>tests/mesh/test_birdcage_port_tags.py::test_birdcage_like_mesh_has_core_and_port_tags PASSED</code></li>
+<li>Test output prints <code>[birdcage-mesh]</code> tag summary including non-zero counts for <code>conductor</code>, <code>air</code>, <code>phantom</code>, and <code>port_P1</code>..<code>port_P4</code></li>
 </ul>
 
 
