@@ -111,3 +111,20 @@ Logs are automatically written to:
   - Pytest reports `tests/materials/test_phantom_material_model.py::test_gelled_saline_material_container_frequency_term_is_finite PASSED`
   - Pytest reports `tests/materials/test_phantom_material_model.py::test_phantom_material_assignment_and_time_harmonic_pipeline_wiring PASSED`
   - Test output has no `ValueError` related to phantom tag assignment or frequency mismatch
+
+## D3 — E and B field extraction inside phantom (🧪 AWAITING-HUMAN-TEST)
+
+- Commit: `6cb701ca509fdc69d63feecb7d300c220476d4b9`
+- Files changed:
+  - `ROADMAP.md`
+  - `src/fem_em_solver/post/__init__.py`
+  - `src/fem_em_solver/post/phantom_fields.py`
+  - `tests/post/test_phantom_field_metrics.py`
+- Manual test command:
+  ```bash
+  scripts/testing/run_and_log.sh D3 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/post/test_phantom_field_metrics.py -v'"
+  ```
+- Expected pass signal:
+  - Pytest reports `tests/post/test_phantom_field_metrics.py::test_phantom_field_metrics_and_exports_are_finite PASSED`
+  - Test output prints `phantom E/B diagnostics` with finite non-zero phantom `|E|` and `|B|` min/max/mean
+  - Log shows exported files `d3_test_phantom_E_samples.csv`, `d3_test_phantom_B_samples.csv`, and `d3_test_phantom_metrics.json`
