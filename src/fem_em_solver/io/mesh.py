@@ -921,3 +921,154 @@ class MeshGenerator:
             gmsh.finalize()
 
         return mesh, cell_tags, facet_tags
+
+    @staticmethod
+    def birdcage_port_domain(
+        n_legs: int = 4,
+        ring_radius: float = 0.07,
+        leg_radius: float = 0.006,
+        leg_height: float = 0.14,
+        ring_minor_radius: float = 0.004,
+        phantom_radius: float = 0.03,
+        phantom_height: float = 0.08,
+        port_box_size: Tuple[float, float, float] = (0.010, 0.008, 0.010),
+        air_padding: float = 0.03,
+        resolution: float = 0.015,
+        comm: MPI.Intracomm = MPI.COMM_WORLD,
+        rank: int = 0,
+    ) -> Tuple[dolfinx.mesh.Mesh, dolfinx.mesh.MeshTags, dolfinx.mesh.MeshTags]:
+        """Generate a coarse birdcage-like geometry fixture with explicit port tags.
+
+        Cell tags:
+        - 1: conductor (rings + legs)
+        - 2: air
+        - 3: phantom
+        - 101..(100+n_legs): per-port regions between adjacent legs
+        """
+        if n_legs < 3:
+            raise ValueError("n_legs must be >= 3 for a birdcage-like fixture")
+
+        if comm.rank == rank:
+            gmsh.initialize()
+            gmsh.model.add("birdcage_port_domain")
+
+            # Simplified conductor scaffold: two rings plus vertical legs.
+            z_ring_offset = 0.5 * leg_height - 1.5 * ring_minor_radius
+            top_ring = gmsh.model.occ.addTorus(0, 0, z_ring_offset, ring_radius, ring_minor_radius)
+            bottom_ring = gmsh.model.occ.addTorus(0, 0, -z_ring_offset, ring_radius, ring_minor_radius)
+
+            leg_tags: List[int] = []
+            theta = np.linspace(0.0, 2.0 * np.pi, n_legs, endpoint=False)
+            for angle in theta:
+                x = ring_radius * np.cos(angle)
+                y = ring_radius * np.sin(angle)
+                leg = gmsh.model.occ.addCylinder(
+                    x,
+                    y,
+                    -0.5 * leg_height,
+                    0.0,
+                    0.0,
+                    leg_height,
+                    leg_radius,
+                )
+                leg_tags.append(leg)
+
+            phantom_tag = gmsh.model.occ.addCylinder(
+                0.0,
+                0.0,
+                -0.5 * phantom_height,
+                0.0,
+                0.0,
+                phantom_height,
+                phantom_radius,
+            )
+
+            port_dx, port_dy, port_dz = port_box_size
+            port_radius = ring_radius + 0.5 * port_dy
+            port_tags: List[int] = []
+            for idx, angle in enumerate(theta):
+                next_angle = theta[(idx + 1) % n_legs]
+                midpoint_angle = np.arctan2(
+                    np.sin(angle) + np.sin(next_angle),
+                    np.cos(angle) + np.cos(next_angle),
+                )
+                cx = port_radius * np.cos(midpoint_angle)
+                cy = port_radius * np.sin(midpoint_angle)
+                port = gmsh.model.occ.addBox(
+                    cx - 0.5 * port_dx,
+                    cy - 0.5 * port_dy,
+                    -0.5 * port_dz,
+                    port_dx,
+                    port_dy,
+                    port_dz,
+                )
+                port_tags.append(port)
+
+            radial_extent = ring_radius + max(leg_radius, ring_minor_radius) + port_dy + air_padding
+            z_extent = max(0.5 * leg_height, 0.5 * phantom_height) + air_padding
+            air_tag = gmsh.model.occ.addBox(
+                -radial_extent,
+                -radial_extent,
+                -z_extent,
+                2.0 * radial_extent,
+                2.0 * radial_extent,
+                2.0 * z_extent,
+            )
+
+            conductor_tags = [top_ring, bottom_ring] + leg_tags
+            cut_result, _ = gmsh.model.occ.cut(
+                [(3, air_tag)],
+                [(3, tag) for tag in conductor_tags + [phantom_tag] + port_tags],
+                removeObject=True,
+                removeTool=False,
+            )
+            gmsh.model.occ.synchronize()
+
+            if not cut_result:
+                raise RuntimeError("Failed to create air volume for birdcage_port_domain")
+            air_volume_tags = [tag for dim, tag in cut_result if dim == 3]
+            if not air_volume_tags:
+                raise RuntimeError("No 3D air volume returned by cut operation")
+            air_tag = air_volume_tags[0]
+
+            gmsh.model.addPhysicalGroup(3, conductor_tags, tag=1)
+            gmsh.model.setPhysicalName(3, 1, "conductor")
+            gmsh.model.addPhysicalGroup(3, [air_tag], tag=2)
+            gmsh.model.setPhysicalName(3, 2, "air")
+            gmsh.model.addPhysicalGroup(3, [phantom_tag], tag=3)
+            gmsh.model.setPhysicalName(3, 3, "phantom")
+
+            for idx, port_tag in enumerate(port_tags, start=1):
+                physical_tag = 100 + idx
+                gmsh.model.addPhysicalGroup(3, [port_tag], tag=physical_tag)
+                gmsh.model.setPhysicalName(3, physical_tag, f"port_P{idx}")
+
+            outer_boundary_surfaces = []
+            for dim, surf in gmsh.model.getEntities(dim=2):
+                x_min, y_min, z_min, x_max, y_max, z_max = gmsh.model.getBoundingBox(dim, surf)
+                if (
+                    abs(abs(x_min) - radial_extent) < resolution
+                    or abs(abs(x_max) - radial_extent) < resolution
+                    or abs(abs(y_min) - radial_extent) < resolution
+                    or abs(abs(y_max) - radial_extent) < resolution
+                    or abs(abs(z_min) - z_extent) < resolution
+                    or abs(abs(z_max) - z_extent) < resolution
+                ):
+                    outer_boundary_surfaces.append(surf)
+
+            if outer_boundary_surfaces:
+                gmsh.model.addPhysicalGroup(2, outer_boundary_surfaces, tag=1)
+                gmsh.model.setPhysicalName(2, 1, "outer_boundary")
+
+            gmsh.model.mesh.setSize(gmsh.model.getEntities(0), resolution)
+            gmsh.model.mesh.generate(3)
+            gmsh.model.mesh.optimize("Netgen")
+
+        mesh, cell_tags, facet_tags = gmshio.model_to_mesh(
+            gmsh.model, comm, rank, gdim=3
+        )
+
+        if comm.rank == rank:
+            gmsh.finalize()
+
+        return mesh, cell_tags, facet_tags

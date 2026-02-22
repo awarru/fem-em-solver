@@ -285,7 +285,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 **Expected signal:**
 - Port definition and tag validation tests pass.
 
-### ⬜ E2 — Add minimal birdcage-like test geometry with port tags
+### 🧪 E2 — Add minimal birdcage-like test geometry with port tags
 **Goal:** Create a lightweight geometry fixture that supports multiple lumped ports without blowing memory.
 
 **Agent tasks:**
