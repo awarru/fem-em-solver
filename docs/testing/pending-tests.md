@@ -160,3 +160,21 @@ Logs are automatically written to:
 - Expected pass signal:
   - Pytest reports `tests/mesh/test_birdcage_port_tags.py::test_birdcage_like_mesh_has_core_and_port_tags PASSED`
   - Test output prints `[birdcage-mesh]` tag summary including non-zero counts for `conductor`, `air`, `phantom`, and `port_P1`..`port_P4`
+
+## E3 — Implement port excitation hook (single-port solve) (🧪 AWAITING-HUMAN-TEST)
+
+- Commit: `1d6fdc1839f1205e6e9ee740fece5ed66ad7dbed`
+- Files changed:
+  - `ROADMAP.md`
+  - `src/fem_em_solver/__init__.py`
+  - `src/fem_em_solver/ports/__init__.py`
+  - `src/fem_em_solver/ports/excitation.py`
+  - `tests/solver/test_single_port_excitation.py`
+- Manual test command:
+  ```bash
+  scripts/testing/run_and_log.sh E3 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver/test_single_port_excitation.py -v'"
+  ```
+- Expected pass signal:
+  - Pytest reports `tests/solver/test_single_port_excitation.py::test_single_port_excitation_returns_finite_estimates PASSED`
+  - Pytest reports `tests/solver/test_single_port_excitation.py::test_single_port_excitation_rejects_missing_required_tags PASSED`
+  - Test output prints `single-port excitation diagnostics` with finite voltage/current estimates for driven and passive ports
