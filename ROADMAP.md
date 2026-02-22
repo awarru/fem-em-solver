@@ -266,7 +266,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 
 ## Phase E — Lumped Ports + S-Parameter Pipeline (Birdcage-oriented)
 
-### ⬜ E1 — Define lumped port data model and tagging contract
+### 🧪 E1 — Define lumped port data model and tagging contract
 **Goal:** Introduce explicit, testable representation of lumped ports between birdcage legs.
 
 **Agent tasks:**

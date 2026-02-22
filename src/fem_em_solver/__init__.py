@@ -18,6 +18,7 @@ from .core import (
     build_material_fields,
 )
 from .materials import GelledSalinePhantomMaterial
+from .ports import PortDefinition, validate_required_port_tags_exist
 
 __all__ = [
     "MagnetostaticProblem",
@@ -28,4 +29,6 @@ __all__ = [
     "TimeHarmonicSolver",
     "build_material_fields",
     "GelledSalinePhantomMaterial",
+    "PortDefinition",
+    "validate_required_port_tags_exist",
 ]
