@@ -20,6 +20,12 @@ LOG_DIR="$ROOT_DIR/docs/testing/logs"
 INDEX_FILE="$ROOT_DIR/docs/testing/test-results.md"
 mkdir -p "$LOG_DIR"
 
+# Ensure docker compose can always find project config for this repo layout.
+DEFAULT_COMPOSE_FILE="$ROOT_DIR/docker/docker-compose.yml"
+if [[ -z "${COMPOSE_FILE:-}" && -f "$DEFAULT_COMPOSE_FILE" ]]; then
+  export COMPOSE_FILE="$DEFAULT_COMPOSE_FILE"
+fi
+
 TS="$(date -u +%Y%m%dT%H%M%SZ)"
 SAFE_CHUNK="${CHUNK_ID//[^a-zA-Z0-9._-]/_}"
 LOG_FILE="$LOG_DIR/${TS}_${SAFE_CHUNK}.log"
@@ -29,13 +35,33 @@ LOG_FILE="$LOG_DIR/${TS}_${SAFE_CHUNK}.log"
   echo "- Chunk: $CHUNK_ID"
   echo "- Time (UTC): $(date -u '+%Y-%m-%d %H:%M:%S')"
   echo "- Host: $(hostname)"
+  echo "- Root Dir: $ROOT_DIR"
+  echo "- Working Dir: $(pwd)"
+  echo "- COMPOSE_FILE: ${COMPOSE_FILE:-<unset>}"
   echo "- Command: $CMD"
+  echo ""
+  echo "## Preflight"
+  echo '\$ pwd'
+  pwd
+  echo ""
+  echo '\$ ls -la docker'
+  ls -la "$ROOT_DIR/docker" 2>&1 || true
+  echo ""
+  echo '\$ docker compose version'
+  docker compose version 2>&1 || true
+  echo ""
+  echo '\$ docker compose config --services'
+  docker compose config --services 2>&1 || true
   echo ""
   echo "## Output"
 } > "$LOG_FILE"
 
 set +e
-bash -lc "$CMD" >> "$LOG_FILE" 2>&1
+(
+  cd "$ROOT_DIR"
+  set -x
+  bash -lc "$CMD"
+) >> "$LOG_FILE" 2>&1
 STATUS=$?
 set -e
 

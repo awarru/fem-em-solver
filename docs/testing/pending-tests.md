@@ -2,22 +2,34 @@
 
 This file is updated by cron-driven coding runs in VPS-safe mode.
 
-For each pending chunk, agent should append:
-- Chunk ID / title
-- Commit hash
-- Files changed
-- **Exact command using** `scripts/testing/run_and_log.sh`
-- Expected pass signal
-- Notes/blockers
+For each pending chunk, agent should append using this exact structure:
+- Chunk: `<ID> — <title>`
+- Status: `🧪 AWAITING-HUMAN-TEST`
+- Commit: `<full-hash>`
+- Files changed: bullet list
+- Manual test command: **Exact command using** `scripts/testing/run_and_log.sh`
+- Expected pass signal: bullet list of concrete `PASSED` lines or diagnostics
+- Notes/blockers: concise line or `none`
 
 Example:
 ```bash
-scripts/testing/run_and_log.sh A1 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/magnetostatics/01_straight_wire.py'"
+# scripts/testing/run_and_log.sh A1 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/magnetostatics/01_straight_wire.py'"
 ```
 
 Logs are automatically written to:
 - `docs/testing/test-results.md` (summary index)
 - `docs/testing/logs/*.log` (full output)
+
+Single-command entrypoint from repo root:
+```bash
+./run_tests.sh
+```
+
+Optional helpers:
+```bash
+./run_tests.sh --list
+./run_tests.sh --chunk E3
+```
 
 ---
 

@@ -52,6 +52,15 @@ During cron cycles, agent should:
 - Mark chunk `🧪 AWAITING-HUMAN-TEST` with command and expected signal
 - Wait for your reported results before marking fully complete
 
+Required cron summary format (strict):
+- `Chunk: <ID> — <title>`
+- `Status: <🧪 AWAITING-HUMAN-TEST | ✅ COMPLETE | 🚫 BLOCKED>`
+- `Commit: <full-hash>`
+- `Files changed:` (bullet list)
+- `Manual test command: scripts/testing/run_and_log.sh <ID> "..."`
+- `Expected signal:` (bullet list)
+- `Notes/Blockers:` concise line or `none`
+
 ---
 
 ## Status Legend
@@ -453,11 +462,12 @@ For each run:
    - manual test command (wrapped with `scripts/testing/run_and_log.sh`)
    - expected signal
    - files changed / commit hash
-5. Human runs tests; results auto-log to:
+5. Human runs tests via `./run_tests.sh` (or `./run_tests.sh --chunk <ID>`); results auto-log to:
    - `docs/testing/test-results.md` (index)
    - `docs/testing/logs/*.log` (full output)
 6. Mark chunk as `🧪 AWAITING-HUMAN-TEST`
 7. After you report test results, agent updates chunk to ✅ or 🚫 BLOCKED
+8. Cron report output must follow the strict summary format from Ground Rule 6
 
 ---
 

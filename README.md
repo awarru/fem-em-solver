@@ -61,7 +61,26 @@ conda install -c conda-forge fenics-dolfinx gmsh pyvista
 pip install -e ".[dev,docs]"
 ```
 
-### Run a Simple Example
+### Run Examples (without entering Docker)
+
+```bash
+# List available examples
+./run_examples.sh --list
+
+# Run one example by number
+./run_examples.sh --example 1
+
+# Run multiple examples and set MPI ranks
+./run_examples.sh --example 1,3 --nproc 4
+
+# Run all examples
+./run_examples.sh --example all --nproc 2
+```
+
+The script automatically targets `docker/docker-compose.yml` and runs each selected example as:
+`docker compose exec fem-em-solver ... mpiexec -n <nproc> python3 <example>`
+
+### Python API Example
 
 ```python
 from fem_em_solver import MagnetostaticSolver

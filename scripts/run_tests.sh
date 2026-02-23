@@ -1,18 +1,13 @@
 #!/usr/bin/env bash
-# Run all tests
+set -euo pipefail
 
-cd "$(dirname "$0")/.."
+# Convenience wrapper: run pending human-manual tests from docs/testing/pending-tests.md
+# with automatic logging to docs/testing/logs and docs/testing/test-results.md.
+#
+# Usage:
+#   ./scripts/run_tests.sh
+#   ./scripts/run_tests.sh --list
+#   ./scripts/run_tests.sh --chunk E3
 
-echo "Running unit tests..."
-pytest tests/unit -v -x
-
-echo ""
-echo "Running integration tests..."
-pytest tests/integration -v -x
-
-echo ""
-echo "Running validation tests..."
-pytest tests/validation -v -x
-
-echo ""
-echo "All tests completed!"
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+exec "$ROOT_DIR/scripts/testing/run_pending_tests.sh" "$@"
