@@ -17,6 +17,7 @@ from .excitation import (
     SinglePortExcitationResult,
     run_single_port_excitation_case,
 )
+from .sparameters import SParameterSweepResult, run_n_port_sparameter_sweep
 
 __all__ = [
     "DEFAULT_REFERENCE_IMPEDANCE_OHM",
@@ -32,4 +33,6 @@ __all__ = [
     "PortVoltageCurrentEstimate",
     "SinglePortExcitationResult",
     "run_single_port_excitation_case",
+    "SParameterSweepResult",
+    "run_n_port_sparameter_sweep",
 ]

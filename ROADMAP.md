@@ -325,7 +325,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 **Expected signal:**
 - Test passes with finite voltage/current results for driven + passive ports.
 
-### ⬜ E4 — Build N-port sweep and S-parameter assembly
+### 🧪 E4 — Build N-port sweep and S-parameter assembly
 **Goal:** Generate an S-matrix by sweeping driven port index.
 
 **Agent tasks:**
@@ -462,6 +462,6 @@ For each run:
 ---
 
 ## Immediate Next Chunk
-**D3 — E and B field extraction inside phantom**
+**E5 — Export S-parameters for external circuit tuning workflow**
 
-Reason: D2 material container + phantom-tag assignment are now wired into the time-harmonic path; next is phantom-specific E/B metric extraction/export.
+Reason: E4 now provides deterministic N-port sweep + S-matrix assembly; next is Touchstone/CSV export for downstream tuning tools.

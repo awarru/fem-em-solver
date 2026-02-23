@@ -21,7 +21,9 @@ from .materials import GelledSalinePhantomMaterial
 from .ports import (
     PortDefinition,
     PortVoltageCurrentEstimate,
+    SParameterSweepResult,
     SinglePortExcitationResult,
+    run_n_port_sparameter_sweep,
     run_single_port_excitation_case,
     validate_required_port_tags_exist,
 )
@@ -37,7 +39,9 @@ __all__ = [
     "GelledSalinePhantomMaterial",
     "PortDefinition",
     "PortVoltageCurrentEstimate",
+    "SParameterSweepResult",
     "SinglePortExcitationResult",
+    "run_n_port_sparameter_sweep",
     "run_single_port_excitation_case",
     "validate_required_port_tags_exist",
 ]
