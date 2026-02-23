@@ -778,19 +778,27 @@
 
 <h1 id="pending-manual-tests">Pending Manual Tests<a class="headerlink" href="#pending-manual-tests" title="Permanent link">&para;</a></h1>
 <p>This file is updated by cron-driven coding runs in VPS-safe mode.</p>
-<p>For each pending chunk, agent should append:
-- Chunk ID / title
-- Commit hash
-- Files changed
-- <strong>Exact command using</strong> <code>scripts/testing/run_and_log.sh</code>
-- Expected pass signal
-- Notes/blockers</p>
+<p>For each pending chunk, agent should append using this exact structure:
+- Chunk: <code>&lt;ID&gt; — &lt;title&gt;</code>
+- Status: <code>🧪 AWAITING-HUMAN-TEST</code>
+- Commit: <code>&lt;full-hash&gt;</code>
+- Files changed: bullet list
+- Manual test command: <strong>Exact command using</strong> <code>scripts/testing/run_and_log.sh</code>
+- Expected pass signal: bullet list of concrete <code>PASSED</code> lines or diagnostics
+- Notes/blockers: concise line or <code>none</code></p>
 <p>Example:</p>
-<pre><code class="language-bash">scripts/testing/run_and_log.sh A1 &quot;docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/magnetostatics/01_straight_wire.py'&quot;
+<pre><code class="language-bash"># scripts/testing/run_and_log.sh A1 &quot;docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/magnetostatics/01_straight_wire.py'&quot;
 </code></pre>
 <p>Logs are automatically written to:
 - <code>docs/testing/test-results.md</code> (summary index)
 - <code>docs/testing/logs/*.log</code> (full output)</p>
+<p>Single-command entrypoint from repo root:</p>
+<pre><code class="language-bash">./run_tests.sh
+</code></pre>
+<p>Optional helpers:</p>
+<pre><code class="language-bash">./run_tests.sh --list
+./run_tests.sh --chunk E3
+</code></pre>
 <hr />
 <h2 id="b2-harden-mesh-qa-checks-awaiting-human-test">B2 — Harden mesh QA checks (🧪 AWAITING-HUMAN-TEST)<a class="headerlink" href="#b2-harden-mesh-qa-checks-awaiting-human-test" title="Permanent link">&para;</a></h2>
 <ul>
