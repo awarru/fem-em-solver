@@ -173,7 +173,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 
 ## Phase C — Magnetostatics on Coil + Phantom
 
-### 🧪 C1 — Solve B-field on coil+phantom model
+### ✅ C1 — Solve B-field on coil+phantom model (2026-02-23, 09eb248f6e5ee161234d8a799692c75a63262efb)
 **Goal:** Reliable magnetostatic solve with source current in coil subdomains only.
 
 **Agent tasks:**

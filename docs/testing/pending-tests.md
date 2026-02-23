@@ -33,7 +33,7 @@ Optional helpers:
 
 ---
 
-## C1 — Solve B-field on coil+phantom model (🧪 AWAITING-HUMAN-TEST)
+## C1 — Solve B-field on coil+phantom model (✅ COMPLETE)
 
 - Commit: `09eb248f6e5ee161234d8a799692c75a63262efb`
 - Files changed:
@@ -47,6 +47,8 @@ Optional helpers:
 - Expected pass signal:
   - Pytest reports `tests/solver/test_coil_phantom_magnetostatics.py::test_coil_phantom_magnetostatics_bfield_is_finite_and_nontrivial_in_phantom PASSED`
   - Test output prints `coil+phantom B-field diagnostics` with finite non-zero phantom `|B|` min/max/mean
+- Human test log:
+  - `docs/testing/logs/20260223T022337Z_C1.log` (exit 0)
 
 ---
 
