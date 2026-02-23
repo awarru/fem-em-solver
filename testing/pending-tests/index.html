@@ -478,10 +478,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#c2-add-sanity-validation-metrics-awaiting-human-test" class="md-nav__link">
+  <a href="#c2-add-sanity-validation-metrics-blocked" class="md-nav__link">
     <span class="md-ellipsis">
       
-        C2 — Add sanity validation metrics (🧪 AWAITING-HUMAN-TEST)
+        C2 — Add sanity validation metrics (🚫 BLOCKED)
       
     </span>
   </a>
@@ -647,10 +647,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#c2-add-sanity-validation-metrics-awaiting-human-test" class="md-nav__link">
+  <a href="#c2-add-sanity-validation-metrics-blocked" class="md-nav__link">
     <span class="md-ellipsis">
       
-        C2 — Add sanity validation metrics (🧪 AWAITING-HUMAN-TEST)
+        C2 — Add sanity validation metrics (🚫 BLOCKED)
       
     </span>
   </a>
@@ -795,7 +795,7 @@
 <li><code>docs/testing/logs/20260223T022337Z_C1.log</code> (exit 0)</li>
 </ul>
 <hr />
-<h2 id="c2-add-sanity-validation-metrics-awaiting-human-test">C2 — Add sanity validation metrics (🧪 AWAITING-HUMAN-TEST)<a class="headerlink" href="#c2-add-sanity-validation-metrics-awaiting-human-test" title="Permanent link">&para;</a></h2>
+<h2 id="c2-add-sanity-validation-metrics-blocked">C2 — Add sanity validation metrics (🚫 BLOCKED)<a class="headerlink" href="#c2-add-sanity-validation-metrics-blocked" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Commit: <code>7ac10f166e283ff7b6f15e20323b6402a4a49d65</code></li>
 <li>Files changed:</li>
@@ -808,6 +808,9 @@
 <li>Expected pass signal:</li>
 <li>Pytest reports <code>tests/validation/test_coil_phantom_bfield_metrics.py::test_coil_phantom_bfield_metrics_are_finite_smooth_and_symmetric PASSED</code></li>
 <li>Test output prints <code>coil+phantom B-field metrics</code> with finite <code>|B|</code> min/max/mean and bounded smoothness/symmetry diagnostics</li>
+<li>Human test log:</li>
+<li><code>docs/testing/logs/20260223T022341Z_C2.log</code> (exit 1)</li>
+<li>Failure: <code>Symmetry sanity check failed for ±x phantom points; max relative |B| mismatch=0.322</code> (limit <code>&lt; 0.30</code>)</li>
 </ul>
 <hr />
 <h2 id="d1-introduce-minimal-frequency-domain-solve-scaffold-awaiting-human-test">D1 — Introduce minimal frequency-domain solve scaffold (🧪 AWAITING-HUMAN-TEST)<a class="headerlink" href="#d1-introduce-minimal-frequency-domain-solve-scaffold-awaiting-human-test" title="Permanent link">&para;</a></h2>
