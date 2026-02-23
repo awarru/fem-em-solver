@@ -151,7 +151,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 **Human verification (YOU):**
 - Inspect mesh visually once; verify phantom is actually inside coil region.
 
-### 🧪 B2 — Harden mesh QA checks
+### ✅ B2 — Harden mesh QA checks (2026-02-23, 3a600ec)
 **Goal:** Catch bad geometry early.
 
 **Agent tasks:**
