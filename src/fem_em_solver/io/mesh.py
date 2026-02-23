@@ -134,10 +134,14 @@ class MeshGenerator:
             gmsh.model.mesh.generate(3)
             gmsh.model.mesh.optimize("Netgen")
 
-            # Save for debugging
-            gmsh.write("straight_wire.msh")
-            if rank == 0:
-                print("  Debug: Mesh saved to straight_wire.msh (open in Gmsh to inspect)")
+            # Save for debugging (best effort; do not fail mesh generation if unwritable)
+            try:
+                gmsh.write("straight_wire.msh")
+                if rank == 0:
+                    print("  Debug: Mesh saved to straight_wire.msh (open in Gmsh to inspect)")
+            except Exception as e:
+                if rank == 0:
+                    print(f"  Debug: Could not write straight_wire.msh ({e})")
             
         # Convert to dolfinx mesh
         mesh, cell_tags, facet_tags = gmshio.model_to_mesh(

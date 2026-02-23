@@ -310,8 +310,9 @@ def main():
         ax.grid(True, alpha=0.3)
         
         plt.tight_layout()
-        plt.savefig('straight_wire_validation.png', dpi=150, bbox_inches='tight')
-        print(f"\n  Plot saved to: straight_wire_validation.png")
+        plot_path = output_dir / "straight_wire_validation.png"
+        plt.savefig(plot_path, dpi=150, bbox_inches='tight')
+        print(f"\n  Plot saved to: {plot_path.resolve()}")
         plt.close()
     
     print("\n" + "=" * 60)
