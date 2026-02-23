@@ -52,7 +52,7 @@ Optional helpers:
 
 ---
 
-## C2 — Add sanity validation metrics (🧪 AWAITING-HUMAN-TEST)
+## C2 — Add sanity validation metrics (🚫 BLOCKED)
 
 - Commit: `7ac10f166e283ff7b6f15e20323b6402a4a49d65`
 - Files changed:
@@ -66,6 +66,9 @@ Optional helpers:
 - Expected pass signal:
   - Pytest reports `tests/validation/test_coil_phantom_bfield_metrics.py::test_coil_phantom_bfield_metrics_are_finite_smooth_and_symmetric PASSED`
   - Test output prints `coil+phantom B-field metrics` with finite `|B|` min/max/mean and bounded smoothness/symmetry diagnostics
+- Human test log:
+  - `docs/testing/logs/20260223T022341Z_C2.log` (exit 1)
+  - Failure: `Symmetry sanity check failed for ±x phantom points; max relative |B| mismatch=0.322` (limit `< 0.30`)
 
 ---
 

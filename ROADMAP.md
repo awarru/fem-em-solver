@@ -195,7 +195,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 **Human verification (YOU):**
 - Spot-check one centerline/profile plot looks physically plausible.
 
-### 🧪 C2 — Add sanity validation metrics
+### 🚫 C2 — Add sanity validation metrics (blocked: symmetry threshold too strict on human run 2026-02-23)
 **Goal:** Prevent silently wrong fields.
 
 **Agent tasks:**
@@ -211,6 +211,10 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 
 **Expected signal:**
 - Threshold-based checks pass with printed metric values
+
+**Latest human test outcome (2026-02-23):**
+- 🚫 BLOCKED — `tests/validation/test_coil_phantom_bfield_metrics.py::test_coil_phantom_bfield_metrics_are_finite_smooth_and_symmetric` failed
+- Failure detail: `max relative |B| mismatch=0.322` exceeded current limit `< 0.30`
 
 ---
 
