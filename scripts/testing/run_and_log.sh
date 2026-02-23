@@ -3,11 +3,21 @@ set -euo pipefail
 
 # Usage:
 #   scripts/testing/run_and_log.sh <chunk_id> <command...>
+#   scripts/testing/run_and_log.sh --dry-run <chunk_id> <command...>
+#   FEM_SOLVER_DRY_RUN=1 scripts/testing/run_and_log.sh <chunk_id> <command...>
 # Example:
 #   scripts/testing/run_and_log.sh A1 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/magnetostatics/01_straight_wire.py'"
 
+DRY_RUN="${FEM_SOLVER_DRY_RUN:-0}"
+
+if [[ "${1:-}" == "--dry-run" ]]; then
+  DRY_RUN=1
+  shift
+fi
+
 if [[ $# -lt 2 ]]; then
-  echo "Usage: $0 <chunk_id> <command...>"
+  echo "Usage: $0 [--dry-run] <chunk_id> <command...>"
+  echo "       FEM_SOLVER_DRY_RUN=1 $0 <chunk_id> <command...>"
   exit 2
 fi
 
@@ -29,6 +39,17 @@ fi
 TS="$(date -u +%Y%m%dT%H%M%SZ)"
 SAFE_CHUNK="${CHUNK_ID//[^a-zA-Z0-9._-]/_}"
 LOG_FILE="$LOG_DIR/${TS}_${SAFE_CHUNK}.log"
+
+# Dry-run mode: just print what would be executed, don't run anything
+if [[ "$DRY_RUN" == "1" ]]; then
+  echo "[DRY RUN] Would execute test for chunk: $CHUNK_ID"
+  echo "[DRY RUN] Command: $CMD"
+  echo "[DRY RUN] Log would be written to: $LOG_FILE"
+  echo ""
+  echo "To actually run this test, execute:"
+  echo "  $0 $CHUNK_ID \"$CMD\""
+  exit 0
+fi
 
 {
   echo "# Test Run"
