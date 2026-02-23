@@ -1,6 +1,7 @@
 """Mesh generation utilities for EM simulations."""
 
 from typing import Optional, Tuple, List
+from pathlib import Path
 import numpy as np
 import gmsh
 from mpi4py import MPI
@@ -136,12 +137,15 @@ class MeshGenerator:
 
             # Save for debugging (best effort; do not fail mesh generation if unwritable)
             try:
-                gmsh.write("straight_wire.msh")
+                debug_dir = Path("paraview_output")
+                debug_dir.mkdir(exist_ok=True)
+                debug_mesh_path = debug_dir / "straight_wire.msh"
+                gmsh.write(str(debug_mesh_path))
                 if rank == 0:
-                    print("  Debug: Mesh saved to straight_wire.msh (open in Gmsh to inspect)")
+                    print(f"  Debug: Mesh saved to {debug_mesh_path} (open in Gmsh to inspect)")
             except Exception as e:
                 if rank == 0:
-                    print(f"  Debug: Could not write straight_wire.msh ({e})")
+                    print(f"  Debug: Could not write debug mesh file ({e})")
             
         # Convert to dolfinx mesh
         mesh, cell_tags, facet_tags = gmshio.model_to_mesh(
