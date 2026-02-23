@@ -178,3 +178,21 @@ Logs are automatically written to:
   - Pytest reports `tests/solver/test_single_port_excitation.py::test_single_port_excitation_returns_finite_estimates PASSED`
   - Pytest reports `tests/solver/test_single_port_excitation.py::test_single_port_excitation_rejects_missing_required_tags PASSED`
   - Test output prints `single-port excitation diagnostics` with finite voltage/current estimates for driven and passive ports
+
+## E4 — Build N-port sweep and S-parameter assembly (🧪 AWAITING-HUMAN-TEST)
+
+- Commit: `593ca473f1cc53f47dce1bece8ea76cb17cc23b8`
+- Files changed:
+  - `ROADMAP.md`
+  - `src/fem_em_solver/__init__.py`
+  - `src/fem_em_solver/ports/__init__.py`
+  - `src/fem_em_solver/ports/sparameters.py`
+  - `tests/ports/test_sparameter_assembly.py`
+- Manual test command:
+  ```bash
+  scripts/testing/run_and_log.sh E4 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/ports/test_sparameter_assembly.py -v'"
+  ```
+- Expected pass signal:
+  - Pytest reports `tests/ports/test_sparameter_assembly.py::test_n_port_sweep_assembles_finite_matrix_with_expected_shape PASSED`
+  - Pytest reports `tests/ports/test_sparameter_assembly.py::test_n_port_sweep_rejects_zero_incident_drive PASSED`
+  - Test output prints `n-port S-parameter sweep diagnostics` with S-matrix shape `(3, 3)` and diagonal `S11/S22/S33` terms
