@@ -212,3 +212,15 @@ Optional helpers:
   - Output artifacts include one `.s2p` file and matching `.csv` companion in pytest tmp path
   - Touchstone header contains `! port_order: P1,P2`, `! frequency_points_hz: ...`, and `! z0_ohm: 50.000000`
 - Notes/blockers: none
+
+- Chunk: E6 — Add "human calibration" checklist for port model assumptions
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: b99dd6b8769347171bd99c9abc2c178241d6b192
+- Files changed:
+  - ROADMAP.md
+  - docs/ports/human_port_calibration_checklist.md
+- Manual test command: scripts/testing/run_and_log.sh E6 "docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/ports/human_port_calibration_checklist.md && echo OK'"
+- Expected pass signal:
+  - Log contains `OK`
+  - Command exits with status `0`
+- Notes/blockers: none
