@@ -360,7 +360,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 **Human verification (YOU):**
 - Sanity-check S11/S21 trends against expectations for your geometry.
 
-### ⬜ E5 — Export S-parameters for external circuit tuning workflow
+### 🧪 E5 — Export S-parameters for external circuit tuning workflow
 **Goal:** Make solver output directly usable in separate tuning/circuit tools.
 
 **Agent tasks:**
@@ -476,6 +476,6 @@ For each run:
 ---
 
 ## Immediate Next Chunk
-**E5 — Export S-parameters for external circuit tuning workflow**
+**E6 — Add "human calibration" checklist for port model assumptions**
 
-Reason: E4 now provides deterministic N-port sweep + S-matrix assembly; next is Touchstone/CSV export for downstream tuning tools.
+Reason: E5 is now implemented and pending manual verification; next is documenting calibration assumptions for trustworthy human-in-the-loop interpretation.

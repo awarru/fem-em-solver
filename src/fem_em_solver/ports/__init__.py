@@ -18,6 +18,7 @@ from .excitation import (
     run_single_port_excitation_case,
 )
 from .sparameters import SParameterSweepResult, run_n_port_sparameter_sweep
+from .touchstone import export_touchstone, load_touchstone
 
 __all__ = [
     "DEFAULT_REFERENCE_IMPEDANCE_OHM",
@@ -35,4 +36,6 @@ __all__ = [
     "run_single_port_excitation_case",
     "SParameterSweepResult",
     "run_n_port_sparameter_sweep",
+    "export_touchstone",
+    "load_touchstone",
 ]
