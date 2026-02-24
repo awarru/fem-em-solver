@@ -929,6 +929,24 @@
 <li>Pytest reports <code>tests/ports/test_sparameter_assembly.py::test_n_port_sweep_rejects_zero_incident_drive PASSED</code></li>
 <li>Test output prints <code>n-port S-parameter sweep diagnostics</code> with S-matrix shape <code>(3, 3)</code> and diagonal <code>S11/S22/S33</code> terms</li>
 </ul>
+<hr />
+<ul>
+<li>Chunk: E5 — Export S-parameters for external circuit tuning workflow</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 531d82a7b852eee6af0f0340adf5a1df4c6a7f9a</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>src/fem_em_solver/<strong>init</strong>.py</li>
+<li>src/fem_em_solver/ports/<strong>init</strong>.py</li>
+<li>src/fem_em_solver/ports/touchstone.py</li>
+<li>tests/io/test_touchstone_export.py</li>
+<li>Manual test command: scripts/testing/run_and_log.sh E5 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/io/test_touchstone_export.py -v'"</li>
+<li>Expected pass signal:</li>
+<li>tests/io/test_touchstone_export.py::test_touchstone_export_and_roundtrip_loader PASSED</li>
+<li>Output artifacts include one <code>.s2p</code> file and matching <code>.csv</code> companion in pytest tmp path</li>
+<li>Touchstone header contains <code>! port_order: P1,P2</code>, <code>! frequency_points_hz: ...</code>, and <code>! z0_ohm: 50.000000</code></li>
+<li>Notes/blockers: none</li>
+</ul>
 
 
 
