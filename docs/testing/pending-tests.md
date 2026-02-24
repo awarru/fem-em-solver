@@ -194,3 +194,21 @@ Optional helpers:
   - Pytest reports `tests/ports/test_sparameter_assembly.py::test_n_port_sweep_assembles_finite_matrix_with_expected_shape PASSED`
   - Pytest reports `tests/ports/test_sparameter_assembly.py::test_n_port_sweep_rejects_zero_incident_drive PASSED`
   - Test output prints `n-port S-parameter sweep diagnostics` with S-matrix shape `(3, 3)` and diagonal `S11/S22/S33` terms
+
+---
+
+- Chunk: E5 — Export S-parameters for external circuit tuning workflow
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 531d82a7b852eee6af0f0340adf5a1df4c6a7f9a
+- Files changed:
+  - ROADMAP.md
+  - src/fem_em_solver/__init__.py
+  - src/fem_em_solver/ports/__init__.py
+  - src/fem_em_solver/ports/touchstone.py
+  - tests/io/test_touchstone_export.py
+- Manual test command: scripts/testing/run_and_log.sh E5 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/io/test_touchstone_export.py -v'"
+- Expected pass signal:
+  - tests/io/test_touchstone_export.py::test_touchstone_export_and_roundtrip_loader PASSED
+  - Output artifacts include one `.s2p` file and matching `.csv` companion in pytest tmp path
+  - Touchstone header contains `! port_order: P1,P2`, `! frequency_points_hz: ...`, and `! z0_ohm: 50.000000`
+- Notes/blockers: none
