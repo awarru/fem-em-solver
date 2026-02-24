@@ -376,7 +376,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 **Expected signal:**
 - `.sNp` file written and reloaded successfully in test.
 
-### ⬜ E6 — Add "human calibration" checklist for port model assumptions
+### 🧪 E6 — Add "human calibration" checklist for port model assumptions
 **Goal:** Explicitly call out assumptions agent cannot reliably tune alone.
 
 **Agent tasks:**
@@ -476,6 +476,6 @@ For each run:
 ---
 
 ## Immediate Next Chunk
-**E6 — Add "human calibration" checklist for port model assumptions**
+**F1 — New example: MRI coil with gelled saline phantom**
 
-Reason: E5 is now implemented and pending manual verification; next is documenting calibration assumptions for trustworthy human-in-the-loop interpretation.
+Reason: E6 checklist handoff is ready for human verification; next is an end-to-end MRI example script covering mesh, solve, phantom metrics, and exports.
