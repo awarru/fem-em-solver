@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
     
     
       
@@ -945,6 +945,21 @@
 <li>tests/io/test_touchstone_export.py::test_touchstone_export_and_roundtrip_loader PASSED</li>
 <li>Output artifacts include one <code>.s2p</code> file and matching <code>.csv</code> companion in pytest tmp path</li>
 <li>Touchstone header contains <code>! port_order: P1,P2</code>, <code>! frequency_points_hz: ...</code>, and <code>! z0_ohm: 50.000000</code></li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: E6 — Add "human calibration" checklist for port model assumptions</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: b99dd6b8769347171bd99c9abc2c178241d6b192</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>docs/ports/human_port_calibration_checklist.md</li>
+<li>Manual test command: scripts/testing/run_and_log.sh E6 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; test -f docs/ports/human_port_calibration_checklist.md &amp;&amp; echo OK'"</li>
+<li>Expected pass signal:</li>
+<li>Log contains <code>OK</code></li>
+<li>Command exits with status <code>0</code></li>
 <li>Notes/blockers: none</li>
 </ul>
 
