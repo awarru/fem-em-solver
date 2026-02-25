@@ -976,6 +976,22 @@
 <li>Output contains <code>Example: MRI coil + gelled saline phantom fields</code></li>
 <li>Output contains <code>Phantom diagnostics:</code> plus finite <code>|E| min/max/mean</code> and <code>|B| min/max/mean</code> lines</li>
 <li>Output lists <code>mri_coil_phantom_fields_combined.xdmf</code> and ends with <code>Example completed</code></li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: F2 — Add “human test checklist” doc</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: a5a7350c779deade5ffeac1ab446baaf48e1bece</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>docs/testing/pending-tests.md</li>
+<li>docs/testing_manual_checklist.md</li>
+<li>Manual test command: scripts/testing/run_and_log.sh F2 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; test -f docs/testing_manual_checklist.md &amp;&amp; echo OK'"</li>
+<li>Expected pass signal:</li>
+<li>Log contains <code>OK</code></li>
+<li>Command exits with status <code>0</code></li>
 <li>Notes/blockers: none</li>
 </ul>
 
