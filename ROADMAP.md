@@ -419,7 +419,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspa
 - Script finishes and writes output files
 - Console shows phantom E/B summaries
 
-### ⬜ F2 — Add “human test checklist” doc
+### 🧪 F2 — Add “human test checklist” doc
 **Goal:** Make it obvious what you should manually validate.
 
 **Agent tasks:**
@@ -476,6 +476,6 @@ For each run:
 ---
 
 ## Immediate Next Chunk
-**F2 — Add “human test checklist” doc**
+**Await human test outcomes for pending chunks (starting with F2)**
 
-Reason: F1 implementation is now waiting on human test confirmation, so the next unstarted chunk is the manual validation checklist handoff.
+Reason: All roadmap chunks are now implemented and marked as `🧪 AWAITING-HUMAN-TEST` or resolved; next progress depends on new human test logs.

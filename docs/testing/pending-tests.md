@@ -237,3 +237,16 @@ Optional helpers:
   - Output contains `Phantom diagnostics:` plus finite `|E| min/max/mean` and `|B| min/max/mean` lines
   - Output lists `mri_coil_phantom_fields_combined.xdmf` and ends with `Example completed`
 - Notes/blockers: none
+
+- Chunk: F2 — Add “human test checklist” doc
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 9a5759e7c0a3300cb08f4945beb33dcf13312adc
+- Files changed:
+  - ROADMAP.md
+  - docs/testing/pending-tests.md
+  - docs/testing_manual_checklist.md
+- Manual test command: scripts/testing/run_and_log.sh F2 "docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/testing_manual_checklist.md && echo OK'"
+- Expected pass signal:
+  - Log contains `OK`
+  - Command exits with status `0`
+- Notes/blockers: none
