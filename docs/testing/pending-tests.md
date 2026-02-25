@@ -224,3 +224,16 @@ Optional helpers:
   - Log contains `OK`
   - Command exits with status `0`
 - Notes/blockers: none
+
+- Chunk: F1 — New example: MRI coil with gelled saline phantom
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 800829bf61aab91f834ba55a5dd7940140264139
+- Files changed:
+  - ROADMAP.md
+  - examples/mri/01_coil_phantom_fields.py
+- Manual test command: scripts/testing/run_and_log.sh F1 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/mri/01_coil_phantom_fields.py'"
+- Expected pass signal:
+  - Output contains `Example: MRI coil + gelled saline phantom fields`
+  - Output contains `Phantom diagnostics:` plus finite `|E| min/max/mean` and `|B| min/max/mean` lines
+  - Output lists `mri_coil_phantom_fields_combined.xdmf` and ends with `Example completed`
+- Notes/blockers: none
