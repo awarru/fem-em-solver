@@ -240,7 +240,7 @@ Optional helpers:
 
 - Chunk: F2 — Add “human test checklist” doc
 - Status: 🧪 AWAITING-HUMAN-TEST
-- Commit: 9a5759e7c0a3300cb08f4945beb33dcf13312adc
+- Commit: a5a7350c779deade5ffeac1ab446baaf48e1bece
 - Files changed:
   - ROADMAP.md
   - docs/testing/pending-tests.md
