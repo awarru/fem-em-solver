@@ -399,7 +399,7 @@ docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/ports/
 
 ## Phase F — End-to-End Example + Documentation
 
-### ⬜ F1 — New example: MRI coil with gelled saline phantom
+### 🧪 F1 — New example: MRI coil with gelled saline phantom
 **Goal:** One runnable script demonstrating end-to-end workflow.
 
 **Agent tasks:**
@@ -476,6 +476,6 @@ For each run:
 ---
 
 ## Immediate Next Chunk
-**F1 — New example: MRI coil with gelled saline phantom**
+**F2 — Add “human test checklist” doc**
 
-Reason: E6 checklist handoff is ready for human verification; next is an end-to-end MRI example script covering mesh, solve, phantom metrics, and exports.
+Reason: F1 implementation is now waiting on human test confirmation, so the next unstarted chunk is the manual validation checklist handoff.
