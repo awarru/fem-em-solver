@@ -960,6 +960,22 @@
 <li>Expected pass signal:</li>
 <li>Log contains <code>OK</code></li>
 <li>Command exits with status <code>0</code></li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: F1 — New example: MRI coil with gelled saline phantom</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 800829bf61aab91f834ba55a5dd7940140264139</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>examples/mri/01_coil_phantom_fields.py</li>
+<li>Manual test command: scripts/testing/run_and_log.sh F1 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/mri/01_coil_phantom_fields.py'"</li>
+<li>Expected pass signal:</li>
+<li>Output contains <code>Example: MRI coil + gelled saline phantom fields</code></li>
+<li>Output contains <code>Phantom diagnostics:</code> plus finite <code>|E| min/max/mean</code> and <code>|B| min/max/mean</code> lines</li>
+<li>Output lists <code>mri_coil_phantom_fields_combined.xdmf</code> and ends with <code>Example completed</code></li>
 <li>Notes/blockers: none</li>
 </ul>
 
