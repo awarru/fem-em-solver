@@ -249,4 +249,4 @@ Optional helpers:
 - Expected pass signal:
   - Log contains `OK`
   - Command exits with status `0`
-- Notes/blockers: none
+- Notes/blockers: awaiting human-run log in docs/testing/test-results.md (no new F2 result yet)
