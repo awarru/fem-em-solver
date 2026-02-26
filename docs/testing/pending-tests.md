@@ -253,7 +253,7 @@ Optional helpers:
 
 - Chunk: A1 — Resolve C2 symmetry metric strategy (sampling vs tolerance)
 - Status: 🧪 AWAITING-HUMAN-TEST
-- Commit: 8b292d07e385f23611213acfe7c7f6695c213f54
+- Commit: 02146baa7465abbbe7059ed555ec9d0831b61937
 - Files changed:
   - ROADMAP.md
   - tests/validation/test_coil_phantom_bfield_metrics.py
