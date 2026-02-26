@@ -100,6 +100,8 @@ if [[ "$DRY_RUN" == "1" ]]; then
   exit 0
 fi
 
+"$ROOT_DIR/scripts/testing/preflight.sh"
+
 cd "$ROOT_DIR"
 
 for cmd in "${COMMAND_LINES[@]}"; do
