@@ -50,7 +50,7 @@ During regular autonomous intervals:
 ## Track A — Baseline Stabilization & Unblocks
 
 ### A1 — Resolve C2 symmetry metric strategy (sampling vs tolerance)
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Unblock current C2 failure by separating physical asymmetry from numerical artifacts.
 
 **Agent tasks:**

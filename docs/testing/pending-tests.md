@@ -250,3 +250,17 @@ Optional helpers:
   - Log contains `OK`
   - Command exits with status `0`
 - Notes/blockers: awaiting human-run log in docs/testing/test-results.md (no new F2 result yet)
+
+- Chunk: A1 — Resolve C2 symmetry metric strategy (sampling vs tolerance)
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 8b292d07e385f23611213acfe7c7f6695c213f54
+- Files changed:
+  - ROADMAP.md
+  - tests/validation/test_coil_phantom_bfield_metrics.py
+  - docs/testing/pending-tests.md
+- Manual test command: scripts/testing/run_and_log.sh A1 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/validation/test_coil_phantom_bfield_metrics.py -v'"
+- Expected pass signal:
+  - tests/validation/test_coil_phantom_bfield_metrics.py::test_coil_phantom_bfield_metrics_are_finite_smooth_and_symmetric PASSED
+  - Output includes `symmetry probe setup:` with interface clearance and interior safe radius/half-height diagnostics
+  - Output includes `symmetry mismatch diagnostics (±x pairs):` with both absolute and relative max/mean values and tolerances
+- Notes/blockers: none
