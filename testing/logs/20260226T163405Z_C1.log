@@ -1,0 +1,32 @@
+# Test Run
+- Chunk: C1
+- Time (UTC): 2026-02-26 16:34:05
+- Host: FSMJFGSK74
+- Root Dir: /home/taz5297/Development/fem-em-solver
+- Working Dir: /home/taz5297/Development/fem-em-solver
+- COMPOSE_FILE: /home/taz5297/Development/fem-em-solver/docker/docker-compose.yml
+- Command: docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver/test_coil_phantom_magnetostatics.py -v'
+
+## Preflight
+\$ pwd
+/home/taz5297/Development/fem-em-solver
+
+\$ ls -la docker
+total 16
+drwxr-xr-x  2 taz5297 taz5297 4096 Feb 18 12:43 .
+drwxr-xr-x 12 taz5297 taz5297 4096 Feb 26 10:28 ..
+-rw-r--r--  1 taz5297 taz5297  656 Feb 18 12:43 Dockerfile
+-rw-r--r--  1 taz5297 taz5297  633 Feb 18 10:29 docker-compose.yml
+
+\$ docker compose version
+Docker Compose version v5.0.2
+
+\$ docker compose config --services
+fem-em-solver
+
+## Output
++ bash -lc 'docker compose exec fem-em-solver bash -lc '\''cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver/test_coil_phantom_magnetostatics.py -v'\'''
+service "fem-em-solver" is not running
+
+## Exit
+- Status: 1
