@@ -992,7 +992,24 @@
 <li>Expected pass signal:</li>
 <li>Log contains <code>OK</code></li>
 <li>Command exits with status <code>0</code></li>
-<li>Notes/blockers: awaiting human-run log in docs/testing/test-results.md (no new F2 result yet)</li>
+<li>
+<p>Notes/blockers: awaiting human-run log in docs/testing/test-results.md (no new F2 result yet)</p>
+</li>
+<li>
+<p>Chunk: A1 — Resolve C2 symmetry metric strategy (sampling vs tolerance)</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 79e5cb22abfb2ed757cd30937d6a4d97e5363b29</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>tests/validation/test_coil_phantom_bfield_metrics.py</li>
+<li>docs/testing/pending-tests.md</li>
+<li>Manual test command: scripts/testing/run_and_log.sh A1 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/validation/test_coil_phantom_bfield_metrics.py -v'"</li>
+<li>Expected pass signal:</li>
+<li>tests/validation/test_coil_phantom_bfield_metrics.py::test_coil_phantom_bfield_metrics_are_finite_smooth_and_symmetric PASSED</li>
+<li>Output includes <code>symmetry probe setup:</code> with interface clearance and interior safe radius/half-height diagnostics</li>
+<li>Output includes <code>symmetry mismatch diagnostics (±x pairs):</code> with both absolute and relative max/mean values and tolerances</li>
+<li>Notes/blockers: none</li>
 </ul>
 
 
