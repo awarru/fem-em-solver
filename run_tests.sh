@@ -2,7 +2,8 @@
 set -euo pipefail
 
 # Project-root test entrypoint.
-# Mirrors scripts/run_tests.sh so you can run from repo root with a single command.
+# Mirrors scripts/run_tests.sh so you can run from repo root with a single command
+# including: --list, --chunk <ID>, --smoke, and --dry-run.
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 exec "$ROOT_DIR/scripts/testing/run_pending_tests.sh" "$@"

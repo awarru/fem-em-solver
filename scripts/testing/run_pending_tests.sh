@@ -5,11 +5,12 @@ set -euo pipefail
 # docs/testing/pending-tests.md (each wrapped with scripts/testing/run_and_log.sh).
 #
 # Usage:
-#   ./scripts/testing/run_pending_tests.sh            # run all pending manual tests
-#   ./scripts/testing/run_pending_tests.sh --list     # list discovered chunk commands
-#   ./scripts/testing/run_pending_tests.sh --chunk E3 # run only one chunk
-#   ./scripts/testing/run_pending_tests.sh --dry-run  # show what would be run (cron-safe)
-#   FEM_SOLVER_DRY_RUN=1 ./scripts/testing/run_pending_tests.sh  # cron-safe mode
+#   ./scripts/testing/run_pending_tests.sh                 # run all pending manual tests
+#   ./scripts/testing/run_pending_tests.sh --list          # list discovered chunk commands
+#   ./scripts/testing/run_pending_tests.sh --chunk E3      # run only one chunk
+#   ./scripts/testing/run_pending_tests.sh --smoke         # run lightweight smoke matrix (cron-safe)
+#   ./scripts/testing/run_pending_tests.sh --dry-run       # show what would be run (cron-safe)
+#   FEM_SOLVER_DRY_RUN=1 ./scripts/testing/run_pending_tests.sh
 #
 # Cron/Automation Note:
 #   This script defaults to EXECUTING tests. For automated environments (like cron),
@@ -17,6 +18,13 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 PENDING_FILE="$ROOT_DIR/docs/testing/pending-tests.md"
+
+SMOKE_TEST_TARGETS=(
+  "tests/unit/test_analytical_lightweight.py"
+  "tests/solver/test_tolerance_policy.py"
+  "tests/validation/test_tolerance_policy.py"
+  "tests/ports/test_port_definition.py"
+)
 
 if [[ ! -f "$PENDING_FILE" ]]; then
   echo "Missing pending test file: $PENDING_FILE" >&2
@@ -33,6 +41,10 @@ while [[ $# -gt 0 ]]; do
       MODE="list"
       shift
       ;;
+    --smoke)
+      MODE="smoke"
+      shift
+      ;;
     --dry-run)
       DRY_RUN=1
       shift
@@ -47,11 +59,34 @@ while [[ $# -gt 0 ]]; do
       ;;
     *)
       echo "Unknown argument: $1" >&2
-      echo "Usage: $0 [--list] [--dry-run] [--chunk <ID>]" >&2
+      echo "Usage: $0 [--list] [--smoke] [--dry-run] [--chunk <ID>]" >&2
       exit 2
       ;;
   esac
 done
+
+if [[ "$MODE" == "smoke" && -n "$CHUNK_FILTER" ]]; then
+  echo "--smoke cannot be combined with --chunk" >&2
+  exit 2
+fi
+
+if [[ "$MODE" == "smoke" ]]; then
+  if [[ "$DRY_RUN" == "1" ]]; then
+    echo "=== DRY RUN MODE (no tests will be executed) ==="
+    echo ""
+    echo "Smoke matrix command:"
+    echo "  python3 -m pytest ${SMOKE_TEST_TARGETS[*]} -v"
+    exit 0
+  fi
+
+  cd "$ROOT_DIR"
+  echo "Running lightweight smoke matrix (no heavy FEM/mesh/solver cases):"
+  for target in "${SMOKE_TEST_TARGETS[@]}"; do
+    echo "  - $target"
+  done
+  python3 -m pytest "${SMOKE_TEST_TARGETS[@]}" -v
+  exit 0
+fi
 
 mapfile -t COMMAND_LINES < <(
   grep -E '^[[:space:]]*scripts/testing/run_and_log\.sh[[:space:]]+[A-Za-z0-9._-]+[[:space:]]+".*"[[:space:]]*$' "$PENDING_FILE" \
@@ -94,6 +129,9 @@ if [[ "$DRY_RUN" == "1" ]]; then
   echo ""
   echo "To run a specific chunk:"
   echo "  $0 --chunk <ID>"
+  echo ""
+  echo "To run the lightweight smoke matrix:"
+  echo "  $0 --smoke"
   echo ""
   echo "To see the list of pending commands:"
   echo "  $0 --list"

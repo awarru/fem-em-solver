@@ -88,7 +88,7 @@ scripts/testing/run_and_log.sh A2 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### A3 — Lightweight smoke matrix for cron-safe confidence
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Add a small test subset to detect regressions early without heavy runs.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: A1 — Resolve C2 symmetry metric strategy.**
+**Next chunk: A4 — Mesh-tag QA diagnostic hardening.**
 
-Reason: Existing known blocker should be resolved before further broad expansion.
+Reason: A1–A3 are implemented and awaiting human verification logs.

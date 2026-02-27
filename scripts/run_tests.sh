@@ -8,6 +8,8 @@ set -euo pipefail
 #   ./scripts/run_tests.sh
 #   ./scripts/run_tests.sh --list
 #   ./scripts/run_tests.sh --chunk E3
+#   ./scripts/run_tests.sh --smoke
+#   ./scripts/run_tests.sh --dry-run
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 exec "$ROOT_DIR/scripts/testing/run_pending_tests.sh" "$@"
