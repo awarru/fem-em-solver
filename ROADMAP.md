@@ -69,7 +69,7 @@ scripts/testing/run_and_log.sh A1 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### A2 — Deterministic test tolerance policy
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Reduce flaky fails by standardizing tolerances across solver/validation tests.
 
 **Agent tasks:**

@@ -10,6 +10,11 @@ from fem_em_solver.io.mesh import MeshGenerator
 from fem_em_solver.post import evaluate_vector_field_parallel
 from fem_em_solver.utils.constants import MU_0
 
+from tests.tolerances import (
+    B_FIELD_MAX_NONTRIVIAL_ABS_MIN,
+    B_FIELD_MEAN_NONTRIVIAL_ABS_MIN,
+)
+
 
 def test_coil_phantom_magnetostatics_bfield_is_finite_and_nontrivial_in_phantom():
     """Solve with current restricted to coil tags and sample B inside phantom."""
@@ -51,7 +56,7 @@ def test_coil_phantom_magnetostatics_bfield_is_finite_and_nontrivial_in_phantom(
     # Global finite/nontrivial checks
     b_values = np.asarray(b_field.x.array)
     assert np.isfinite(b_values).all(), "B-field contains non-finite values"
-    assert np.any(np.abs(b_values) > 1e-12), "B-field should not be near-zero everywhere"
+    assert np.any(np.abs(b_values) > B_FIELD_MAX_NONTRIVIAL_ABS_MIN), "B-field should not be near-zero everywhere"
 
     # Interpolate to Lagrange space for robust point sampling
     v_lagrange = fem.functionspace(mesh, ("Lagrange", 1, (3,)))
@@ -92,5 +97,9 @@ def test_coil_phantom_magnetostatics_bfield_is_finite_and_nontrivial_in_phantom(
         print(f"  phantom sample points: {len(sample_points)}")
         print(f"  |B| min/max/mean in phantom samples: {np.min(b_magnitude):.6e} / {max_mag:.6e} / {mean_mag:.6e}")
 
-    assert max_mag > 1e-12, f"Expected nontrivial phantom B-field, got max |B|={max_mag:.3e}"
-    assert mean_mag > 1e-13, f"Expected nontrivial average phantom B-field, got mean |B|={mean_mag:.3e}"
+    assert max_mag > B_FIELD_MAX_NONTRIVIAL_ABS_MIN, (
+        f"Expected nontrivial phantom B-field, got max |B|={max_mag:.3e}"
+    )
+    assert mean_mag > B_FIELD_MEAN_NONTRIVIAL_ABS_MIN, (
+        f"Expected nontrivial average phantom B-field, got mean |B|={mean_mag:.3e}"
+    )

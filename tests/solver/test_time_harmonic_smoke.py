@@ -15,6 +15,8 @@ from fem_em_solver.core import (
 from fem_em_solver.io.mesh import MeshGenerator
 from fem_em_solver.post import evaluate_vector_field_parallel
 
+from tests.tolerances import E_FIELD_MAX_NONTRIVIAL_ABS_MIN
+
 
 def test_time_harmonic_smoke_returns_finite_e_field_values():
     """Solve a small frequency-domain case and verify finite nontrivial E-field."""
@@ -81,4 +83,6 @@ def test_time_harmonic_smoke_returns_finite_e_field_values():
         print(f"  sample points: {len(sample_points)}")
         print(f"  |E_imag| min/max/mean: {np.min(e_mag):.6e} / {max_mag:.6e} / {mean_mag:.6e}")
 
-    assert max_mag > 1e-14, f"Expected nontrivial E-field, got max |E|={max_mag:.3e}"
+    assert max_mag > E_FIELD_MAX_NONTRIVIAL_ABS_MIN, (
+        f"Expected nontrivial E-field, got max |E|={max_mag:.3e}"
+    )

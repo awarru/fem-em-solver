@@ -8,6 +8,8 @@ from fem_em_solver.core.solvers import MagnetostaticProblem, MagnetostaticSolver
 from fem_em_solver.io.mesh import MeshGenerator
 from fem_em_solver.utils.constants import MU_0
 
+from tests.tolerances import FIELD_NONTRIVIAL_ABS_MIN_WEAK
+
 
 def test_cylinder_solver_computes_nonzero_b_field():
     """Create cylindrical mesh, solve magnetostatics, verify B-field is non-zero."""
@@ -36,4 +38,4 @@ def test_cylinder_solver_computes_nonzero_b_field():
     b_values = np.asarray(b_field.x.array)
 
     assert np.isfinite(b_values).all(), "B-field contains non-finite values"
-    assert np.any(np.abs(b_values) > 1e-14), "B-field should be non-zero"
+    assert np.any(np.abs(b_values) > FIELD_NONTRIVIAL_ABS_MIN_WEAK), "B-field should be non-zero"

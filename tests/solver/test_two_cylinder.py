@@ -8,6 +8,12 @@ from fem_em_solver.core.solvers import MagnetostaticProblem, MagnetostaticSolver
 from fem_em_solver.io.mesh import MeshGenerator
 from fem_em_solver.utils.constants import MU_0
 
+from tests.tolerances import (
+    B_FIELD_MAX_NONTRIVIAL_ABS_MIN,
+    CENTERLINE_CV_MAX,
+    FIELD_STD_NEAR_ZERO_MAX,
+)
+
 
 def test_two_cylinder_solver_centerline_field_is_roughly_constant():
     """Apply current in both cylinders and check centerline B-field behavior."""
@@ -52,7 +58,7 @@ def test_two_cylinder_solver_centerline_field_is_roughly_constant():
 
     b_values = np.asarray(b_field.x.array)
     assert np.isfinite(b_values).all(), "B-field contains non-finite values"
-    assert np.any(np.abs(b_values) > 1e-12), "B-field should be non-zero"
+    assert np.any(np.abs(b_values) > B_FIELD_MAX_NONTRIVIAL_ABS_MIN), "B-field should be non-zero"
 
     # Check B-field along centerline (x=0, y=0, varying z)
     n_points = 11
@@ -69,6 +75,6 @@ def test_two_cylinder_solver_centerline_field_is_roughly_constant():
     # "Roughly constant" criterion in the center region
     if mean_mag > 0:
         cv = std_mag / mean_mag
-        assert cv < 0.75, f"Centerline B-field not roughly constant (CV={cv:.3f})"
+        assert cv < CENTERLINE_CV_MAX, f"Centerline B-field not roughly constant (CV={cv:.3f})"
     else:
-        assert std_mag < 1e-9, "Centerline B-field magnitude varies unexpectedly"
+        assert std_mag < FIELD_STD_NEAR_ZERO_MAX, "Centerline B-field magnitude varies unexpectedly"
