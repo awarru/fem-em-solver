@@ -264,3 +264,24 @@ Optional helpers:
   - Output includes `symmetry probe setup:` with interface clearance and interior safe radius/half-height diagnostics
   - Output includes `symmetry mismatch diagnostics (±x pairs):` with both absolute and relative max/mean values and tolerances
 - Notes/blockers: none
+
+- Chunk: A2 — Deterministic test tolerance policy
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 529cc557998f51e48025a7fef4323cc54c259a2d
+- Files changed:
+  - ROADMAP.md
+  - docs/testing/tolerance-policy.md
+  - tests/tolerances.py
+  - tests/solver/test_coil_phantom_magnetostatics.py
+  - tests/solver/test_cylinder.py
+  - tests/solver/test_time_harmonic_smoke.py
+  - tests/solver/test_tolerance_policy.py
+  - tests/solver/test_two_cylinder.py
+  - tests/validation/test_coil_phantom_bfield_metrics.py
+  - tests/validation/test_tolerance_policy.py
+- Manual test command: scripts/testing/run_and_log.sh A2 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src python3 -m pytest tests/validation tests/solver -v -k tolerance'"
+- Expected pass signal:
+  - tests/validation/test_tolerance_policy.py::test_validation_tolerance_policy_is_ordered_and_positive PASSED
+  - tests/solver/test_tolerance_policy.py::test_solver_tolerance_policy_is_consistent PASSED
+  - No failures mentioning undefined tolerance constants; updated solver/validation tests import thresholds from tests/tolerances.py
+- Notes/blockers: none
