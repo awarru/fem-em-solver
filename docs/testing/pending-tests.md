@@ -285,3 +285,19 @@ Optional helpers:
   - tests/solver/test_tolerance_policy.py::test_solver_tolerance_policy_is_consistent PASSED
   - No failures mentioning undefined tolerance constants; updated solver/validation tests import thresholds from tests/tolerances.py
 - Notes/blockers: none
+
+- Chunk: A3 — Lightweight smoke matrix for cron-safe confidence
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 9a61957e79936c9588d15805cfec10509afb76f3
+- Files changed:
+  - ROADMAP.md
+  - run_tests.sh
+  - scripts/run_tests.sh
+  - scripts/testing/run_pending_tests.sh
+- Manual test command: scripts/testing/run_and_log.sh A3 "docker compose exec fem-em-solver bash -lc 'cd /workspace && ./run_tests.sh --smoke'"
+- Expected pass signal:
+  - tests/unit/test_analytical_lightweight.py::test_straight_wire_analytical_direction_and_magnitude PASSED
+  - tests/solver/test_tolerance_policy.py::test_solver_tolerance_policy_is_consistent PASSED
+  - tests/validation/test_tolerance_policy.py::test_validation_tolerance_policy_is_ordered_and_positive PASSED
+  - Pytest summary reports all selected smoke tests passed with no heavy mesh/solve commands executed
+- Notes/blockers: none
