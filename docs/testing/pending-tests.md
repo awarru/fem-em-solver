@@ -301,3 +301,19 @@ Optional helpers:
   - tests/validation/test_tolerance_policy.py::test_validation_tolerance_policy_is_ordered_and_positive PASSED
   - Pytest summary reports all selected smoke tests passed with no heavy mesh/solve commands executed
 - Notes/blockers: none
+
+- Chunk: A4 — Mesh-tag QA diagnostic hardening
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 7c9b2c49cceb5f1035da23503e567ca242f6f821
+- Files changed:
+  - ROADMAP.md
+  - src/fem_em_solver/io/__init__.py
+  - src/fem_em_solver/io/mesh_qa.py
+  - tests/io/test_mesh_qa_diagnostics.py
+  - tests/mesh/helpers.py
+- Manual test command: scripts/testing/run_and_log.sh A4 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/mesh/test_mesh_tag_integrity.py -v'"
+- Expected pass signal:
+  - tests/mesh/test_mesh_tag_integrity.py::test_coil_phantom_mesh_tag_integrity PASSED
+  - On forced/missing-tag failures, log prints `[mesh-qa] required-tag expected vs actual:` with per-tag expected>=1 and actual counts
+  - On forced/missing-tag failures, log prints `[mesh-qa] observed-tag summary:` including named required tags and unnamed tags as `tag_<id>`
+- Notes/blockers: none
