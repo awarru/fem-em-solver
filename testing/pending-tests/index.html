@@ -467,6 +467,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#testing-status-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing Status Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#c1-solve-b-field-on-coilphantom-model-complete" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -636,6 +647,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#testing-status-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing Status Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#c1-solve-b-field-on-coilphantom-model-complete" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -777,6 +799,61 @@
 <pre><code class="language-bash">./run_tests.sh --list
 ./run_tests.sh --chunk E3
 </code></pre>
+<h2 id="testing-status-dashboard">Testing Status Dashboard<a class="headerlink" href="#testing-status-dashboard" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Chunk</th>
+<th>Status</th>
+<th>Commit</th>
+<th>Last known log</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C1</td>
+<td>✅ COMPLETE</td>
+<td><code>09eb248f6e5ee161234d8a799692c75a63262efb</code></td>
+<td><code>docs/testing/logs/20260226T164233Z_C1.log</code></td>
+</tr>
+<tr>
+<td>C2</td>
+<td>🚫 BLOCKED</td>
+<td><code>7ac10f166e283ff7b6f15e20323b6402a4a49d65</code></td>
+<td><code>docs/testing/logs/20260226T164235Z_C2.log</code></td>
+</tr>
+<tr>
+<td>A1</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>79e5cb22abfb2ed757cd30937d6a4d97e5363b29</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td>A2</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>529cc557998f51e48025a7fef4323cc54c259a2d</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td>A3</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>9a61957e79936c9588d15805cfec10509afb76f3</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td>A4</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>7c9b2c49cceb5f1035da23503e567ca242f6f821</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td>A5</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>527529e435a37968863f518e02b20c3619aed690</code></td>
+<td>none</td>
+</tr>
+</tbody>
+</table>
 <hr />
 <h2 id="c1-solve-b-field-on-coilphantom-model-complete">C1 — Solve B-field on coil+phantom model (✅ COMPLETE)<a class="headerlink" href="#c1-solve-b-field-on-coilphantom-model-complete" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1071,6 +1148,22 @@
 <li>tests/mesh/test_mesh_tag_integrity.py::test_coil_phantom_mesh_tag_integrity PASSED</li>
 <li>On forced/missing-tag failures, log prints <code>[mesh-qa] required-tag expected vs actual:</code> with per-tag expected&gt;=1 and actual counts</li>
 <li>On forced/missing-tag failures, log prints <code>[mesh-qa] observed-tag summary:</code> including named required tags and unnamed tags as <code>tag_&lt;id&gt;</code></li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: A5 — Testing status dashboard section</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 527529e435a37968863f518e02b20c3619aed690</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>docs/testing/pending-tests.md</li>
+<li>Manual test command: scripts/testing/run_and_log.sh A5 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; test -f docs/testing/pending-tests.md &amp;&amp; echo OK'"</li>
+<li>Expected pass signal:</li>
+<li>Log contains <code>OK</code></li>
+<li>Command exits with status <code>0</code></li>
+<li><code>docs/testing/pending-tests.md</code> includes a <code>Testing Status Dashboard</code> table with columns: Chunk, Status, Commit, Last known log</li>
 <li>Notes/blockers: none</li>
 </ul>
 
