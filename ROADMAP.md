@@ -125,7 +125,7 @@ scripts/testing/run_and_log.sh A4 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### A5 — Testing status dashboard section
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Make pending/blocked/completed status obvious at a glance.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: A5 — Testing status dashboard section.**
+**Next chunk: B1 — Parametric birdcage geometry generator.**
 
-Reason: A1–A4 are implemented and awaiting human verification logs.
+Reason: A1–A5 are implemented and awaiting human verification logs; proceed with baseline geometry realism work.

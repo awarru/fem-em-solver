@@ -31,6 +31,19 @@ Optional helpers:
 ./run_tests.sh --chunk E3
 ```
 
+
+## Testing Status Dashboard
+
+| Chunk | Status | Commit | Last known log |
+|---|---|---|---|
+| C1 | ✅ COMPLETE | `09eb248f6e5ee161234d8a799692c75a63262efb` | `docs/testing/logs/20260226T164233Z_C1.log` |
+| C2 | 🚫 BLOCKED | `7ac10f166e283ff7b6f15e20323b6402a4a49d65` | `docs/testing/logs/20260226T164235Z_C2.log` |
+| A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
+| A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
+| A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
+| A4 | 🧪 AWAITING-HUMAN-TEST | `7c9b2c49cceb5f1035da23503e567ca242f6f821` | none |
+| A5 | 🧪 AWAITING-HUMAN-TEST | `82d2b6e4a0bf00bc521d3751d727e79dbdb6208e` | none |
+
 ---
 
 ## C1 — Solve B-field on coil+phantom model (✅ COMPLETE)
@@ -316,4 +329,18 @@ Optional helpers:
   - tests/mesh/test_mesh_tag_integrity.py::test_coil_phantom_mesh_tag_integrity PASSED
   - On forced/missing-tag failures, log prints `[mesh-qa] required-tag expected vs actual:` with per-tag expected>=1 and actual counts
   - On forced/missing-tag failures, log prints `[mesh-qa] observed-tag summary:` including named required tags and unnamed tags as `tag_<id>`
+- Notes/blockers: none
+
+
+- Chunk: A5 — Testing status dashboard section
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 82d2b6e4a0bf00bc521d3751d727e79dbdb6208e
+- Files changed:
+  - ROADMAP.md
+  - docs/testing/pending-tests.md
+- Manual test command: scripts/testing/run_and_log.sh A5 "docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/testing/pending-tests.md && echo OK'"
+- Expected pass signal:
+  - Log contains `OK`
+  - Command exits with status `0`
+  - `docs/testing/pending-tests.md` includes a `Testing Status Dashboard` table with columns: Chunk, Status, Commit, Last known log
 - Notes/blockers: none
