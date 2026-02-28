@@ -42,7 +42,7 @@ Optional helpers:
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
 | A4 | 🧪 AWAITING-HUMAN-TEST | `7c9b2c49cceb5f1035da23503e567ca242f6f821` | none |
-| A5 | 🧪 AWAITING-HUMAN-TEST | `82d2b6e4a0bf00bc521d3751d727e79dbdb6208e` | none |
+| A5 | 🧪 AWAITING-HUMAN-TEST | `527529e435a37968863f518e02b20c3619aed690` | none |
 
 ---
 
@@ -334,7 +334,7 @@ Optional helpers:
 
 - Chunk: A5 — Testing status dashboard section
 - Status: 🧪 AWAITING-HUMAN-TEST
-- Commit: 82d2b6e4a0bf00bc521d3751d727e79dbdb6208e
+- Commit: 527529e435a37968863f518e02b20c3619aed690
 - Files changed:
   - ROADMAP.md
   - docs/testing/pending-tests.md
