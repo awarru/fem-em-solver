@@ -7,7 +7,11 @@ from typing import Mapping
 import numpy as np
 from mpi4py import MPI
 
-from fem_em_solver.io.mesh_qa import cell_tag_counts
+from fem_em_solver.io.mesh_qa import (
+    cell_tag_counts,
+    format_expected_tag_counts,
+    print_required_tag_failure_summary,
+)
 
 
 REQUIRED_COIL_PHANTOM_TAGS = {
@@ -27,7 +31,14 @@ def assert_required_tags_nonempty(cell_tags, required_tags: Mapping[int, str], c
         if counts.get(tag, 0) <= 0:
             missing.append(f"{name} (tag={tag})")
 
-    assert not missing, f"Required mesh tags missing/empty: {', '.join(missing)}"
+    if missing:
+        print_required_tag_failure_summary(counts, required_tags, comm=comm, prefix="[mesh-qa] ")
+
+    expected_vs_actual = format_expected_tag_counts(counts, required_tags)
+    assert not missing, (
+        f"Required mesh tags missing/empty: {', '.join(missing)} | "
+        f"expected-vs-actual: {expected_vs_actual}"
+    )
 
 
 def compute_tag_cell_centroid(mesh, cell_tags, tag: int, comm: MPI.Intracomm) -> np.ndarray:

@@ -75,3 +75,58 @@ def print_cell_tag_summary(
         print(f"{prefix}cell-tag counts: {format_cell_tag_summary(counts, tag_names=tag_names)}")
 
     return counts
+
+
+def format_expected_tag_counts(
+    counts: Mapping[int, int],
+    required_tags: Mapping[int, str],
+    minimum_count: int = 1,
+) -> str:
+    """Format expected-vs-actual counts for required tags.
+
+    Parameters
+    ----------
+    counts : Mapping[int, int]
+        Observed global cell counts by tag.
+    required_tags : Mapping[int, str]
+        Required tags and display names.
+    minimum_count : int, default=1
+        Minimum required count for each required tag.
+    """
+    if not required_tags:
+        return "(no required tags)"
+
+    rendered = []
+    for tag in sorted(required_tags):
+        name = required_tags[tag]
+        actual = int(counts.get(tag, 0))
+        status = "OK" if actual >= minimum_count else "MISSING"
+        rendered.append(
+            f"{name}(tag={tag}): expected>={minimum_count}, actual={actual} [{status}]"
+        )
+
+    return "; ".join(rendered)
+
+
+def print_required_tag_failure_summary(
+    counts: Mapping[int, int],
+    required_tags: Mapping[int, str],
+    comm: Optional[MPI.Intracomm] = None,
+    prefix: str = "[mesh-qa] ",
+) -> None:
+    """Print compact diagnostics for required-tag failures on rank 0.
+
+    Includes expected-vs-actual required tag counts and a compact summary of
+    all observed tags to speed up debugging for missing/empty tag failures.
+    """
+    if comm is not None and comm.rank != 0:
+        return
+
+    print(
+        f"{prefix}required-tag expected vs actual: "
+        f"{format_expected_tag_counts(counts, required_tags)}"
+    )
+    print(
+        f"{prefix}observed-tag summary: "
+        f"{format_cell_tag_summary(counts, tag_names=required_tags)}"
+    )

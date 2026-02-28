@@ -107,7 +107,7 @@ scripts/testing/run_and_log.sh A3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### A4 — Mesh-tag QA diagnostic hardening
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Improve failure readability for missing/empty tags.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: A4 — Mesh-tag QA diagnostic hardening.**
+**Next chunk: A5 — Testing status dashboard section.**
 
-Reason: A1–A3 are implemented and awaiting human verification logs.
+Reason: A1–A4 are implemented and awaiting human verification logs.
