@@ -852,6 +852,12 @@
 <td><code>527529e435a37968863f518e02b20c3619aed690</code></td>
 <td>none</td>
 </tr>
+<tr>
+<td>B1</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>463c3c3c5bdb312859cfcf8ca59938f77a2bee95</code></td>
+<td>none</td>
+</tr>
 </tbody>
 </table>
 <hr />
@@ -1164,6 +1170,23 @@
 <li>Log contains <code>OK</code></li>
 <li>Command exits with status <code>0</code></li>
 <li><code>docs/testing/pending-tests.md</code> includes a <code>Testing Status Dashboard</code> table with columns: Chunk, Status, Commit, Last known log</li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: B1 — Parametric birdcage geometry generator</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 463c3c3c5bdb312859cfcf8ca59938f77a2bee95</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>src/fem_em_solver/io/mesh.py</li>
+<li>tests/mesh/test_birdcage_port_tags.py</li>
+<li>Manual test command: scripts/testing/run_and_log.sh B1 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/mesh/test_birdcage_port_tags.py -v'"</li>
+<li>Expected pass signal:</li>
+<li>tests/mesh/test_birdcage_port_tags.py::test_birdcage_like_mesh_has_core_and_port_tags PASSED</li>
+<li>Output includes <code>[birdcage-mesh]</code> summary with non-zero <code>conductor</code>, <code>air</code>, <code>phantom</code>, and <code>port_P1</code>..<code>port_P4</code></li>
+<li>No <code>ValueError</code> about <code>leg_count</code>, <code>leg_width</code>, <code>leg_spacing</code>, <code>coil_length</code>, or <code>ring_radius</code> in default B1 setup</li>
 <li>Notes/blockers: none</li>
 </ul>
 
