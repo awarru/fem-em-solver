@@ -163,7 +163,7 @@ scripts/testing/run_and_log.sh B1 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### B2 — Port-face geometry robustness checks
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Ensure port regions are valid, non-overlapping, and physically plausible.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: B2 — Port-face geometry robustness checks.**
+**Next chunk: B3 — Phantom placement presets (centered/off-center).**
 
-Reason: B1 is now implemented and awaiting human verification logs; proceed to port validity checks once B1 test output is logged.
+Reason: B2 is now implemented and awaiting human verification logs; proceed to placement preset coverage to expand realistic loaded scenarios.

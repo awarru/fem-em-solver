@@ -1,6 +1,6 @@
 """Mesh generation utilities for EM simulations."""
 
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Dict
 from pathlib import Path
 import numpy as np
 import gmsh
@@ -931,6 +931,110 @@ class MeshGenerator:
         return mesh, cell_tags, facet_tags
 
     @staticmethod
+    def birdcage_port_layout_diagnostics(
+        *,
+        leg_count: int,
+        ring_radius: float,
+        leg_width: float,
+        ring_minor_radius: float,
+        phantom_radius: float,
+        port_box_size: Tuple[float, float, float],
+        port_clearance: float = 1.0e-3,
+        min_port_face_area: float = 2.5e-5,
+        min_port_center_separation: Optional[float] = None,
+    ) -> Dict[str, float]:
+        """Compute and validate birdcage port geometry diagnostics.
+
+        This helper is intentionally lightweight and does not require meshing.
+        It enforces a minimum port face area, checks center-to-center
+        separation, and guards against radial overlap with conductor/phantom
+        bulk regions.
+        """
+        if leg_count < 3:
+            raise ValueError("leg_count must be >= 3 for port layout checks")
+        if leg_width <= 0.0:
+            raise ValueError("leg_width must be > 0")
+        if ring_radius <= 0.0:
+            raise ValueError("ring_radius must be > 0")
+
+        port_dx, port_dy, port_dz = port_box_size
+        if port_dx <= 0.0 or port_dy <= 0.0 or port_dz <= 0.0:
+            raise ValueError("port_box_size components must be > 0")
+        if ring_minor_radius <= 0.0:
+            raise ValueError("ring_minor_radius must be > 0")
+        if phantom_radius <= 0.0:
+            raise ValueError("phantom_radius must be > 0")
+        if port_clearance < 0.0:
+            raise ValueError("port_clearance must be >= 0")
+
+        port_face_area = port_dx * port_dz
+        if port_face_area < min_port_face_area:
+            raise ValueError(
+                "Port face area too small for robust tagging: "
+                f"area={port_face_area:.6e} m^2, required>={min_port_face_area:.6e} m^2"
+            )
+
+        leg_radius_eff = 0.5 * leg_width
+        conductor_outer_radius = ring_radius + max(leg_radius_eff, ring_minor_radius)
+        port_radius = conductor_outer_radius + 0.5 * port_dy + port_clearance
+
+        theta = np.linspace(0.0, 2.0 * np.pi, leg_count, endpoint=False)
+        port_centers = []
+        for idx, angle in enumerate(theta):
+            next_angle = theta[(idx + 1) % leg_count]
+            midpoint_angle = np.arctan2(
+                np.sin(angle) + np.sin(next_angle),
+                np.cos(angle) + np.cos(next_angle),
+            )
+            port_centers.append(
+                np.array([
+                    port_radius * np.cos(midpoint_angle),
+                    port_radius * np.sin(midpoint_angle),
+                ])
+            )
+
+        min_center_separation = float("inf")
+        for idx in range(len(port_centers)):
+            for jdx in range(idx + 1, len(port_centers)):
+                distance = float(np.linalg.norm(port_centers[idx] - port_centers[jdx]))
+                min_center_separation = min(min_center_separation, distance)
+
+        if min_port_center_separation is None:
+            min_port_center_separation = max(5.0e-4, 1.25 * max(port_dx, port_dy))
+
+        if min_center_separation < min_port_center_separation:
+            raise ValueError(
+                "Port center separation too small: "
+                f"min={min_center_separation:.6e} m, "
+                f"required>={min_port_center_separation:.6e} m"
+            )
+
+        conductor_radial_clearance = port_radius - 0.5 * port_dy - conductor_outer_radius
+        phantom_radial_clearance = port_radius - 0.5 * port_dy - phantom_radius
+
+        if conductor_radial_clearance <= 0.0:
+            raise ValueError(
+                "Port/conductor radial overlap detected: "
+                f"clearance={conductor_radial_clearance:.6e} m"
+            )
+        if phantom_radial_clearance <= 0.0:
+            raise ValueError(
+                "Port/phantom radial overlap detected: "
+                f"clearance={phantom_radial_clearance:.6e} m"
+            )
+
+        return {
+            "port_face_area_m2": float(port_face_area),
+            "min_port_face_area_m2": float(min_port_face_area),
+            "min_port_center_separation_m": float(min_center_separation),
+            "required_port_center_separation_m": float(min_port_center_separation),
+            "conductor_radial_clearance_m": float(conductor_radial_clearance),
+            "phantom_radial_clearance_m": float(phantom_radial_clearance),
+            "port_radius_m": float(port_radius),
+            "conductor_outer_radius_m": float(conductor_outer_radius),
+        }
+
+    @staticmethod
     def birdcage_port_domain(
         leg_count: int = 4,
         ring_radius: float = 0.07,
@@ -941,6 +1045,9 @@ class MeshGenerator:
         phantom_radius: float = 0.03,
         phantom_height: float = 0.08,
         port_box_size: Tuple[float, float, float] = (0.010, 0.008, 0.010),
+        port_clearance: float = 1.0e-3,
+        min_port_face_area: float = 2.5e-5,
+        min_port_center_separation: Optional[float] = None,
         air_padding: float = 0.03,
         resolution: float = 0.015,
         comm: MPI.Intracomm = MPI.COMM_WORLD,
@@ -994,6 +1101,17 @@ class MeshGenerator:
             raise ValueError("ring_radius must be > 0")
 
         leg_radius_eff = 0.5 * leg_width
+        port_diagnostics = MeshGenerator.birdcage_port_layout_diagnostics(
+            leg_count=leg_count,
+            ring_radius=ring_radius,
+            leg_width=leg_width,
+            ring_minor_radius=ring_minor_radius,
+            phantom_radius=phantom_radius,
+            port_box_size=port_box_size,
+            port_clearance=port_clearance,
+            min_port_face_area=min_port_face_area,
+            min_port_center_separation=min_port_center_separation,
+        )
 
         if comm.rank == rank:
             gmsh.initialize()
@@ -1031,7 +1149,7 @@ class MeshGenerator:
             )
 
             port_dx, port_dy, port_dz = port_box_size
-            port_radius = ring_radius + max(0.5 * port_dy, leg_radius_eff)
+            port_radius = port_diagnostics["port_radius_m"]
             port_tags: List[int] = []
             for idx, angle in enumerate(theta):
                 next_angle = theta[(idx + 1) % leg_count]
