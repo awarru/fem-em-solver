@@ -17,15 +17,16 @@ BIRDCAGE_CORE_TAGS = {
 
 
 def test_birdcage_like_mesh_has_core_and_port_tags():
-    """Ensure coarse birdcage fixture provides all required core + port tags."""
+    """Ensure parametric birdcage fixture provides all required core + port tags."""
     comm = MPI.COMM_WORLD
 
-    n_legs = 4
+    leg_count = 4
     mesh, cell_tags, _ = MeshGenerator.birdcage_port_domain(
-        n_legs=n_legs,
+        leg_count=leg_count,
         ring_radius=0.07,
-        leg_radius=0.006,
-        leg_height=0.14,
+        leg_width=0.012,
+        leg_spacing=0.11,
+        coil_length=0.14,
         ring_minor_radius=0.004,
         phantom_radius=0.03,
         phantom_height=0.08,
@@ -41,7 +42,7 @@ def test_birdcage_like_mesh_has_core_and_port_tags():
 
     unique_tags = set(np.unique(cell_tags.values).tolist())
 
-    expected_port_tags = [100 + i for i in range(1, n_legs + 1)]
+    expected_port_tags = [100 + i for i in range(1, leg_count + 1)]
 
     missing_core = [name for tag, name in BIRDCAGE_CORE_TAGS.items() if tag not in unique_tags]
     assert not missing_core, f"Missing core birdcage tags: {', '.join(missing_core)}"

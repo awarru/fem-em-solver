@@ -145,7 +145,7 @@ scripts/testing/run_and_log.sh A5 "docker compose exec fem-em-solver bash -lc 'c
 ## Track B — Geometry Realism for Birdcage + Phantom
 
 ### B1 — Parametric birdcage geometry generator
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Introduce configurable birdcage geometry dimensions suitable for phased studies.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: B1 — Parametric birdcage geometry generator.**
+**Next chunk: B2 — Port-face geometry robustness checks.**
 
-Reason: A1–A5 are implemented and awaiting human verification logs; proceed with baseline geometry realism work.
+Reason: B1 is now implemented and awaiting human verification logs; proceed to port validity checks once B1 test output is logged.

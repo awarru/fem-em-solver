@@ -932,10 +932,11 @@ class MeshGenerator:
 
     @staticmethod
     def birdcage_port_domain(
-        n_legs: int = 4,
+        leg_count: int = 4,
         ring_radius: float = 0.07,
-        leg_radius: float = 0.006,
-        leg_height: float = 0.14,
+        leg_width: float = 0.012,
+        leg_spacing: float = 0.11,
+        coil_length: float = 0.14,
         ring_minor_radius: float = 0.004,
         phantom_radius: float = 0.03,
         phantom_height: float = 0.08,
@@ -944,40 +945,78 @@ class MeshGenerator:
         resolution: float = 0.015,
         comm: MPI.Intracomm = MPI.COMM_WORLD,
         rank: int = 0,
+        n_legs: Optional[int] = None,
+        leg_radius: Optional[float] = None,
+        leg_height: Optional[float] = None,
     ) -> Tuple[dolfinx.mesh.Mesh, dolfinx.mesh.MeshTags, dolfinx.mesh.MeshTags]:
-        """Generate a coarse birdcage-like geometry fixture with explicit port tags.
+        """Generate a coarse, parametric birdcage-like geometry fixture with port tags.
+
+        Parameters
+        ----------
+        leg_count : int
+            Number of birdcage legs distributed uniformly around the ring.
+        ring_radius : float
+            Radius of the birdcage rings [m].
+        leg_width : float
+            Leg diameter [m].
+        leg_spacing : float
+            Center-to-center spacing between bottom and top ring planes [m].
+        coil_length : float
+            Axial conductor span used for vertical legs [m].
+
+        Notes
+        -----
+        `n_legs`, `leg_radius`, and `leg_height` are accepted as backward-compatible
+        aliases and map to `leg_count`, `leg_width/2`, and `coil_length` respectively.
 
         Cell tags:
         - 1: conductor (rings + legs)
         - 2: air
         - 3: phantom
-        - 101..(100+n_legs): per-port regions between adjacent legs
+        - 101..(100+leg_count): per-port regions between adjacent legs
         """
-        if n_legs < 3:
-            raise ValueError("n_legs must be >= 3 for a birdcage-like fixture")
+        if n_legs is not None:
+            leg_count = n_legs
+        if leg_radius is not None:
+            leg_width = 2.0 * leg_radius
+        if leg_height is not None:
+            coil_length = leg_height
+
+        if leg_count < 3:
+            raise ValueError("leg_count must be >= 3 for a birdcage-like fixture")
+        if leg_width <= 0.0:
+            raise ValueError("leg_width must be > 0")
+        if leg_spacing <= 0.0:
+            raise ValueError("leg_spacing must be > 0")
+        if coil_length <= 0.0:
+            raise ValueError("coil_length must be > 0")
+        if ring_radius <= 0.0:
+            raise ValueError("ring_radius must be > 0")
+
+        leg_radius_eff = 0.5 * leg_width
 
         if comm.rank == rank:
             gmsh.initialize()
             gmsh.model.add("birdcage_port_domain")
 
             # Simplified conductor scaffold: two rings plus vertical legs.
-            z_ring_offset = 0.5 * leg_height - 1.5 * ring_minor_radius
+            z_ring_offset = 0.5 * leg_spacing
             top_ring = gmsh.model.occ.addTorus(0, 0, z_ring_offset, ring_radius, ring_minor_radius)
             bottom_ring = gmsh.model.occ.addTorus(0, 0, -z_ring_offset, ring_radius, ring_minor_radius)
 
             leg_tags: List[int] = []
-            theta = np.linspace(0.0, 2.0 * np.pi, n_legs, endpoint=False)
+            theta = np.linspace(0.0, 2.0 * np.pi, leg_count, endpoint=False)
             for angle in theta:
                 x = ring_radius * np.cos(angle)
                 y = ring_radius * np.sin(angle)
                 leg = gmsh.model.occ.addCylinder(
                     x,
                     y,
-                    -0.5 * leg_height,
+                    -0.5 * coil_length,
                     0.0,
                     0.0,
-                    leg_height,
-                    leg_radius,
+                    coil_length,
+                    leg_radius_eff,
                 )
                 leg_tags.append(leg)
 
@@ -992,10 +1031,10 @@ class MeshGenerator:
             )
 
             port_dx, port_dy, port_dz = port_box_size
-            port_radius = ring_radius + 0.5 * port_dy
+            port_radius = ring_radius + max(0.5 * port_dy, leg_radius_eff)
             port_tags: List[int] = []
             for idx, angle in enumerate(theta):
-                next_angle = theta[(idx + 1) % n_legs]
+                next_angle = theta[(idx + 1) % leg_count]
                 midpoint_angle = np.arctan2(
                     np.sin(angle) + np.sin(next_angle),
                     np.cos(angle) + np.cos(next_angle),
@@ -1012,8 +1051,8 @@ class MeshGenerator:
                 )
                 port_tags.append(port)
 
-            radial_extent = ring_radius + max(leg_radius, ring_minor_radius) + port_dy + air_padding
-            z_extent = max(0.5 * leg_height, 0.5 * phantom_height) + air_padding
+            radial_extent = ring_radius + max(leg_radius_eff, ring_minor_radius) + port_dy + air_padding
+            z_extent = max(0.5 * coil_length, 0.5 * leg_spacing + ring_minor_radius, 0.5 * phantom_height) + air_padding
             air_tag = gmsh.model.occ.addBox(
                 -radial_extent,
                 -radial_extent,
