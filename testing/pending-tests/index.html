@@ -858,6 +858,12 @@
 <td><code>463c3c3c5bdb312859cfcf8ca59938f77a2bee95</code></td>
 <td>none</td>
 </tr>
+<tr>
+<td>B2</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>136cf051039809710bb672eccae1b3e53d2766d6</code></td>
+<td>none</td>
+</tr>
 </tbody>
 </table>
 <hr />
@@ -1187,6 +1193,23 @@
 <li>tests/mesh/test_birdcage_port_tags.py::test_birdcage_like_mesh_has_core_and_port_tags PASSED</li>
 <li>Output includes <code>[birdcage-mesh]</code> summary with non-zero <code>conductor</code>, <code>air</code>, <code>phantom</code>, and <code>port_P1</code>..<code>port_P4</code></li>
 <li>No <code>ValueError</code> about <code>leg_count</code>, <code>leg_width</code>, <code>leg_spacing</code>, <code>coil_length</code>, or <code>ring_radius</code> in default B1 setup</li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: B2 — Port-face geometry robustness checks</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 136cf051039809710bb672eccae1b3e53d2766d6</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>src/fem_em_solver/io/mesh.py</li>
+<li>tests/mesh/test_birdcage_port_tags.py</li>
+<li>Manual test command: scripts/testing/run_and_log.sh B2 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/mesh/test_birdcage_port_tags.py -v -k port'"</li>
+<li>Expected pass signal:</li>
+<li>tests/mesh/test_birdcage_port_tags.py::test_birdcage_like_mesh_has_core_and_port_tags PASSED</li>
+<li>tests/mesh/test_birdcage_port_tags.py::test_birdcage_port_layout_rejects_too_small_or_overlapping_port_regions PASSED</li>
+<li>Output includes <code>[birdcage-port] area/separation diagnostics:</code> with finite <code>port_face_area</code>, <code>min_center_separation</code>, <code>conductor_clearance</code>, and <code>phantom_clearance</code></li>
 <li>Notes/blockers: none</li>
 </ul>
 
