@@ -43,6 +43,7 @@ Optional helpers:
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
 | A4 | 🧪 AWAITING-HUMAN-TEST | `7c9b2c49cceb5f1035da23503e567ca242f6f821` | none |
 | A5 | 🧪 AWAITING-HUMAN-TEST | `527529e435a37968863f518e02b20c3619aed690` | none |
+| B1 | 🧪 AWAITING-HUMAN-TEST | `463c3c3c5bdb312859cfcf8ca59938f77a2bee95` | none |
 
 ---
 
@@ -343,4 +344,18 @@ Optional helpers:
   - Log contains `OK`
   - Command exits with status `0`
   - `docs/testing/pending-tests.md` includes a `Testing Status Dashboard` table with columns: Chunk, Status, Commit, Last known log
+- Notes/blockers: none
+
+- Chunk: B1 — Parametric birdcage geometry generator
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 463c3c3c5bdb312859cfcf8ca59938f77a2bee95
+- Files changed:
+  - ROADMAP.md
+  - src/fem_em_solver/io/mesh.py
+  - tests/mesh/test_birdcage_port_tags.py
+- Manual test command: scripts/testing/run_and_log.sh B1 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/mesh/test_birdcage_port_tags.py -v'"
+- Expected pass signal:
+  - tests/mesh/test_birdcage_port_tags.py::test_birdcage_like_mesh_has_core_and_port_tags PASSED
+  - Output includes `[birdcage-mesh]` summary with non-zero `conductor`, `air`, `phantom`, and `port_P1`..`port_P4`
+  - No `ValueError` about `leg_count`, `leg_width`, `leg_spacing`, `coil_length`, or `ring_radius` in default B1 setup
 - Notes/blockers: none
