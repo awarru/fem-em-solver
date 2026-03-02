@@ -383,6 +383,7 @@ Optional helpers:
   - ROADMAP.md
   - src/fem_em_solver/io/mesh.py
   - tests/mesh/test_coil_phantom_mesh.py
+  - docs/testing/pending-tests.md
 - Manual test command: scripts/testing/run_and_log.sh B3 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/mesh/test_coil_phantom_mesh.py -v'"
 - Expected pass signal:
   - tests/mesh/test_coil_phantom_mesh.py::test_coil_phantom_mesh_generates_required_tags_centered_preset PASSED
