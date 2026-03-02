@@ -45,6 +45,7 @@ Optional helpers:
 | A5 | 🧪 AWAITING-HUMAN-TEST | `527529e435a37968863f518e02b20c3619aed690` | none |
 | B1 | 🧪 AWAITING-HUMAN-TEST | `463c3c3c5bdb312859cfcf8ca59938f77a2bee95` | none |
 | B2 | 🧪 AWAITING-HUMAN-TEST | `136cf051039809710bb672eccae1b3e53d2766d6` | none |
+| B3 | 🧪 AWAITING-HUMAN-TEST | `e732d76d2f23d53fa775c1309b27f7d69dda2411` | none |
 
 ---
 
@@ -373,4 +374,19 @@ Optional helpers:
   - tests/mesh/test_birdcage_port_tags.py::test_birdcage_like_mesh_has_core_and_port_tags PASSED
   - tests/mesh/test_birdcage_port_tags.py::test_birdcage_port_layout_rejects_too_small_or_overlapping_port_regions PASSED
   - Output includes `[birdcage-port] area/separation diagnostics:` with finite `port_face_area`, `min_center_separation`, `conductor_clearance`, and `phantom_clearance`
+- Notes/blockers: none
+
+- Chunk: B3 — Phantom placement presets (centered/off-center)
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: e732d76d2f23d53fa775c1309b27f7d69dda2411
+- Files changed:
+  - ROADMAP.md
+  - src/fem_em_solver/io/mesh.py
+  - tests/mesh/test_coil_phantom_mesh.py
+- Manual test command: scripts/testing/run_and_log.sh B3 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/mesh/test_coil_phantom_mesh.py -v'"
+- Expected pass signal:
+  - tests/mesh/test_coil_phantom_mesh.py::test_coil_phantom_mesh_generates_required_tags_centered_preset PASSED
+  - tests/mesh/test_coil_phantom_mesh.py::test_coil_phantom_mesh_off_center_preset_moves_phantom_without_overlap PASSED
+  - tests/mesh/test_coil_phantom_mesh.py::test_coil_phantom_mesh_rejects_overlapping_off_center_placement PASSED
+  - Output has no failures mentioning missing `phantom` tag for centered or off-center presets
 - Notes/blockers: none
