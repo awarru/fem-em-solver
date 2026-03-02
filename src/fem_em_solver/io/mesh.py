@@ -837,10 +837,21 @@ class MeshGenerator:
         phantom_height: float = 0.10,
         air_padding: float = 0.04,
         resolution: float = 0.015,
+        phantom_placement_preset: str = "centered",
+        phantom_offset_xy: Optional[Tuple[float, float]] = None,
         comm: MPI.Intracomm = MPI.COMM_WORLD,
         rank: int = 0,
     ) -> Tuple[dolfinx.mesh.Mesh, dolfinx.mesh.MeshTags, dolfinx.mesh.MeshTags]:
         """Generate a coarse two-coil + cylindrical phantom + air mesh.
+
+        Parameters
+        ----------
+        phantom_placement_preset : str
+            Placement preset for phantom center in the xy-plane.
+            Supported values: ``centered`` and ``off_center``.
+        phantom_offset_xy : tuple[float, float] | None
+            Optional explicit ``(x, y)`` phantom center offset [m]. When provided,
+            this overrides the preset offset.
 
         Cell tags:
         - 1: coil_1
@@ -848,6 +859,32 @@ class MeshGenerator:
         - 3: phantom
         - 4: air
         """
+        allowed_presets = {"centered", "off_center"}
+        if phantom_placement_preset not in allowed_presets:
+            raise ValueError(
+                "phantom_placement_preset must be one of "
+                f"{sorted(allowed_presets)}, got '{phantom_placement_preset}'"
+            )
+
+        if phantom_offset_xy is None:
+            if phantom_placement_preset == "centered":
+                phantom_cx, phantom_cy = 0.0, 0.0
+            else:
+                phantom_cx, phantom_cy = 0.35 * phantom_radius, 0.0
+        else:
+            phantom_cx, phantom_cy = float(phantom_offset_xy[0]), float(phantom_offset_xy[1])
+
+        phantom_offset_radius = np.sqrt(phantom_cx**2 + phantom_cy**2)
+        coil_inner_radius = coil_major_radius - coil_minor_radius
+        radial_clearance = coil_inner_radius - (phantom_offset_radius + phantom_radius)
+        if radial_clearance <= 0.0:
+            raise ValueError(
+                "Phantom overlaps coil conductor envelope for selected placement: "
+                f"offset_radius={phantom_offset_radius:.6e} m, "
+                f"phantom_radius={phantom_radius:.6e} m, "
+                f"available_inner_radius={coil_inner_radius:.6e} m"
+            )
+
         if comm.rank == rank:
             gmsh.initialize()
             gmsh.model.add("coil_phantom_domain")
@@ -856,12 +893,16 @@ class MeshGenerator:
             coil_1 = gmsh.model.occ.addTorus(0, 0, -z_offset, coil_major_radius, coil_minor_radius)
             coil_2 = gmsh.model.occ.addTorus(0, 0, z_offset, coil_major_radius, coil_minor_radius)
             phantom = gmsh.model.occ.addCylinder(
-                0, 0, -phantom_height / 2,
-                0, 0, phantom_height,
+                phantom_cx,
+                phantom_cy,
+                -phantom_height / 2,
+                0,
+                0,
+                phantom_height,
                 phantom_radius,
             )
 
-            radial_extent = max(coil_major_radius + coil_minor_radius, phantom_radius)
+            radial_extent = max(coil_major_radius + coil_minor_radius, phantom_offset_radius + phantom_radius)
             z_extent = max(z_offset + coil_minor_radius, phantom_height / 2)
             air = gmsh.model.occ.addBox(
                 -(radial_extent + air_padding),

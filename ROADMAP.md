@@ -181,7 +181,7 @@ scripts/testing/run_and_log.sh B2 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### B3 — Phantom placement presets (centered/off-center)
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Support realistic loaded scenarios beyond perfect symmetry.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: B3 — Phantom placement presets (centered/off-center).**
+**Next chunk: B4 — Air-box and boundary sizing heuristics.**
 
-Reason: B2 is now implemented and awaiting human verification logs; proceed to placement preset coverage to expand realistic loaded scenarios.
+Reason: B3 now adds centered/off-center phantom presets with overlap guardrails; next step is domain sizing heuristics to reduce boundary artifacts.
