@@ -870,6 +870,12 @@
 <td><code>e732d76d2f23d53fa775c1309b27f7d69dda2411</code></td>
 <td>none</td>
 </tr>
+<tr>
+<td>B4</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>2c52f051e5ec47f60942086a22d6a7c447f043c5</code></td>
+<td>none</td>
+</tr>
 </tbody>
 </table>
 <hr />
@@ -1235,6 +1241,26 @@
 <li>tests/mesh/test_coil_phantom_mesh.py::test_coil_phantom_mesh_off_center_preset_moves_phantom_without_overlap PASSED</li>
 <li>tests/mesh/test_coil_phantom_mesh.py::test_coil_phantom_mesh_rejects_overlapping_off_center_placement PASSED</li>
 <li>Output has no failures mentioning missing <code>phantom</code> tag for centered or off-center presets</li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: B4 — Air-box and boundary sizing heuristics</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 2c52f051e5ec47f60942086a22d6a7c447f043c5</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>src/fem_em_solver/io/mesh.py</li>
+<li>tests/mesh/test_domain_sizing_heuristics.py</li>
+<li>docs/testing/pending-tests.md</li>
+<li>Manual test command: scripts/testing/run_and_log.sh B4 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src python3 -m pytest tests/mesh -v -k domain'"</li>
+<li>Expected pass signal:</li>
+<li>tests/mesh/test_domain_sizing_heuristics.py::test_coil_phantom_domain_sizing_defaults_are_not_undersized PASSED</li>
+<li>tests/mesh/test_domain_sizing_heuristics.py::test_coil_phantom_domain_sizing_detects_small_padding_and_recommends_floor PASSED</li>
+<li>tests/mesh/test_domain_sizing_heuristics.py::test_coil_phantom_domain_sizing_accounts_for_off_center_phantom_extent PASSED</li>
+<li>tests/mesh/test_domain_sizing_heuristics.py::test_coil_phantom_domain_sizing_rejects_negative_air_padding PASSED</li>
+<li>Undersized-domain runs print <code>[coil-phantom-domain] WARNING: requested air_padding is below recommended minimum</code> and include provided/recommended/effective padding values</li>
 <li>Notes/blockers: none</li>
 </ul>
 
