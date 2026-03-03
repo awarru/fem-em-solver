@@ -47,6 +47,7 @@ Optional helpers:
 | B2 | 🧪 AWAITING-HUMAN-TEST | `136cf051039809710bb672eccae1b3e53d2766d6` | none |
 | B3 | 🧪 AWAITING-HUMAN-TEST | `e732d76d2f23d53fa775c1309b27f7d69dda2411` | none |
 | B4 | 🧪 AWAITING-HUMAN-TEST | `2c52f051e5ec47f60942086a22d6a7c447f043c5` | none |
+| B5 | 🧪 AWAITING-HUMAN-TEST | `dcdf6ec83d5ad3a84386f5b3604930f4ca80b88f` | none |
 
 ---
 
@@ -408,4 +409,20 @@ Optional helpers:
   - tests/mesh/test_domain_sizing_heuristics.py::test_coil_phantom_domain_sizing_accounts_for_off_center_phantom_extent PASSED
   - tests/mesh/test_domain_sizing_heuristics.py::test_coil_phantom_domain_sizing_rejects_negative_air_padding PASSED
   - Undersized-domain runs print `[coil-phantom-domain] WARNING: requested air_padding is below recommended minimum` and include provided/recommended/effective padding values
+- Notes/blockers: none
+
+- Chunk: B5 — Region-specific mesh resolution policy
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: dcdf6ec83d5ad3a84386f5b3604930f4ca80b88f
+- Files changed:
+  - ROADMAP.md
+  - src/fem_em_solver/io/mesh.py
+  - tests/mesh/test_mesh_tag_integrity.py
+  - tests/mesh/test_region_resolution_policy.py
+  - docs/testing/pending-tests.md
+- Manual test command: scripts/testing/run_and_log.sh B5 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/mesh/test_mesh_tag_integrity.py -v'"
+- Expected pass signal:
+  - tests/mesh/test_mesh_tag_integrity.py::test_coil_phantom_mesh_tag_integrity PASSED
+  - tests/mesh/test_mesh_tag_integrity.py::test_coil_phantom_mesh_tag_integrity_with_region_resolution_policy PASSED
+  - Output includes [coil-phantom-mesh] region resolution policy: coil=... phantom=... air=...
 - Notes/blockers: none
