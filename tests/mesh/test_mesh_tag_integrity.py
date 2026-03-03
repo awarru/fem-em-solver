@@ -34,3 +34,27 @@ def test_coil_phantom_mesh_tag_integrity():
     # Distinctness checks requested by roadmap chunk B2.
     assert_tags_distinct_by_centroid(mesh, cell_tags, tag_a=1, tag_b=3, comm=comm)
     assert_tags_distinct_by_centroid(mesh, cell_tags, tag_a=2, tag_b=3, comm=comm)
+
+
+def test_coil_phantom_mesh_tag_integrity_with_region_resolution_policy():
+    """Region-specific sizing must keep required tags stable for coarse cron-safe defaults."""
+    comm = MPI.COMM_WORLD
+
+    mesh, cell_tags, _ = MeshGenerator.coil_phantom_domain(
+        coil_major_radius=0.08,
+        coil_minor_radius=0.01,
+        coil_separation=0.08,
+        phantom_radius=0.04,
+        phantom_height=0.10,
+        air_padding=0.04,
+        resolution=0.015,
+        coil_resolution=0.012,
+        phantom_resolution=0.010,
+        air_resolution=0.020,
+        comm=comm,
+    )
+
+    print_cell_tag_summary(cell_tags, tag_names=REQUIRED_COIL_PHANTOM_TAGS, comm=comm, prefix="[mesh-qa] ")
+
+    assert mesh.topology.index_map(3).size_global > 0
+    assert_required_tags_nonempty(cell_tags, REQUIRED_COIL_PHANTOM_TAGS, comm=comm)

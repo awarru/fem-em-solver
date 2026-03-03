@@ -877,6 +877,52 @@ class MeshGenerator:
         }
 
     @staticmethod
+    def coil_phantom_region_resolution_policy(
+        *,
+        resolution: float,
+        coil_resolution: Optional[float] = None,
+        phantom_resolution: Optional[float] = None,
+        air_resolution: Optional[float] = None,
+        region_resolutions: Optional[Dict[str, float]] = None,
+    ) -> Dict[str, float]:
+        """Resolve per-region mesh resolution policy for coil+phantom fixtures.
+
+        Resolution precedence (highest to lowest):
+        1) Explicit keyword args (``coil_resolution``, ``phantom_resolution``, ``air_resolution``)
+        2) ``region_resolutions`` mapping keys: ``coil``, ``phantom``, ``air``
+        3) Global ``resolution`` fallback
+        """
+        if resolution <= 0.0:
+            raise ValueError("resolution must be > 0")
+
+        mapping = region_resolutions or {}
+        allowed_mapping_keys = {"coil", "phantom", "air"}
+        unknown_keys = sorted(set(mapping.keys()) - allowed_mapping_keys)
+        if unknown_keys:
+            raise ValueError(
+                "region_resolutions contains unsupported keys: "
+                f"{unknown_keys}; allowed keys are {sorted(allowed_mapping_keys)}"
+            )
+
+        coil_h = float(coil_resolution if coil_resolution is not None else mapping.get("coil", resolution))
+        phantom_h = float(
+            phantom_resolution if phantom_resolution is not None else mapping.get("phantom", resolution)
+        )
+        air_h = float(air_resolution if air_resolution is not None else mapping.get("air", resolution))
+
+        for name, h in (("coil", coil_h), ("phantom", phantom_h), ("air", air_h)):
+            if h <= 0.0:
+                raise ValueError(f"{name}_resolution must be > 0 (got {h:.6e})")
+
+        return {
+            "coil_resolution_m": coil_h,
+            "phantom_resolution_m": phantom_h,
+            "air_resolution_m": air_h,
+            "min_resolution_m": min(coil_h, phantom_h, air_h),
+            "max_resolution_m": max(coil_h, phantom_h, air_h),
+        }
+
+    @staticmethod
     def coil_phantom_domain(
         coil_major_radius: float = 0.08,
         coil_minor_radius: float = 0.01,
@@ -885,6 +931,10 @@ class MeshGenerator:
         phantom_height: float = 0.10,
         air_padding: float = 0.04,
         resolution: float = 0.015,
+        coil_resolution: Optional[float] = None,
+        phantom_resolution: Optional[float] = None,
+        air_resolution: Optional[float] = None,
+        region_resolutions: Optional[Dict[str, float]] = None,
         phantom_placement_preset: str = "centered",
         phantom_offset_xy: Optional[Tuple[float, float]] = None,
         comm: MPI.Intracomm = MPI.COMM_WORLD,
@@ -894,6 +944,12 @@ class MeshGenerator:
 
         Parameters
         ----------
+        coil_resolution, phantom_resolution, air_resolution : float | None
+            Optional per-region characteristic mesh sizes [m].
+            When omitted, ``resolution`` is used. Smaller values refine locally.
+        region_resolutions : dict[str, float] | None
+            Optional mapping with keys ``coil``, ``phantom``, ``air`` as an
+            alternative to individual keyword arguments.
         phantom_placement_preset : str
             Placement preset for phantom center in the xy-plane.
             Supported values: ``centered`` and ``off_center``.
@@ -951,6 +1007,14 @@ class MeshGenerator:
                 f"recommended_min={sizing['recommended_min_air_padding_m']:.6e} m. "
                 f"Using effective air_padding={effective_air_padding:.6e} m to reduce boundary artifacts."
             )
+
+        region_h = MeshGenerator.coil_phantom_region_resolution_policy(
+            resolution=resolution,
+            coil_resolution=coil_resolution,
+            phantom_resolution=phantom_resolution,
+            air_resolution=air_resolution,
+            region_resolutions=region_resolutions,
+        )
 
         if comm.rank == rank:
             gmsh.initialize()
@@ -1025,7 +1089,39 @@ class MeshGenerator:
                 gmsh.model.addPhysicalGroup(2, outer_boundary_surfaces, tag=1)
                 gmsh.model.setPhysicalName(2, 1, "outer_boundary")
 
-            gmsh.model.mesh.setSize(gmsh.model.getEntities(0), resolution)
+            def _collect_volume_point_tags(volume_tag: int) -> set[int]:
+                surfaces = gmsh.model.getBoundary([(3, volume_tag)], oriented=False, recursive=False)
+                curves = gmsh.model.getBoundary(surfaces, oriented=False, recursive=False)
+                points = gmsh.model.getBoundary(curves, oriented=False, recursive=False)
+                return {entity_tag for dim, entity_tag in points if dim == 0}
+
+            point_size_targets: Dict[int, float] = {}
+
+            def _assign_size(points: set[int], size_value: float) -> None:
+                for point_tag in points:
+                    if point_tag in point_size_targets:
+                        point_size_targets[point_tag] = min(point_size_targets[point_tag], size_value)
+                    else:
+                        point_size_targets[point_tag] = size_value
+
+            _assign_size(_collect_volume_point_tags(air_tag), region_h["air_resolution_m"])
+            _assign_size(_collect_volume_point_tags(coil_1_tag), region_h["coil_resolution_m"])
+            _assign_size(_collect_volume_point_tags(coil_2_tag), region_h["coil_resolution_m"])
+            _assign_size(_collect_volume_point_tags(phantom_tag), region_h["phantom_resolution_m"])
+
+            for point_tag, size_value in point_size_targets.items():
+                gmsh.model.mesh.setSize([(0, point_tag)], size_value)
+
+            gmsh.option.setNumber("Mesh.CharacteristicLengthMin", region_h["min_resolution_m"])
+            gmsh.option.setNumber("Mesh.CharacteristicLengthMax", region_h["max_resolution_m"])
+
+            print(
+                "[coil-phantom-mesh] region resolution policy: "
+                f"coil={region_h['coil_resolution_m']:.6e} m, "
+                f"phantom={region_h['phantom_resolution_m']:.6e} m, "
+                f"air={region_h['air_resolution_m']:.6e} m"
+            )
+
             gmsh.model.mesh.generate(3)
             gmsh.model.mesh.optimize("Netgen")
 

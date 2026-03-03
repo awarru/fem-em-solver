@@ -217,7 +217,7 @@ scripts/testing/run_and_log.sh B4 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### B5 — Region-specific mesh resolution policy
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Balance speed and fidelity by region (coil/phantom/air).
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: B5 — Region-specific mesh resolution policy.**
+**Next chunk: B6 — Geometry sanity report utility.**
 
-Reason: B4 introduced air-box sizing heuristics and undersized-domain warnings; next step is per-region mesh sizing so coil/phantom/air fidelity can be tuned without bloating routine runs.
+Reason: B5 introduced region-specific mesh sizing controls; next step is a compact geometry/tag quality report so humans can quickly validate setup quality before heavier solves.
