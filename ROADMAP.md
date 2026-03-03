@@ -199,7 +199,7 @@ scripts/testing/run_and_log.sh B3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### B4 — Air-box and boundary sizing heuristics
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Avoid boundary artifacts from too-tight domains.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: B4 — Air-box and boundary sizing heuristics.**
+**Next chunk: B5 — Region-specific mesh resolution policy.**
 
-Reason: B3 now adds centered/off-center phantom presets with overlap guardrails; next step is domain sizing heuristics to reduce boundary artifacts.
+Reason: B4 introduced air-box sizing heuristics and undersized-domain warnings; next step is per-region mesh sizing so coil/phantom/air fidelity can be tuned without bloating routine runs.

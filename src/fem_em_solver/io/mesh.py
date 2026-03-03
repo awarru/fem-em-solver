@@ -829,6 +829,54 @@ class MeshGenerator:
         return mesh, cell_tags, facet_tags
 
     @staticmethod
+    def coil_phantom_domain_sizing_diagnostics(
+        *,
+        coil_major_radius: float,
+        coil_minor_radius: float,
+        coil_separation: float,
+        phantom_radius: float,
+        phantom_height: float,
+        air_padding: float,
+        phantom_offset_xy: Tuple[float, float] = (0.0, 0.0),
+        min_air_padding_ratio: float = 0.35,
+    ) -> Dict[str, float | bool]:
+        """Compute air-box sizing diagnostics for the coil+phantom fixture.
+
+        The returned values are lightweight geometry heuristics (no meshing).
+        They are used to flag undersized domains that can amplify boundary artifacts.
+        """
+        if min_air_padding_ratio <= 0.0:
+            raise ValueError("min_air_padding_ratio must be > 0")
+        if air_padding < 0.0:
+            raise ValueError("air_padding must be >= 0")
+
+        phantom_cx, phantom_cy = float(phantom_offset_xy[0]), float(phantom_offset_xy[1])
+        phantom_offset_radius = np.sqrt(phantom_cx**2 + phantom_cy**2)
+
+        radial_extent_without_padding = max(
+            coil_major_radius + coil_minor_radius,
+            phantom_offset_radius + phantom_radius,
+        )
+        z_offset = coil_separation / 2.0
+        z_extent_without_padding = max(z_offset + coil_minor_radius, phantom_height / 2.0)
+
+        reference_extent = max(radial_extent_without_padding, z_extent_without_padding)
+        recommended_min_padding = min_air_padding_ratio * reference_extent
+        effective_air_padding = max(air_padding, recommended_min_padding)
+
+        return {
+            "radial_extent_without_padding_m": float(radial_extent_without_padding),
+            "z_extent_without_padding_m": float(z_extent_without_padding),
+            "reference_extent_m": float(reference_extent),
+            "provided_air_padding_m": float(air_padding),
+            "recommended_min_air_padding_m": float(recommended_min_padding),
+            "effective_air_padding_m": float(effective_air_padding),
+            "is_domain_undersized": bool(air_padding < recommended_min_padding),
+            "recommended_domain_half_width_m": float(radial_extent_without_padding + recommended_min_padding),
+            "recommended_domain_half_height_m": float(z_extent_without_padding + recommended_min_padding),
+        }
+
+    @staticmethod
     def coil_phantom_domain(
         coil_major_radius: float = 0.08,
         coil_minor_radius: float = 0.01,
@@ -885,6 +933,25 @@ class MeshGenerator:
                 f"available_inner_radius={coil_inner_radius:.6e} m"
             )
 
+        sizing = MeshGenerator.coil_phantom_domain_sizing_diagnostics(
+            coil_major_radius=coil_major_radius,
+            coil_minor_radius=coil_minor_radius,
+            coil_separation=coil_separation,
+            phantom_radius=phantom_radius,
+            phantom_height=phantom_height,
+            air_padding=air_padding,
+            phantom_offset_xy=(phantom_cx, phantom_cy),
+        )
+        effective_air_padding = sizing["effective_air_padding_m"]
+
+        if comm.rank == rank and sizing["is_domain_undersized"]:
+            print(
+                "[coil-phantom-domain] WARNING: requested air_padding is below recommended minimum; "
+                f"provided={sizing['provided_air_padding_m']:.6e} m, "
+                f"recommended_min={sizing['recommended_min_air_padding_m']:.6e} m. "
+                f"Using effective air_padding={effective_air_padding:.6e} m to reduce boundary artifacts."
+            )
+
         if comm.rank == rank:
             gmsh.initialize()
             gmsh.model.add("coil_phantom_domain")
@@ -902,15 +969,15 @@ class MeshGenerator:
                 phantom_radius,
             )
 
-            radial_extent = max(coil_major_radius + coil_minor_radius, phantom_offset_radius + phantom_radius)
-            z_extent = max(z_offset + coil_minor_radius, phantom_height / 2)
+            radial_extent = sizing["radial_extent_without_padding_m"]
+            z_extent = sizing["z_extent_without_padding_m"]
             air = gmsh.model.occ.addBox(
-                -(radial_extent + air_padding),
-                -(radial_extent + air_padding),
-                -(z_extent + air_padding),
-                2 * (radial_extent + air_padding),
-                2 * (radial_extent + air_padding),
-                2 * (z_extent + air_padding),
+                -(radial_extent + effective_air_padding),
+                -(radial_extent + effective_air_padding),
+                -(z_extent + effective_air_padding),
+                2 * (radial_extent + effective_air_padding),
+                2 * (radial_extent + effective_air_padding),
+                2 * (z_extent + effective_air_padding),
             )
 
             gmsh.model.occ.fragment(
@@ -943,8 +1010,8 @@ class MeshGenerator:
             gmsh.model.setPhysicalName(3, 4, "air")
 
             outer_boundary_surfaces = []
-            box_half_x = radial_extent + air_padding
-            box_half_z = z_extent + air_padding
+            box_half_x = radial_extent + effective_air_padding
+            box_half_z = z_extent + effective_air_padding
             for dim, surf in gmsh.model.getEntities(dim=2):
                 x_min, y_min, z_min, x_max, y_max, z_max = gmsh.model.getBoundingBox(dim, surf)
                 if (
