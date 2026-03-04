@@ -48,6 +48,7 @@ Optional helpers:
 | B3 | 🧪 AWAITING-HUMAN-TEST | `e732d76d2f23d53fa775c1309b27f7d69dda2411` | none |
 | B4 | 🧪 AWAITING-HUMAN-TEST | `2c52f051e5ec47f60942086a22d6a7c447f043c5` | none |
 | B5 | 🧪 AWAITING-HUMAN-TEST | `dcdf6ec83d5ad3a84386f5b3604930f4ca80b88f` | none |
+| B6 | 🧪 AWAITING-HUMAN-TEST | `44f8ed8c8f5c65c6fc3c0adca0c5da22ab0d3ce7` | none |
 
 ---
 
@@ -425,4 +426,19 @@ Optional helpers:
   - tests/mesh/test_mesh_tag_integrity.py::test_coil_phantom_mesh_tag_integrity PASSED
   - tests/mesh/test_mesh_tag_integrity.py::test_coil_phantom_mesh_tag_integrity_with_region_resolution_policy PASSED
   - Output includes [coil-phantom-mesh] region resolution policy: coil=... phantom=... air=...
+- Notes/blockers: none
+
+- Chunk: B6 — Geometry sanity report utility
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 44f8ed8c8f5c65c6fc3c0adca0c5da22ab0d3ce7
+- Files changed:
+  - ROADMAP.md
+  - src/fem_em_solver/io/mesh.py
+  - tests/mesh/test_geometry_sanity_report.py
+  - docs/testing/pending-tests.md
+- Manual test command: scripts/testing/run_and_log.sh B6 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src python3 -m pytest tests/mesh -v -k sanity'"
+- Expected pass signal:
+  - tests/mesh/test_geometry_sanity_report.py::test_coil_phantom_geometry_sanity_report_includes_expected_sections PASSED
+  - tests/mesh/test_geometry_sanity_report.py::test_coil_phantom_geometry_sanity_report_warns_for_missing_required_tag PASSED
+  - Output includes `[coil-phantom-sanity] geometry sanity report:` with required tag counts, expected/observed ratio lines, and `warnings: none` for nominal setup
 - Notes/blockers: none

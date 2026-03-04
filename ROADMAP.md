@@ -235,7 +235,7 @@ scripts/testing/run_and_log.sh B5 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### B6 — Geometry sanity report utility
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Generate one compact report of geometry/tag quality.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: B6 — Geometry sanity report utility.**
+**Next chunk: C1 — Time-harmonic API hardening.**
 
-Reason: B5 introduced region-specific mesh sizing controls; next step is a compact geometry/tag quality report so humans can quickly validate setup quality before heavier solves.
+Reason: B6 now adds compact geometry/tag sanity diagnostics. Next, harden frequency-domain API validation and error messaging before expanding material/BC complexity.

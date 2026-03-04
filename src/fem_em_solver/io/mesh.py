@@ -877,6 +877,152 @@ class MeshGenerator:
         }
 
     @staticmethod
+    def coil_phantom_geometry_sanity_report(
+        *,
+        cell_tags: dolfinx.mesh.MeshTags,
+        coil_major_radius: float,
+        coil_minor_radius: float,
+        coil_separation: float,
+        phantom_radius: float,
+        phantom_height: float,
+        air_padding: float,
+        phantom_offset_xy: Tuple[float, float] = (0.0, 0.0),
+        comm: MPI.Intracomm = MPI.COMM_WORLD,
+    ) -> Dict[str, object]:
+        """Build a compact geometry/tag sanity report for the coil+phantom fixture.
+
+        The report combines:
+        - required tag counts (global)
+        - expected analytic region-volume ratios (coil/phantom/air)
+        - observed tag cell-count ratios
+        - lightweight warnings for obviously suspicious setups
+        """
+        required_tags = {
+            1: "coil_1",
+            2: "coil_2",
+            3: "phantom",
+            4: "air",
+        }
+
+        counts = {}
+        for tag in required_tags:
+            local = int(np.count_nonzero(cell_tags.values == tag))
+            counts[tag] = int(comm.allreduce(local, op=MPI.SUM))
+
+        total_cells = int(sum(counts.values()))
+        observed_cell_ratios = {
+            tag: (counts[tag] / total_cells if total_cells > 0 else 0.0)
+            for tag in required_tags
+        }
+
+        sizing = MeshGenerator.coil_phantom_domain_sizing_diagnostics(
+            coil_major_radius=coil_major_radius,
+            coil_minor_radius=coil_minor_radius,
+            coil_separation=coil_separation,
+            phantom_radius=phantom_radius,
+            phantom_height=phantom_height,
+            air_padding=air_padding,
+            phantom_offset_xy=phantom_offset_xy,
+        )
+
+        effective_air_padding = sizing["effective_air_padding_m"]
+        radial_extent = sizing["radial_extent_without_padding_m"]
+        z_extent = sizing["z_extent_without_padding_m"]
+
+        box_volume = (
+            (2.0 * (radial_extent + effective_air_padding))
+            * (2.0 * (radial_extent + effective_air_padding))
+            * (2.0 * (z_extent + effective_air_padding))
+        )
+        coil_single_volume = 2.0 * np.pi**2 * coil_major_radius * (coil_minor_radius**2)
+        phantom_volume = np.pi * (phantom_radius**2) * phantom_height
+        occupied_volume = 2.0 * coil_single_volume + phantom_volume
+        air_volume = max(0.0, box_volume - occupied_volume)
+
+        expected_volumes = {
+            1: float(coil_single_volume),
+            2: float(coil_single_volume),
+            3: float(phantom_volume),
+            4: float(air_volume),
+        }
+        expected_total_volume = float(sum(expected_volumes.values()))
+        expected_volume_ratios = {
+            tag: (expected_volumes[tag] / expected_total_volume if expected_total_volume > 0.0 else 0.0)
+            for tag in required_tags
+        }
+
+        warnings: List[str] = []
+        missing = [required_tags[tag] for tag, count in counts.items() if count <= 0]
+        if missing:
+            warnings.append(f"missing required tags: {', '.join(missing)}")
+
+        if sizing["is_domain_undersized"]:
+            warnings.append(
+                "air padding below recommended minimum "
+                f"({sizing['provided_air_padding_m']:.6e} < {sizing['recommended_min_air_padding_m']:.6e} m)"
+            )
+
+        for tag, name in required_tags.items():
+            expected_ratio = expected_volume_ratios[tag]
+            observed_ratio = observed_cell_ratios[tag]
+            if expected_ratio > 0.0 and observed_ratio > 0.0:
+                mismatch = max(observed_ratio / expected_ratio, expected_ratio / observed_ratio)
+                if mismatch > 5.0:
+                    warnings.append(
+                        f"{name} observed/expected ratio mismatch is large "
+                        f"(observed={observed_ratio:.3f}, expected={expected_ratio:.3f})"
+                    )
+
+        return {
+            "required_tag_counts": {
+                required_tags[tag]: counts[tag] for tag in required_tags
+            },
+            "expected_volume_ratios": {
+                required_tags[tag]: expected_volume_ratios[tag] for tag in required_tags
+            },
+            "observed_cell_ratios": {
+                required_tags[tag]: observed_cell_ratios[tag] for tag in required_tags
+            },
+            "effective_air_padding_m": float(effective_air_padding),
+            "warnings": warnings,
+            "ok": len(warnings) == 0,
+        }
+
+    @staticmethod
+    def print_coil_phantom_geometry_sanity_report(
+        *,
+        report: Dict[str, object],
+        prefix: str = "[coil-phantom-sanity] ",
+        comm: MPI.Intracomm = MPI.COMM_WORLD,
+    ) -> None:
+        """Print a deterministic, compact sanity report on rank 0."""
+        if comm.rank != 0:
+            return
+
+        print(f"{prefix}geometry sanity report:")
+
+        counts = report["required_tag_counts"]
+        print(f"{prefix}required tag counts:")
+        for name in ("coil_1", "coil_2", "phantom", "air"):
+            print(f"{prefix}  {name}: {counts[name]}")
+
+        expected = report["expected_volume_ratios"]
+        observed = report["observed_cell_ratios"]
+        print(f"{prefix}volume ratio check (expected_volume_ratio vs observed_cell_ratio):")
+        for name in ("coil_1", "coil_2", "phantom", "air"):
+            print(f"{prefix}  {name}: expected={expected[name]:.6f}, observed={observed[name]:.6f}")
+
+        print(f"{prefix}effective air padding: {report['effective_air_padding_m']:.6e} m")
+
+        warnings = report["warnings"]
+        if warnings:
+            print(f"{prefix}warnings:")
+            for warning in warnings:
+                print(f"{prefix}  - {warning}")
+        else:
+            print(f"{prefix}warnings: none")
+
+    @staticmethod
     def coil_phantom_region_resolution_policy(
         *,
         resolution: float,
@@ -1128,6 +1274,19 @@ class MeshGenerator:
         mesh, cell_tags, facet_tags = gmshio.model_to_mesh(
             gmsh.model, comm, rank, gdim=3
         )
+
+        sanity_report = MeshGenerator.coil_phantom_geometry_sanity_report(
+            cell_tags=cell_tags,
+            coil_major_radius=coil_major_radius,
+            coil_minor_radius=coil_minor_radius,
+            coil_separation=coil_separation,
+            phantom_radius=phantom_radius,
+            phantom_height=phantom_height,
+            air_padding=air_padding,
+            phantom_offset_xy=(phantom_cx, phantom_cy),
+            comm=comm,
+        )
+        MeshGenerator.print_coil_phantom_geometry_sanity_report(report=sanity_report, comm=comm)
 
         if comm.rank == rank:
             gmsh.finalize()
