@@ -442,3 +442,19 @@ Optional helpers:
   - tests/mesh/test_geometry_sanity_report.py::test_coil_phantom_geometry_sanity_report_warns_for_missing_required_tag PASSED
   - Output includes `[coil-phantom-sanity] geometry sanity report:` with required tag counts, expected/observed ratio lines, and `warnings: none` for nominal setup
 - Notes/blockers: none
+
+- Chunk: C1 — Time-harmonic API hardening
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 7cf2bf3f20d4a3e22cad55095e0ab18b0d3ddbd0
+- Files changed:
+  - ROADMAP.md
+  - src/fem_em_solver/core/time_harmonic.py
+  - tests/solver/test_time_harmonic_smoke.py
+- Manual test command: scripts/testing/run_and_log.sh C1 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver/test_time_harmonic_smoke.py -v'"
+- Expected pass signal:
+  - tests/solver/test_time_harmonic_smoke.py::test_time_harmonic_smoke_returns_finite_e_field_values PASSED
+  - tests/solver/test_time_harmonic_smoke.py::test_time_harmonic_solver_rejects_non_hz_frequency_unit_before_solve PASSED
+  - tests/solver/test_time_harmonic_smoke.py::test_time_harmonic_solver_rejects_material_map_without_cell_tags_before_solve PASSED
+  - tests/solver/test_time_harmonic_smoke.py::test_time_harmonic_solver_rejects_unknown_material_map_tag_before_solve PASSED
+  - Error diagnostics include `TimeHarmonicProblem.frequency_unit must be 'Hz'` and `material_map references tags that do not exist in problem.cell_tags`
+- Notes/blockers: none
