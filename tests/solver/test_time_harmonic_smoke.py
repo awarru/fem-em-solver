@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 import ufl
 from mpi4py import MPI
 from dolfinx import fem
@@ -86,3 +87,77 @@ def test_time_harmonic_smoke_returns_finite_e_field_values():
     assert max_mag > E_FIELD_MAX_NONTRIVIAL_ABS_MIN, (
         f"Expected nontrivial E-field, got max |E|={max_mag:.3e}"
     )
+
+
+def test_time_harmonic_solver_rejects_non_hz_frequency_unit_before_solve():
+    """API should fail fast when users pass non-Hz units to avoid silent mistakes."""
+    comm = MPI.COMM_WORLD
+
+    mesh, _, _ = MeshGenerator.cylindrical_domain(
+        inner_radius=0.01,
+        outer_radius=0.08,
+        length=0.12,
+        resolution=0.03,
+        comm=comm,
+    )
+
+    problem = TimeHarmonicProblem(
+        mesh=mesh,
+        frequency_hz=127.74e6,
+        frequency_unit="rad/s",
+        material=HomogeneousMaterial(sigma=0.7, epsilon_r=78.0, mu_r=1.0),
+    )
+    solver = TimeHarmonicSolver(problem, degree=1)
+
+    with pytest.raises(ValueError, match="frequency_unit"):
+        solver.solve()
+
+
+def test_time_harmonic_solver_rejects_material_map_without_cell_tags_before_solve():
+    """Material-map API should explain that cell tags are required for tag assignments."""
+    comm = MPI.COMM_WORLD
+
+    mesh, _, _ = MeshGenerator.cylindrical_domain(
+        inner_radius=0.01,
+        outer_radius=0.08,
+        length=0.12,
+        resolution=0.03,
+        comm=comm,
+    )
+
+    problem = TimeHarmonicProblem(
+        mesh=mesh,
+        frequency_hz=127.74e6,
+        material=HomogeneousMaterial(sigma=0.7, epsilon_r=78.0, mu_r=1.0),
+        material_map={3: HomogeneousMaterial(sigma=1.2, epsilon_r=68.0, mu_r=1.0)},
+    )
+    solver = TimeHarmonicSolver(problem, degree=1)
+
+    with pytest.raises(ValueError, match="material_map requires problem.cell_tags"):
+        solver.solve()
+
+
+def test_time_harmonic_solver_rejects_unknown_material_map_tag_before_solve():
+    """Material-map API should report unknown tags with known-tag diagnostics."""
+    comm = MPI.COMM_WORLD
+
+    mesh, cell_tags, facet_tags = MeshGenerator.cylindrical_domain(
+        inner_radius=0.01,
+        outer_radius=0.08,
+        length=0.12,
+        resolution=0.03,
+        comm=comm,
+    )
+
+    problem = TimeHarmonicProblem(
+        mesh=mesh,
+        frequency_hz=127.74e6,
+        material=HomogeneousMaterial(sigma=0.7, epsilon_r=78.0, mu_r=1.0),
+        material_map={999: HomogeneousMaterial(sigma=1.2, epsilon_r=68.0, mu_r=1.0)},
+        cell_tags=cell_tags,
+        facet_tags=facet_tags,
+    )
+    solver = TimeHarmonicSolver(problem, degree=1)
+
+    with pytest.raises(ValueError, match="material_map references tags"):
+        solver.solve()

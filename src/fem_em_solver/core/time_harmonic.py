@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable, Optional, Sequence
+from typing import Callable, Mapping, Optional, Sequence
 
 import numpy as np
 import dolfinx
@@ -22,6 +22,19 @@ class HomogeneousMaterial:
     epsilon_r: float
     mu_r: float = 1.0
 
+    def validate(self, *, context: str = "material") -> None:
+        """Validate scalar material properties and raise actionable errors."""
+        if not np.isfinite(self.sigma) or self.sigma < 0:
+            raise ValueError(f"{context}.sigma must be finite and non-negative (S/m), got {self.sigma!r}")
+        if not np.isfinite(self.epsilon_r) or self.epsilon_r <= 0:
+            raise ValueError(
+                f"{context}.epsilon_r must be finite and positive (relative permittivity), got {self.epsilon_r!r}"
+            )
+        if not np.isfinite(self.mu_r) or self.mu_r <= 0:
+            raise ValueError(
+                f"{context}.mu_r must be finite and positive (relative permeability), got {self.mu_r!r}"
+            )
+
 
 @dataclass(frozen=True)
 class TimeHarmonicProblem:
@@ -30,6 +43,8 @@ class TimeHarmonicProblem:
     mesh: dolfinx.mesh.Mesh
     frequency_hz: float
     material: HomogeneousMaterial
+    frequency_unit: str = "Hz"
+    material_map: Optional[Mapping[int, HomogeneousMaterial]] = None
     cell_tags: Optional[dolfinx.mesh.MeshTags] = None
     facet_tags: Optional[dolfinx.mesh.MeshTags] = None
     phantom_material: Optional[GelledSalinePhantomMaterial] = None
@@ -56,6 +71,7 @@ def build_material_fields(
     default_material: HomogeneousMaterial,
     *,
     cell_tags: Optional[dolfinx.mesh.MeshTags] = None,
+    material_map: Optional[Mapping[int, HomogeneousMaterial]] = None,
     phantom_material: Optional[GelledSalinePhantomMaterial] = None,
     phantom_tag: int = 3,
 ) -> tuple[fem.Function, fem.Function]:
@@ -77,10 +93,37 @@ def build_material_fields(
     sigma_values[:] = float(default_material.sigma)
     epsilon_values[:] = float(default_material.epsilon_r)
 
+    if material_map:
+        if cell_tags is None:
+            raise ValueError(
+                "material_map requires problem.cell_tags so each requested tag can be assigned a material"
+            )
+
+        known_tags = {int(tag) for tag in np.asarray(cell_tags.values)}
+        missing_tags = sorted(int(tag) for tag in material_map if int(tag) not in known_tags)
+        if missing_tags:
+            raise ValueError(
+                "material_map references tags that do not exist in problem.cell_tags: "
+                f"{missing_tags}. Known tags: {sorted(known_tags)}"
+            )
+
+        for tag, tagged_material in material_map.items():
+            tagged_material.validate(context=f"material_map[{int(tag)}]")
+            tag_cells = cell_tags.indices[cell_tags.values == int(tag)]
+            for cell in tag_cells:
+                dofs = q0.dofmap.cell_dofs(int(cell))
+                sigma_values[dofs] = float(tagged_material.sigma)
+                epsilon_values[dofs] = float(tagged_material.epsilon_r)
+
     if phantom_material is not None:
         phantom_material.validate()
         if cell_tags is None:
             raise ValueError("phantom_material requires problem.cell_tags to assign phantom-tagged cells")
+
+        if material_map and int(phantom_tag) in {int(tag) for tag in material_map}:
+            raise ValueError(
+                f"phantom_tag={phantom_tag} is assigned in both material_map and phantom_material; choose one assignment path"
+            )
 
         phantom_cells = cell_tags.indices[cell_tags.values == int(phantom_tag)]
         if phantom_cells.size == 0:
@@ -126,14 +169,20 @@ class TimeHarmonicSolver:
     ) -> TimeHarmonicFields:
         """Run a minimal frequency-domain solve and return E-field phasor parts."""
         material = self.problem.material
-        if self.problem.frequency_hz <= 0:
-            raise ValueError("frequency_hz must be positive")
-        if material.sigma < 0:
-            raise ValueError("material.sigma must be non-negative")
-        if material.epsilon_r <= 0:
-            raise ValueError("material.epsilon_r must be positive")
-        if material.mu_r <= 0:
-            raise ValueError("material.mu_r must be positive")
+        if not np.isfinite(self.problem.frequency_hz) or self.problem.frequency_hz <= 0:
+            raise ValueError(f"frequency_hz must be finite and positive (Hz), got {self.problem.frequency_hz!r}")
+        if self.problem.frequency_unit.strip().lower() != "hz":
+            raise ValueError(
+                "TimeHarmonicProblem.frequency_unit must be 'Hz'. "
+                f"Received {self.problem.frequency_unit!r}; convert to Hz before solving."
+            )
+        if self.problem.frequency_hz > 1e12:
+            raise ValueError(
+                f"frequency_hz={self.problem.frequency_hz:.6e} is unexpectedly high for this solver API. "
+                "If you passed angular frequency, convert using f = omega / (2*pi)."
+            )
+
+        material.validate(context="material")
 
         if self.problem.phantom_material is not None:
             if abs(self.problem.phantom_material.frequency_hz - self.problem.frequency_hz) > 1e-9:
@@ -145,6 +194,7 @@ class TimeHarmonicSolver:
             self.mesh,
             material,
             cell_tags=self.problem.cell_tags,
+            material_map=self.problem.material_map,
             phantom_material=self.problem.phantom_material,
             phantom_tag=self.problem.phantom_tag,
         )

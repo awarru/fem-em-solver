@@ -255,7 +255,7 @@ scripts/testing/run_and_log.sh B6 "docker compose exec fem-em-solver bash -lc 'c
 ## Track C — Frequency-Domain EM Solve Quality
 
 ### C1 — Time-harmonic API hardening
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Clarify and enforce assumptions in the frequency-domain solver API.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: C1 — Time-harmonic API hardening.**
+**Next chunk: C2 — Phantom material model expansion.**
 
-Reason: B6 now adds compact geometry/tag sanity diagnostics. Next, harden frequency-domain API validation and error messaging before expanding material/BC complexity.
+Reason: C1 now hardens time-harmonic API validation (frequency units/range + material-map assignment diagnostics). Next, expand practical gelled saline presets and frequency-dependent hooks.
