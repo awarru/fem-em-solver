@@ -1310,6 +1310,25 @@
 <li>tests/mesh/test_geometry_sanity_report.py::test_coil_phantom_geometry_sanity_report_includes_expected_sections PASSED</li>
 <li>tests/mesh/test_geometry_sanity_report.py::test_coil_phantom_geometry_sanity_report_warns_for_missing_required_tag PASSED</li>
 <li>Output includes <code>[coil-phantom-sanity] geometry sanity report:</code> with required tag counts, expected/observed ratio lines, and <code>warnings: none</code> for nominal setup</li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: C1 — Time-harmonic API hardening</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 7cf2bf3f20d4a3e22cad55095e0ab18b0d3ddbd0</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>src/fem_em_solver/core/time_harmonic.py</li>
+<li>tests/solver/test_time_harmonic_smoke.py</li>
+<li>Manual test command: scripts/testing/run_and_log.sh C1 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver/test_time_harmonic_smoke.py -v'"</li>
+<li>Expected pass signal:</li>
+<li>tests/solver/test_time_harmonic_smoke.py::test_time_harmonic_smoke_returns_finite_e_field_values PASSED</li>
+<li>tests/solver/test_time_harmonic_smoke.py::test_time_harmonic_solver_rejects_non_hz_frequency_unit_before_solve PASSED</li>
+<li>tests/solver/test_time_harmonic_smoke.py::test_time_harmonic_solver_rejects_material_map_without_cell_tags_before_solve PASSED</li>
+<li>tests/solver/test_time_harmonic_smoke.py::test_time_harmonic_solver_rejects_unknown_material_map_tag_before_solve PASSED</li>
+<li>Error diagnostics include <code>TimeHarmonicProblem.frequency_unit must be 'Hz'</code> and <code>material_map references tags that do not exist in problem.cell_tags</code></li>
 <li>Notes/blockers: none</li>
 </ul>
 
