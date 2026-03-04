@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -882,6 +882,12 @@
 <td><code>dcdf6ec83d5ad3a84386f5b3604930f4ca80b88f</code></td>
 <td>none</td>
 </tr>
+<tr>
+<td>B6</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>f1031362f6eb4ccf10f599fddf7fa4fdbf03dbda</code></td>
+<td>none</td>
+</tr>
 </tbody>
 </table>
 <hr />
@@ -1286,6 +1292,24 @@
 <li>tests/mesh/test_mesh_tag_integrity.py::test_coil_phantom_mesh_tag_integrity PASSED</li>
 <li>tests/mesh/test_mesh_tag_integrity.py::test_coil_phantom_mesh_tag_integrity_with_region_resolution_policy PASSED</li>
 <li>Output includes [coil-phantom-mesh] region resolution policy: coil=... phantom=... air=...</li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: B6 — Geometry sanity report utility</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: f1031362f6eb4ccf10f599fddf7fa4fdbf03dbda</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>src/fem_em_solver/io/mesh.py</li>
+<li>tests/mesh/test_geometry_sanity_report.py</li>
+<li>docs/testing/pending-tests.md</li>
+<li>Manual test command: scripts/testing/run_and_log.sh B6 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src python3 -m pytest tests/mesh -v -k sanity'"</li>
+<li>Expected pass signal:</li>
+<li>tests/mesh/test_geometry_sanity_report.py::test_coil_phantom_geometry_sanity_report_includes_expected_sections PASSED</li>
+<li>tests/mesh/test_geometry_sanity_report.py::test_coil_phantom_geometry_sanity_report_warns_for_missing_required_tag PASSED</li>
+<li>Output includes <code>[coil-phantom-sanity] geometry sanity report:</code> with required tag counts, expected/observed ratio lines, and <code>warnings: none</code> for nominal setup</li>
 <li>Notes/blockers: none</li>
 </ul>
 
