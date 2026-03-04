@@ -48,7 +48,7 @@ Optional helpers:
 | B3 | 🧪 AWAITING-HUMAN-TEST | `e732d76d2f23d53fa775c1309b27f7d69dda2411` | none |
 | B4 | 🧪 AWAITING-HUMAN-TEST | `2c52f051e5ec47f60942086a22d6a7c447f043c5` | none |
 | B5 | 🧪 AWAITING-HUMAN-TEST | `dcdf6ec83d5ad3a84386f5b3604930f4ca80b88f` | none |
-| B6 | 🧪 AWAITING-HUMAN-TEST | `44f8ed8c8f5c65c6fc3c0adca0c5da22ab0d3ce7` | none |
+| B6 | 🧪 AWAITING-HUMAN-TEST | `f1031362f6eb4ccf10f599fddf7fa4fdbf03dbda` | none |
 
 ---
 
@@ -430,7 +430,7 @@ Optional helpers:
 
 - Chunk: B6 — Geometry sanity report utility
 - Status: 🧪 AWAITING-HUMAN-TEST
-- Commit: 44f8ed8c8f5c65c6fc3c0adca0c5da22ab0d3ce7
+- Commit: f1031362f6eb4ccf10f599fddf7fa4fdbf03dbda
 - Files changed:
   - ROADMAP.md
   - src/fem_em_solver/io/mesh.py
