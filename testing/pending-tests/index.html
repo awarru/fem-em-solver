@@ -823,6 +823,12 @@
 <td>none</td>
 </tr>
 <tr>
+<td>C3</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>27bec75802a867ab72569a9474ef344149daadce</code></td>
+<td>none</td>
+</tr>
+<tr>
 <td>A1</td>
 <td>🧪 AWAITING-HUMAN-TEST</td>
 <td><code>79e5cb22abfb2ed757cd30937d6a4d97e5363b29</code></td>
@@ -1348,6 +1354,28 @@
 <li>tests/materials/test_phantom_material_model.py::test_gelled_saline_material_container_frequency_term_is_finite PASSED</li>
 <li>tests/materials/test_phantom_material_model.py::test_phantom_material_assignment_and_time_harmonic_pipeline_wiring PASSED</li>
 <li>Output contains no ValueError related to unknown preset, invalid adjusted frequency, or non-finite derived phantom terms</li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: C3 — Boundary-condition option set</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 27bec75802a867ab72569a9474ef344149daadce</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>docs/testing/pending-tests.md</li>
+<li>src/fem_em_solver/<strong>init</strong>.py</li>
+<li>src/fem_em_solver/core/<strong>init</strong>.py</li>
+<li>src/fem_em_solver/core/time_harmonic.py</li>
+<li>tests/solver/test_boundary_condition_selection.py</li>
+<li>Manual test command: scripts/testing/run_and_log.sh C3 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver -v -k boundary'"</li>
+<li>Expected pass signal:</li>
+<li>tests/solver/test_boundary_condition_selection.py::test_normalize_boundary_condition_accepts_enum_and_string_values PASSED</li>
+<li>tests/solver/test_boundary_condition_selection.py::test_normalize_boundary_condition_rejects_unknown_value PASSED</li>
+<li>tests/solver/test_boundary_condition_selection.py::test_time_harmonic_solver_boundary_natural_selects_empty_dirichlet_set PASSED</li>
+<li>tests/solver/test_boundary_condition_selection.py::test_time_harmonic_solver_boundary_pec_is_applied_to_solve_path PASSED</li>
+<li>Output contains no ValueError except expected invalid-mode check and no failures about unsupported boundary_condition values</li>
 <li>Notes/blockers: none</li>
 </ul>
 
