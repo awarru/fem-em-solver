@@ -1,4 +1,4 @@
-"""Tests for gelled saline phantom material integration (chunk D2)."""
+"""Tests for gelled saline phantom material integration (chunk C2)."""
 
 from __future__ import annotations
 
@@ -42,6 +42,37 @@ def _global_bounds_for_tagged_cells(field: fem.Function, cell_tags, tag: int, co
     return global_min, global_max, global_count
 
 
+def test_gelled_saline_preset_table_supports_low_mid_high_conductivity_variants():
+    low = GelledSalinePhantomMaterial.from_preset("low", frequency_hz=127.74e6)
+    mid = GelledSalinePhantomMaterial.from_preset("mid", frequency_hz=127.74e6)
+    high = GelledSalinePhantomMaterial.from_preset("high", frequency_hz=127.74e6)
+
+    assert GelledSalinePhantomMaterial.preset_names() == ("high", "low", "mid")
+    assert low.sigma < mid.sigma < high.sigma
+
+    for material in (low, mid, high):
+        material.validate()
+        assert material.epsilon_r > 0.0
+        assert np.isfinite(material.conduction_plus_displacement)
+
+
+def test_gelled_saline_frequency_adjustment_hook_produces_finite_terms():
+    base = GelledSalinePhantomMaterial.from_preset("mid", frequency_hz=64.0e6)
+    adjusted = base.with_frequency_adjustment(
+        128.0e6,
+        conductivity_exponent=0.15,
+        permittivity_exponent=-0.05,
+    )
+
+    assert adjusted.frequency_hz == 128.0e6
+    assert adjusted.sigma > 0.0
+    assert adjusted.epsilon_r > 0.0
+    assert np.isfinite(adjusted.displacement_term)
+    assert np.isfinite(adjusted.conduction_plus_displacement)
+    assert np.isfinite(adjusted.complex_admittivity.real)
+    assert np.isfinite(adjusted.complex_admittivity.imag)
+
+
 def test_gelled_saline_material_container_frequency_term_is_finite():
     material = GelledSalinePhantomMaterial(sigma=0.7, epsilon_r=78.0, frequency_hz=127.74e6)
     material.validate()
@@ -67,12 +98,7 @@ def test_phantom_material_assignment_and_time_harmonic_pipeline_wiring():
     )
 
     background = HomogeneousMaterial(sigma=0.0, epsilon_r=1.0, mu_r=1.0)
-    phantom = GelledSalinePhantomMaterial(
-        sigma=0.72,
-        epsilon_r=76.5,
-        frequency_hz=127.74e6,
-        mu_r=1.0,
-    )
+    phantom = GelledSalinePhantomMaterial.from_preset("mid", frequency_hz=127.74e6)
 
     sigma_field, epsilon_r_field = build_material_fields(
         mesh,
@@ -89,7 +115,7 @@ def test_phantom_material_assignment_and_time_harmonic_pipeline_wiring():
     assert np.isclose(sigma_min, phantom.sigma) and np.isclose(sigma_max, phantom.sigma)
     assert np.isclose(eps_min, phantom.epsilon_r) and np.isclose(eps_max, phantom.epsilon_r)
 
-    # Verify the D2 wiring is active in the solve pipeline by swapping in a lightweight
+    # Verify the wiring is active in the solve pipeline by swapping in a lightweight
     # magnetostatic backend and checking returned fields carry the assigned material maps.
     from fem_em_solver.core import time_harmonic as time_harmonic_module
 

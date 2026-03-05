@@ -273,7 +273,7 @@ scripts/testing/run_and_log.sh C1 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### C2 — Phantom material model expansion
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Support practical gelled saline parameter presets for MRI-like frequencies.
 
 **Agent tasks:**
