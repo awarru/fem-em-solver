@@ -291,7 +291,7 @@ scripts/testing/run_and_log.sh C2 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### C3 — Boundary-condition option set
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Compare and document BC choices impacting E/B stability.
 
 **Agent tasks:**

@@ -12,10 +12,12 @@ from .core import (
     HomogeneousMaterial,
     MagnetostaticProblem,
     MagnetostaticSolver,
+    TimeHarmonicBoundaryCondition,
     TimeHarmonicFields,
     TimeHarmonicProblem,
     TimeHarmonicSolver,
     build_material_fields,
+    normalize_boundary_condition,
 )
 from .materials import GelledSalinePhantomMaterial
 from .ports import (
@@ -34,10 +36,12 @@ __all__ = [
     "MagnetostaticProblem",
     "MagnetostaticSolver",
     "HomogeneousMaterial",
+    "TimeHarmonicBoundaryCondition",
     "TimeHarmonicFields",
     "TimeHarmonicProblem",
     "TimeHarmonicSolver",
     "build_material_fields",
+    "normalize_boundary_condition",
     "GelledSalinePhantomMaterial",
     "PortDefinition",
     "PortVoltageCurrentEstimate",

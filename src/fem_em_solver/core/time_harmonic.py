@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import Callable, Mapping, Optional, Sequence
 
 import numpy as np
@@ -12,6 +13,32 @@ from dolfinx import fem
 from ..materials import GelledSalinePhantomMaterial
 from ..utils.constants import EPSILON_0, MU_0
 from .solvers import MagnetostaticProblem, MagnetostaticSolver
+
+
+class TimeHarmonicBoundaryCondition(str, Enum):
+    """Supported time-harmonic boundary-condition modes (MVP set)."""
+
+    NATURAL = "natural"
+    PEC_ZERO_TANGENTIAL_A = "pec_zero_tangential_a"
+
+
+def normalize_boundary_condition(
+    value: TimeHarmonicBoundaryCondition | str,
+) -> TimeHarmonicBoundaryCondition:
+    """Normalize/validate boundary-condition mode from enum or string."""
+    if isinstance(value, TimeHarmonicBoundaryCondition):
+        return value
+
+    normalized = str(value).strip().lower()
+    for candidate in TimeHarmonicBoundaryCondition:
+        if normalized == candidate.value:
+            return candidate
+
+    valid = ", ".join(repr(mode.value) for mode in TimeHarmonicBoundaryCondition)
+    raise ValueError(
+        "TimeHarmonicProblem.boundary_condition must be one of "
+        f"{valid}; got {value!r}"
+    )
 
 
 @dataclass(frozen=True)
@@ -49,6 +76,7 @@ class TimeHarmonicProblem:
     facet_tags: Optional[dolfinx.mesh.MeshTags] = None
     phantom_material: Optional[GelledSalinePhantomMaterial] = None
     phantom_tag: int = 3
+    boundary_condition: TimeHarmonicBoundaryCondition | str = TimeHarmonicBoundaryCondition.NATURAL
 
 
 @dataclass
@@ -60,6 +88,8 @@ class TimeHarmonicFields:
     frequency_hz: float
     sigma_field: Optional[fem.Function] = None
     epsilon_r_field: Optional[fem.Function] = None
+    boundary_condition: TimeHarmonicBoundaryCondition = TimeHarmonicBoundaryCondition.NATURAL
+    dirichlet_dof_count: int = 0
 
     @property
     def omega(self) -> float:
@@ -160,6 +190,28 @@ class TimeHarmonicSolver:
         self.mesh = problem.mesh
         self._fields: Optional[TimeHarmonicFields] = None
 
+    def build_boundary_conditions(
+        self,
+    ) -> tuple[list, TimeHarmonicBoundaryCondition, int]:
+        """Build BC objects from selected mode and return diagnostics."""
+        mode = normalize_boundary_condition(self.problem.boundary_condition)
+
+        if mode == TimeHarmonicBoundaryCondition.NATURAL:
+            return [], mode, 0
+
+        # MVP PEC-like option: constrain A to zero on exterior boundary.
+        # Use same N1curl space as MagnetostaticSolver.
+        v_space = fem.functionspace(self.mesh, ("N1curl", self.degree))
+        fdim = self.mesh.topology.dim - 1
+        self.mesh.topology.create_connectivity(fdim, self.mesh.topology.dim)
+        exterior_facets = dolfinx.mesh.exterior_facet_indices(self.mesh.topology)
+        exterior_dofs = fem.locate_dofs_topological(v_space, fdim, exterior_facets)
+
+        zero = fem.Function(v_space)
+        zero.x.array[:] = 0.0
+        bcs = [fem.dirichletbc(zero, exterior_dofs)]
+        return bcs, mode, int(exterior_dofs.size)
+
     def solve(
         self,
         current_density: Optional[Callable] = None,
@@ -208,8 +260,12 @@ class TimeHarmonicSolver:
             mu=mu,
         )
         mag_solver = MagnetostaticSolver(mag_problem, degree=self.degree)
+
+        bcs, selected_bc, dirichlet_dof_count = self.build_boundary_conditions()
+
         A = mag_solver.solve(
             current_density=current_density,
+            bc_functions=bcs,
             subdomain_id=subdomain_id,
             subdomain_ids=subdomain_ids,
             gauge_penalty=gauge_penalty,
@@ -238,6 +294,8 @@ class TimeHarmonicSolver:
             frequency_hz=self.problem.frequency_hz,
             sigma_field=sigma_field,
             epsilon_r_field=epsilon_r_field,
+            boundary_condition=selected_bc,
+            dirichlet_dof_count=dirichlet_dof_count,
         )
         return self._fields
 
