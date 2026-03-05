@@ -37,7 +37,7 @@ Optional helpers:
 | Chunk | Status | Commit | Last known log |
 |---|---|---|---|
 | C1 | ✅ COMPLETE | `09eb248f6e5ee161234d8a799692c75a63262efb` | `docs/testing/logs/20260226T164233Z_C1.log` |
-| C2 | 🚫 BLOCKED | `7ac10f166e283ff7b6f15e20323b6402a4a49d65` | `docs/testing/logs/20260226T164235Z_C2.log` |
+| C2 | 🧪 AWAITING-HUMAN-TEST | `70a2178148e28b7b533ccace5725b0b81a789075` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -457,4 +457,20 @@ Optional helpers:
   - tests/solver/test_time_harmonic_smoke.py::test_time_harmonic_solver_rejects_material_map_without_cell_tags_before_solve PASSED
   - tests/solver/test_time_harmonic_smoke.py::test_time_harmonic_solver_rejects_unknown_material_map_tag_before_solve PASSED
   - Error diagnostics include `TimeHarmonicProblem.frequency_unit must be 'Hz'` and `material_map references tags that do not exist in problem.cell_tags`
+- Notes/blockers: none
+
+- Chunk: C2 — Phantom material model expansion
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 70a2178148e28b7b533ccace5725b0b81a789075
+- Files changed:
+  - ROADMAP.md
+  - src/fem_em_solver/materials/phantom.py
+  - tests/materials/test_phantom_material_model.py
+- Manual test command: scripts/testing/run_and_log.sh C2 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/materials/test_phantom_material_model.py -v'"
+- Expected pass signal:
+  - tests/materials/test_phantom_material_model.py::test_gelled_saline_preset_table_supports_low_mid_high_conductivity_variants PASSED
+  - tests/materials/test_phantom_material_model.py::test_gelled_saline_frequency_adjustment_hook_produces_finite_terms PASSED
+  - tests/materials/test_phantom_material_model.py::test_gelled_saline_material_container_frequency_term_is_finite PASSED
+  - tests/materials/test_phantom_material_model.py::test_phantom_material_assignment_and_time_harmonic_pipeline_wiring PASSED
+  - Output contains no ValueError related to unknown preset, invalid adjusted frequency, or non-finite derived phantom terms
 - Notes/blockers: none
