@@ -818,9 +818,9 @@
 </tr>
 <tr>
 <td>C2</td>
-<td>🚫 BLOCKED</td>
-<td><code>7ac10f166e283ff7b6f15e20323b6402a4a49d65</code></td>
-<td><code>docs/testing/logs/20260226T164235Z_C2.log</code></td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>70a2178148e28b7b533ccace5725b0b81a789075</code></td>
+<td>none</td>
 </tr>
 <tr>
 <td>A1</td>
@@ -1329,6 +1329,25 @@
 <li>tests/solver/test_time_harmonic_smoke.py::test_time_harmonic_solver_rejects_material_map_without_cell_tags_before_solve PASSED</li>
 <li>tests/solver/test_time_harmonic_smoke.py::test_time_harmonic_solver_rejects_unknown_material_map_tag_before_solve PASSED</li>
 <li>Error diagnostics include <code>TimeHarmonicProblem.frequency_unit must be 'Hz'</code> and <code>material_map references tags that do not exist in problem.cell_tags</code></li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: C2 — Phantom material model expansion</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 70a2178148e28b7b533ccace5725b0b81a789075</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>src/fem_em_solver/materials/phantom.py</li>
+<li>tests/materials/test_phantom_material_model.py</li>
+<li>Manual test command: scripts/testing/run_and_log.sh C2 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/materials/test_phantom_material_model.py -v'"</li>
+<li>Expected pass signal:</li>
+<li>tests/materials/test_phantom_material_model.py::test_gelled_saline_preset_table_supports_low_mid_high_conductivity_variants PASSED</li>
+<li>tests/materials/test_phantom_material_model.py::test_gelled_saline_frequency_adjustment_hook_produces_finite_terms PASSED</li>
+<li>tests/materials/test_phantom_material_model.py::test_gelled_saline_material_container_frequency_term_is_finite PASSED</li>
+<li>tests/materials/test_phantom_material_model.py::test_phantom_material_assignment_and_time_harmonic_pipeline_wiring PASSED</li>
+<li>Output contains no ValueError related to unknown preset, invalid adjusted frequency, or non-finite derived phantom terms</li>
 <li>Notes/blockers: none</li>
 </ul>
 
