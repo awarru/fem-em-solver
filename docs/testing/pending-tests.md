@@ -40,6 +40,7 @@ Optional helpers:
 | C2 | 🧪 AWAITING-HUMAN-TEST | `70a2178148e28b7b533ccace5725b0b81a789075` | none |
 | C3 | 🧪 AWAITING-HUMAN-TEST | `27bec75802a867ab72569a9474ef344149daadce` | none |
 | C4 | 🧪 AWAITING-HUMAN-TEST | `393e53b9e888b17ba31ee70f69d17c4996b25fdc` | none |
+| C5 | 🧪 AWAITING-HUMAN-TEST | `388c2c0a07ed278facf5f04391527c39ba3a5ecc` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -509,4 +510,23 @@ Optional helpers:
   - tests/post/test_phantom_field_metrics.py::test_phantom_field_metrics_and_exports_are_finite PASSED
   - tests/post/test_phantom_field_metrics.py::test_evaluate_on_cells_fallback_skips_invalid_cell_point_pairs PASSED
   - Output includes `phantom E/B diagnostics:` and summary JSON has `sampling` section with `prefer_interior_samples: true`
+- Notes/blockers: none
+
+- Chunk: C5 — Energy/consistency diagnostics
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 388c2c0a07ed278facf5f04391527c39ba3a5ecc
+- Files changed:
+  - ROADMAP.md
+  - examples/mri/01_coil_phantom_fields.py
+  - src/fem_em_solver/post/__init__.py
+  - src/fem_em_solver/post/consistency.py
+  - src/fem_em_solver/post/phantom_fields.py
+  - tests/post/test_phantom_field_metrics.py
+  - tests/validation/test_field_consistency_metrics.py
+- Manual test command: scripts/testing/run_and_log.sh C5 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src python3 -m pytest tests/validation -v -k metrics'"
+- Expected pass signal:
+  - tests/validation/test_coil_phantom_bfield_metrics.py::test_coil_phantom_bfield_metrics_are_finite_smooth_and_symmetric PASSED
+  - tests/validation/test_field_consistency_metrics.py::test_field_consistency_metrics_are_finite_and_warning_oriented PASSED
+  - tests/validation/test_field_consistency_metrics.py::test_field_consistency_metrics_emit_actionable_warnings_for_extreme_imbalance PASSED
+  - Example/JSON diagnostics include consistency keys: `e_to_b_mean_ratio`, `e_to_b_max_ratio`, `e_span_ratio`, `b_span_ratio`, `mean_balance_rel_diff`, and `warnings`
 - Notes/blockers: none
