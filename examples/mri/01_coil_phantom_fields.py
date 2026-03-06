@@ -192,6 +192,22 @@ def main():
             f"  centerline samples valid (E/B): "
             f"{np.count_nonzero(e_valid)}/{len(e_valid)} / {np.count_nonzero(b_valid)}/{len(b_valid)}"
         )
+        consistency = metrics["consistency"]
+        print("  consistency diagnostics:")
+        print(
+            f"    |E|/|B| mean ratio: {consistency['e_to_b_mean_ratio']:.6e} "
+            f"(max ratio: {consistency['e_to_b_max_ratio']:.6e})"
+        )
+        print(
+            f"    span ratios (E/B): {consistency['e_span_ratio']:.6f} / {consistency['b_span_ratio']:.6f}"
+        )
+        print(f"    mean-balance relative diff: {consistency['mean_balance_rel_diff']:.6f}")
+        if consistency["warnings"]:
+            print("    warnings:")
+            for warning in consistency["warnings"]:
+                print(f"      - {warning}")
+        else:
+            print("    warnings: none")
         print("\nCenterline sample magnitudes (z, |E|, |B|):")
         for i, z in enumerate(z_line):
             e_mag = np.linalg.norm(e_samples[i])

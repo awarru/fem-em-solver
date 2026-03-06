@@ -10,6 +10,8 @@ import json
 import numpy as np
 from mpi4py import MPI
 
+from .consistency import compute_field_consistency_diagnostics
+
 
 def _tagged_cells(cell_tags, tag: int) -> np.ndarray:
     cells = cell_tags.indices[cell_tags.values == int(tag)]
@@ -310,6 +312,8 @@ def compute_phantom_eb_metrics_and_export(
         prefer_interior_samples=prefer_interior_samples,
     )
 
+    consistency = compute_field_consistency_diagnostics(e_stats, b_stats)
+
     summary = {
         "phantom_tag": int(phantom_tag),
         "sampling": {
@@ -323,6 +327,7 @@ def compute_phantom_eb_metrics_and_export(
         },
         "E_magnitude": e_stats,
         "B_magnitude": b_stats,
+        "consistency": consistency,
         "exports": {
             "E_csv": str(e_csv) if e_csv is not None else None,
             "B_csv": str(b_csv) if b_csv is not None else None,

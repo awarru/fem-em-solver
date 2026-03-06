@@ -130,6 +130,9 @@ def test_phantom_field_metrics_and_exports_are_finite():
         assert summary["sampling"]["prefer_interior_samples"] is True
         assert summary["sampling"]["requested_cells"] >= summary["sampling"]["sampling_cells"]
         assert summary["sampling"]["valid_sample_cells"] == summary["E_magnitude"]["count"]
+        assert "consistency" in summary
+        assert summary["consistency"]["e_to_b_mean_ratio"] > 0.0
+        assert summary["consistency"]["e_to_b_max_ratio"] > 0.0
 
         print("phantom E/B diagnostics:")
         print(

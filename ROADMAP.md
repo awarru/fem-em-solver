@@ -327,7 +327,7 @@ scripts/testing/run_and_log.sh C4 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### C5 — Energy/consistency diagnostics
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Add solver-level consistency checks beyond finite/non-zero.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: C5 — Energy/consistency diagnostics.**
+**Next chunk: C6 — Convergence/conditioning diagnostics.**
 
-Reason: C4 now adds interface-aware field extraction guardrails and invalid-cell fallback behavior. Next, add solver-level consistency diagnostics beyond finite/non-zero checks.
+Reason: C5 now adds solver-level energy/consistency diagnostics (including warning thresholds) beyond finite/non-zero checks. Next, surface convergence/conditioning health indicators for human tuning.
