@@ -829,6 +829,12 @@
 <td>none</td>
 </tr>
 <tr>
+<td>C4</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>393e53b9e888b17ba31ee70f69d17c4996b25fdc</code></td>
+<td>none</td>
+</tr>
+<tr>
 <td>A1</td>
 <td>🧪 AWAITING-HUMAN-TEST</td>
 <td><code>79e5cb22abfb2ed757cd30937d6a4d97e5363b29</code></td>
@@ -1376,6 +1382,24 @@
 <li>tests/solver/test_boundary_condition_selection.py::test_time_harmonic_solver_boundary_natural_selects_empty_dirichlet_set PASSED</li>
 <li>tests/solver/test_boundary_condition_selection.py::test_time_harmonic_solver_boundary_pec_is_applied_to_solve_path PASSED</li>
 <li>Output contains no ValueError except expected invalid-mode check and no failures about unsupported boundary_condition values</li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: C4 — Interface-aware field extraction reliability</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 393e53b9e888b17ba31ee70f69d17c4996b25fdc</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>docs/testing/pending-tests.md</li>
+<li>src/fem_em_solver/post/phantom_fields.py</li>
+<li>tests/post/test_phantom_field_metrics.py</li>
+<li>Manual test command: scripts/testing/run_and_log.sh C4 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/post/test_phantom_field_metrics.py -v'"</li>
+<li>Expected pass signal:</li>
+<li>tests/post/test_phantom_field_metrics.py::test_phantom_field_metrics_and_exports_are_finite PASSED</li>
+<li>tests/post/test_phantom_field_metrics.py::test_evaluate_on_cells_fallback_skips_invalid_cell_point_pairs PASSED</li>
+<li>Output includes <code>phantom E/B diagnostics:</code> and summary JSON has <code>sampling</code> section with <code>prefer_interior_samples: true</code></li>
 <li>Notes/blockers: none</li>
 </ul>
 
