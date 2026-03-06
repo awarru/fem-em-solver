@@ -39,7 +39,7 @@ Optional helpers:
 | C1 | ✅ COMPLETE | `09eb248f6e5ee161234d8a799692c75a63262efb` | `docs/testing/logs/20260226T164233Z_C1.log` |
 | C2 | 🧪 AWAITING-HUMAN-TEST | `70a2178148e28b7b533ccace5725b0b81a789075` | none |
 | C3 | 🧪 AWAITING-HUMAN-TEST | `27bec75802a867ab72569a9474ef344149daadce` | none |
-| C4 | 🧪 AWAITING-HUMAN-TEST | `<pending-commit>` | none |
+| C4 | 🧪 AWAITING-HUMAN-TEST | `393e53b9e888b17ba31ee70f69d17c4996b25fdc` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -498,7 +498,7 @@ Optional helpers:
 
 - Chunk: C4 — Interface-aware field extraction reliability
 - Status: 🧪 AWAITING-HUMAN-TEST
-- Commit: <pending-commit>
+- Commit: 393e53b9e888b17ba31ee70f69d17c4996b25fdc
 - Files changed:
   - ROADMAP.md
   - docs/testing/pending-tests.md
