@@ -835,6 +835,12 @@
 <td>none</td>
 </tr>
 <tr>
+<td>C5</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>388c2c0a07ed278facf5f04391527c39ba3a5ecc</code></td>
+<td>none</td>
+</tr>
+<tr>
 <td>A1</td>
 <td>🧪 AWAITING-HUMAN-TEST</td>
 <td><code>79e5cb22abfb2ed757cd30937d6a4d97e5363b29</code></td>
@@ -1400,6 +1406,28 @@
 <li>tests/post/test_phantom_field_metrics.py::test_phantom_field_metrics_and_exports_are_finite PASSED</li>
 <li>tests/post/test_phantom_field_metrics.py::test_evaluate_on_cells_fallback_skips_invalid_cell_point_pairs PASSED</li>
 <li>Output includes <code>phantom E/B diagnostics:</code> and summary JSON has <code>sampling</code> section with <code>prefer_interior_samples: true</code></li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: C5 — Energy/consistency diagnostics</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 388c2c0a07ed278facf5f04391527c39ba3a5ecc</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>examples/mri/01_coil_phantom_fields.py</li>
+<li>src/fem_em_solver/post/<strong>init</strong>.py</li>
+<li>src/fem_em_solver/post/consistency.py</li>
+<li>src/fem_em_solver/post/phantom_fields.py</li>
+<li>tests/post/test_phantom_field_metrics.py</li>
+<li>tests/validation/test_field_consistency_metrics.py</li>
+<li>Manual test command: scripts/testing/run_and_log.sh C5 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src python3 -m pytest tests/validation -v -k metrics'"</li>
+<li>Expected pass signal:</li>
+<li>tests/validation/test_coil_phantom_bfield_metrics.py::test_coil_phantom_bfield_metrics_are_finite_smooth_and_symmetric PASSED</li>
+<li>tests/validation/test_field_consistency_metrics.py::test_field_consistency_metrics_are_finite_and_warning_oriented PASSED</li>
+<li>tests/validation/test_field_consistency_metrics.py::test_field_consistency_metrics_emit_actionable_warnings_for_extreme_imbalance PASSED</li>
+<li>Example/JSON diagnostics include consistency keys: <code>e_to_b_mean_ratio</code>, <code>e_to_b_max_ratio</code>, <code>e_span_ratio</code>, <code>b_span_ratio</code>, <code>mean_balance_rel_diff</code>, and <code>warnings</code></li>
 <li>Notes/blockers: none</li>
 </ul>
 
