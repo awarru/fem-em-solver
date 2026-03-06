@@ -309,7 +309,7 @@ scripts/testing/run_and_log.sh C3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### C4 — Interface-aware field extraction reliability
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Make E/B sampling robust near material boundaries.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: C2 — Phantom material model expansion.**
+**Next chunk: C5 — Energy/consistency diagnostics.**
 
-Reason: C1 now hardens time-harmonic API validation (frequency units/range + material-map assignment diagnostics). Next, expand practical gelled saline presets and frequency-dependent hooks.
+Reason: C4 now adds interface-aware field extraction guardrails and invalid-cell fallback behavior. Next, add solver-level consistency diagnostics beyond finite/non-zero checks.

@@ -15,6 +15,7 @@ from fem_em_solver.core import HomogeneousMaterial, TimeHarmonicProblem, TimeHar
 from fem_em_solver.io.mesh import MeshGenerator
 from fem_em_solver.materials import GelledSalinePhantomMaterial
 from fem_em_solver.post import compute_phantom_eb_metrics_and_export
+from fem_em_solver.post.phantom_fields import _evaluate_on_cells
 
 
 def test_phantom_field_metrics_and_exports_are_finite():
@@ -108,6 +109,11 @@ def test_phantom_field_metrics_and_exports_are_finite():
     assert e_stats["max"] > 0.0
     assert b_stats["max"] > 0.0
 
+    assert e_stats["requested_cells"] >= e_stats["sampling_cells"] >= e_stats["count"] > 0
+    assert b_stats["requested_cells"] >= b_stats["sampling_cells"] >= b_stats["count"] > 0
+    assert e_stats["invalid_samples_dropped"] == 0
+    assert b_stats["invalid_samples_dropped"] == 0
+
     if comm.rank == 0:
         e_csv = Path(result["exports"]["E_csv"])
         b_csv = Path(result["exports"]["B_csv"])
@@ -121,6 +127,9 @@ def test_phantom_field_metrics_and_exports_are_finite():
         assert summary["phantom_tag"] == 3
         assert summary["E_magnitude"]["count"] > 0
         assert summary["B_magnitude"]["count"] > 0
+        assert summary["sampling"]["prefer_interior_samples"] is True
+        assert summary["sampling"]["requested_cells"] >= summary["sampling"]["sampling_cells"]
+        assert summary["sampling"]["valid_sample_cells"] == summary["E_magnitude"]["count"]
 
         print("phantom E/B diagnostics:")
         print(
@@ -130,3 +139,47 @@ def test_phantom_field_metrics_and_exports_are_finite():
             f"  |B| min/max/mean: {b_stats['min']:.6e} / {b_stats['max']:.6e} / {b_stats['mean']:.6e}"
         )
         print(f"  exports: {e_csv.name}, {b_csv.name}, {summary_json.name}")
+
+
+def test_evaluate_on_cells_fallback_skips_invalid_cell_point_pairs():
+    """Fallback path should retain valid samples when batched eval fails."""
+
+    class _DummyElement:
+        value_shape = (3,)
+
+    class _DummyFunctionSpace:
+        element = _DummyElement()
+
+    class _DummyField:
+        function_space = _DummyFunctionSpace()
+
+        def eval(self, points, cells):
+            cells = np.asarray(cells, dtype=np.int32)
+            points = np.asarray(points, dtype=np.float64)
+
+            if points.shape[0] > 1:
+                raise RuntimeError("batch evaluation failed")
+            if int(cells[0]) == 11:
+                raise RuntimeError("invalid containing cell")
+
+            x, y, z = points[0]
+            return np.asarray([[x + 1.0, y + 2.0, z + 3.0]], dtype=np.float64)
+
+    points = np.asarray(
+        [
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [2.0, 0.0, 0.0],
+        ],
+        dtype=np.float64,
+    )
+    cells = np.asarray([10, 11, 12], dtype=np.int32)
+
+    values, valid_points, valid_cells, invalid = _evaluate_on_cells(_DummyField(), points, cells)
+
+    assert invalid == 1
+    assert valid_cells.tolist() == [10, 12]
+    assert valid_points.shape == (2, 3)
+    assert values.shape == (2, 3)
+    assert np.allclose(values[0], np.asarray([1.0, 2.0, 3.0]))
+    assert np.allclose(values[1], np.asarray([3.0, 2.0, 3.0]))
