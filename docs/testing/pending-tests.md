@@ -41,6 +41,7 @@ Optional helpers:
 | C3 | 🧪 AWAITING-HUMAN-TEST | `27bec75802a867ab72569a9474ef344149daadce` | none |
 | C4 | 🧪 AWAITING-HUMAN-TEST | `393e53b9e888b17ba31ee70f69d17c4996b25fdc` | none |
 | C5 | 🧪 AWAITING-HUMAN-TEST | `388c2c0a07ed278facf5f04391527c39ba3a5ecc` | none |
+| C6 | 🧪 AWAITING-HUMAN-TEST | `59a69892181593e7228c329077ddd225f508966c` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -529,4 +530,23 @@ Optional helpers:
   - tests/validation/test_field_consistency_metrics.py::test_field_consistency_metrics_are_finite_and_warning_oriented PASSED
   - tests/validation/test_field_consistency_metrics.py::test_field_consistency_metrics_emit_actionable_warnings_for_extreme_imbalance PASSED
   - Example/JSON diagnostics include consistency keys: `e_to_b_mean_ratio`, `e_to_b_max_ratio`, `e_span_ratio`, `b_span_ratio`, `mean_balance_rel_diff`, and `warnings`
+- Notes/blockers: none
+
+- Chunk: C6 — Convergence/conditioning diagnostics
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 59a69892181593e7228c329077ddd225f508966c
+- Files changed:
+  - ROADMAP.md
+  - docs/testing/pending-tests.md
+  - examples/mri/01_coil_phantom_fields.py
+  - src/fem_em_solver/__init__.py
+  - src/fem_em_solver/core/__init__.py
+  - src/fem_em_solver/core/solvers.py
+  - src/fem_em_solver/core/time_harmonic.py
+  - tests/solver/test_convergence_diagnostics.py
+- Manual test command: scripts/testing/run_and_log.sh C6 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src python3 -m pytest tests/solver -v -k convergence'"
+- Expected pass signal:
+  - tests/solver/test_convergence_diagnostics.py::test_classify_residual_trend_summaries_are_deterministic PASSED
+  - tests/solver/test_convergence_diagnostics.py::test_time_harmonic_solver_emits_optional_solve_health_diagnostics PASSED
+  - Output includes `solve health diagnostics:` with `ksp=...`, `converged=...`, `iterations=...`, and `residual_trend=...`
 - Notes/blockers: none
