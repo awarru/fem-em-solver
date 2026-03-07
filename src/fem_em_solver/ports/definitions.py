@@ -1,9 +1,9 @@
-"""Lumped-port definitions and mesh-tag validation helpers (chunk E1)."""
+"""Lumped-port definitions and calibration checklist validation helpers."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, Sequence
+from typing import Iterable, Mapping, Sequence
 
 
 DEFAULT_REFERENCE_IMPEDANCE_OHM = 50.0
@@ -20,6 +20,9 @@ PORT_SUFFIXES = (PORT_POSITIVE_SUFFIX, PORT_NEGATIVE_SUFFIX)
 PORT_BOUNDARY_DIMENSION_PRIMARY = "facet"
 PORT_BOUNDARY_DIMENSION_FALLBACK = "edge"
 PORT_TAG_NAME_TEMPLATE = "port_{port_id}_{suffix}"
+
+# Human calibration checklist document that these checks operationalize.
+PORT_CALIBRATION_CHECKLIST_DOC = "docs/ports/human_port_calibration_checklist.md"
 
 
 @dataclass(frozen=True)
@@ -94,3 +97,138 @@ def validate_required_port_tags_exist(
     missing = sorted(expected.difference(observed))
     if missing:
         raise ValueError(f"missing required port tags: {missing}")
+
+
+def validate_port_ordering(
+    ports: Sequence[PortDefinition],
+    *,
+    expected_port_order: Sequence[str],
+) -> tuple[str, ...]:
+    """Assert deterministic port ordering against an expected sequence.
+
+    This maps to checklist section: "Z0 and normalization choices" where
+    port ordering must stay stable and documented.
+    """
+    if not expected_port_order:
+        raise ValueError("expected_port_order must be non-empty")
+
+    observed = tuple(port.port_id for port in ports)
+    expected = tuple(expected_port_order)
+    if observed != expected:
+        raise ValueError(
+            "port ordering mismatch: "
+            f"observed={list(observed)} expected={list(expected)}; "
+            f"see {PORT_CALIBRATION_CHECKLIST_DOC}"
+        )
+    return observed
+
+
+def validate_port_orientation_metadata(ports: Sequence[PortDefinition]) -> tuple[str, ...]:
+    """Assert that every port carries non-empty orientation metadata.
+
+    This maps to checklist section: "Port placement realism".
+    Returns the normalized orientation tuple in port order.
+    """
+    orientations: list[str] = []
+    missing: list[str] = []
+    for port in ports:
+        port.validate()
+        normalized = port.orientation.strip() if isinstance(port.orientation, str) else ""
+        if not normalized:
+            missing.append(port.port_id)
+        orientations.append(normalized)
+
+    if missing:
+        raise ValueError(
+            "missing orientation metadata for ports: "
+            f"{missing}; see {PORT_CALIBRATION_CHECKLIST_DOC}"
+        )
+    return tuple(orientations)
+
+
+def validate_port_face_area_consistency(
+    ports: Sequence[PortDefinition],
+    port_face_areas: Mapping[str, float],
+    *,
+    max_area_ratio: float = 1.25,
+) -> dict[str, float]:
+    """Assert that per-port face areas are finite and roughly comparable.
+
+    Parameters
+    ----------
+    ports
+        Port definitions in solver order.
+    port_face_areas
+        Mapping ``port_id -> area`` from geometry/mesh QA routines.
+    max_area_ratio
+        Maximum allowed ratio ``max(area)/min(area)`` for consistency checks.
+
+    Returns
+    -------
+    dict[str, float]
+        Normalized area mapping in the same logical order as ``ports``.
+    """
+    if max_area_ratio < 1.0:
+        raise ValueError("max_area_ratio must be >= 1.0")
+
+    normalized: dict[str, float] = {}
+    for port in ports:
+        if port.port_id not in port_face_areas:
+            raise ValueError(
+                f"missing face area for port '{port.port_id}'; "
+                f"see {PORT_CALIBRATION_CHECKLIST_DOC}"
+            )
+
+        area = float(port_face_areas[port.port_id])
+        if area <= 0.0:
+            raise ValueError(
+                f"port '{port.port_id}' face area must be positive, got {area:.6e}; "
+                f"see {PORT_CALIBRATION_CHECKLIST_DOC}"
+            )
+        normalized[port.port_id] = area
+
+    values = tuple(normalized.values())
+    area_ratio = max(values) / min(values)
+    if area_ratio > max_area_ratio:
+        raise ValueError(
+            "port face area ratio exceeds threshold: "
+            f"ratio={area_ratio:.6f}, max_area_ratio={max_area_ratio:.6f}; "
+            f"see {PORT_CALIBRATION_CHECKLIST_DOC}"
+        )
+
+    return normalized
+
+
+@dataclass(frozen=True)
+class PortCalibrationChecks:
+    """Summary of executable checks derived from the human checklist."""
+
+    port_order: tuple[str, ...]
+    orientations: tuple[str, ...]
+    face_areas: dict[str, float]
+    max_face_area_ratio: float
+
+
+def run_port_calibration_checks(
+    ports: Sequence[PortDefinition],
+    *,
+    expected_port_order: Sequence[str],
+    port_face_areas: Mapping[str, float],
+    max_area_ratio: float = 1.25,
+) -> PortCalibrationChecks:
+    """Run checklist-derived executable assertions for lumped ports."""
+    port_order = validate_port_ordering(ports, expected_port_order=expected_port_order)
+    orientations = validate_port_orientation_metadata(ports)
+    face_areas = validate_port_face_area_consistency(
+        ports,
+        port_face_areas,
+        max_area_ratio=max_area_ratio,
+    )
+
+    ratio = max(face_areas.values()) / min(face_areas.values())
+    return PortCalibrationChecks(
+        port_order=port_order,
+        orientations=orientations,
+        face_areas=face_areas,
+        max_face_area_ratio=ratio,
+    )

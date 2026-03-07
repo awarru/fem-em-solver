@@ -365,7 +365,7 @@ scripts/testing/run_and_log.sh C6 "docker compose exec fem-em-solver bash -lc 'c
 ## Track D — Port Model & S-Parameter Credibility
 
 ### D1 — Calibration checklist to executable checks bridge
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Convert manual calibration guidance into partial automated assertions.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: D1 — Calibration checklist to executable checks bridge.**
+**Next chunk: D2 — Multi-port drive/termination consistency checks.**
 
-Reason: C6 now adds optional convergence/conditioning health diagnostics (including residual trend summaries) for the time-harmonic path. Next, convert calibration checklist expectations into executable port-definition checks.
+Reason: D1 now bridges calibration checklist assumptions into executable checks for port ordering, orientation metadata, and face-area consistency. Next, enforce deterministic driven/passive setup diagnostics.

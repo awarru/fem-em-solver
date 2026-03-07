@@ -42,6 +42,7 @@ Optional helpers:
 | C4 | 🧪 AWAITING-HUMAN-TEST | `393e53b9e888b17ba31ee70f69d17c4996b25fdc` | none |
 | C5 | 🧪 AWAITING-HUMAN-TEST | `388c2c0a07ed278facf5f04391527c39ba3a5ecc` | none |
 | C6 | 🧪 AWAITING-HUMAN-TEST | `59a69892181593e7228c329077ddd225f508966c` | none |
+| D1 | 🧪 AWAITING-HUMAN-TEST | `b6fccfaaa2b2221599780298501bf20d3d6c1684` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -549,4 +550,23 @@ Optional helpers:
   - tests/solver/test_convergence_diagnostics.py::test_classify_residual_trend_summaries_are_deterministic PASSED
   - tests/solver/test_convergence_diagnostics.py::test_time_harmonic_solver_emits_optional_solve_health_diagnostics PASSED
   - Output includes `solve health diagnostics:` with `ksp=...`, `converged=...`, `iterations=...`, and `residual_trend=...`
+- Notes/blockers: none
+
+- Chunk: D1 — Calibration checklist to executable checks bridge
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: b6fccfaaa2b2221599780298501bf20d3d6c1684
+- Files changed:
+  - ROADMAP.md
+  - docs/ports/human_port_calibration_checklist.md
+  - docs/testing/pending-tests.md
+  - src/fem_em_solver/ports/__init__.py
+  - src/fem_em_solver/ports/definitions.py
+  - tests/ports/test_port_definition.py
+- Manual test command: scripts/testing/run_and_log.sh D1 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/ports/test_port_definition.py -v'"
+- Expected pass signal:
+  - tests/ports/test_port_definition.py::test_run_port_calibration_checks_accepts_consistent_order_orientation_and_area PASSED
+  - tests/ports/test_port_definition.py::test_run_port_calibration_checks_rejects_order_mismatch_with_checklist_reference PASSED
+  - tests/ports/test_port_definition.py::test_run_port_calibration_checks_rejects_missing_orientation_metadata PASSED
+  - tests/ports/test_port_definition.py::test_run_port_calibration_checks_rejects_inconsistent_face_area_ratio PASSED
+  - Output/error diagnostics for failing calibration assertions include docs/ports/human_port_calibration_checklist.md reference
 - Notes/blockers: none

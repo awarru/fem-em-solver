@@ -2,6 +2,11 @@
 
 Use this checklist before trusting birdcage lumped-port S-parameter results for tuning decisions.
 
+Executable bridge: `fem_em_solver.ports.run_port_calibration_checks(...)` enforces three checklist-derived assertions in code:
+- expected port ordering matches declared solver/export order,
+- every port has non-empty orientation metadata,
+- per-port face areas are present/positive and within a configurable max ratio.
+
 ## 1) Port placement realism
 
 - [ ] Confirm each port tag is physically located between the intended leg pair.
