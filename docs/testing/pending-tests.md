@@ -42,7 +42,7 @@ Optional helpers:
 | C4 | 🧪 AWAITING-HUMAN-TEST | `393e53b9e888b17ba31ee70f69d17c4996b25fdc` | none |
 | C5 | 🧪 AWAITING-HUMAN-TEST | `388c2c0a07ed278facf5f04391527c39ba3a5ecc` | none |
 | C6 | 🧪 AWAITING-HUMAN-TEST | `59a69892181593e7228c329077ddd225f508966c` | none |
-| D1 | 🧪 AWAITING-HUMAN-TEST | `b6fccfaaa2b2221599780298501bf20d3d6c1684` | none |
+| D1 | 🧪 AWAITING-HUMAN-TEST | `4de76c5c30c92f45ba04f4ff2ac75a3f55046e2b` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -554,7 +554,7 @@ Optional helpers:
 
 - Chunk: D1 — Calibration checklist to executable checks bridge
 - Status: 🧪 AWAITING-HUMAN-TEST
-- Commit: b6fccfaaa2b2221599780298501bf20d3d6c1684
+- Commit: 4de76c5c30c92f45ba04f4ff2ac75a3f55046e2b
 - Files changed:
   - ROADMAP.md
   - docs/ports/human_port_calibration_checklist.md
