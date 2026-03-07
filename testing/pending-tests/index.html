@@ -841,6 +841,12 @@
 <td>none</td>
 </tr>
 <tr>
+<td>C6</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>59a69892181593e7228c329077ddd225f508966c</code></td>
+<td>none</td>
+</tr>
+<tr>
 <td>A1</td>
 <td>🧪 AWAITING-HUMAN-TEST</td>
 <td><code>79e5cb22abfb2ed757cd30937d6a4d97e5363b29</code></td>
@@ -1428,6 +1434,28 @@
 <li>tests/validation/test_field_consistency_metrics.py::test_field_consistency_metrics_are_finite_and_warning_oriented PASSED</li>
 <li>tests/validation/test_field_consistency_metrics.py::test_field_consistency_metrics_emit_actionable_warnings_for_extreme_imbalance PASSED</li>
 <li>Example/JSON diagnostics include consistency keys: <code>e_to_b_mean_ratio</code>, <code>e_to_b_max_ratio</code>, <code>e_span_ratio</code>, <code>b_span_ratio</code>, <code>mean_balance_rel_diff</code>, and <code>warnings</code></li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: C6 — Convergence/conditioning diagnostics</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 59a69892181593e7228c329077ddd225f508966c</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>docs/testing/pending-tests.md</li>
+<li>examples/mri/01_coil_phantom_fields.py</li>
+<li>src/fem_em_solver/<strong>init</strong>.py</li>
+<li>src/fem_em_solver/core/<strong>init</strong>.py</li>
+<li>src/fem_em_solver/core/solvers.py</li>
+<li>src/fem_em_solver/core/time_harmonic.py</li>
+<li>tests/solver/test_convergence_diagnostics.py</li>
+<li>Manual test command: scripts/testing/run_and_log.sh C6 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src python3 -m pytest tests/solver -v -k convergence'"</li>
+<li>Expected pass signal:</li>
+<li>tests/solver/test_convergence_diagnostics.py::test_classify_residual_trend_summaries_are_deterministic PASSED</li>
+<li>tests/solver/test_convergence_diagnostics.py::test_time_harmonic_solver_emits_optional_solve_health_diagnostics PASSED</li>
+<li>Output includes <code>solve health diagnostics:</code> with <code>ksp=...</code>, <code>converged=...</code>, <code>iterations=...</code>, and <code>residual_trend=...</code></li>
 <li>Notes/blockers: none</li>
 </ul>
 
