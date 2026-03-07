@@ -847,6 +847,12 @@
 <td>none</td>
 </tr>
 <tr>
+<td>D1</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>4de76c5c30c92f45ba04f4ff2ac75a3f55046e2b</code></td>
+<td>none</td>
+</tr>
+<tr>
 <td>A1</td>
 <td>🧪 AWAITING-HUMAN-TEST</td>
 <td><code>79e5cb22abfb2ed757cd30937d6a4d97e5363b29</code></td>
@@ -1456,6 +1462,28 @@
 <li>tests/solver/test_convergence_diagnostics.py::test_classify_residual_trend_summaries_are_deterministic PASSED</li>
 <li>tests/solver/test_convergence_diagnostics.py::test_time_harmonic_solver_emits_optional_solve_health_diagnostics PASSED</li>
 <li>Output includes <code>solve health diagnostics:</code> with <code>ksp=...</code>, <code>converged=...</code>, <code>iterations=...</code>, and <code>residual_trend=...</code></li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: D1 — Calibration checklist to executable checks bridge</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 4de76c5c30c92f45ba04f4ff2ac75a3f55046e2b</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>docs/ports/human_port_calibration_checklist.md</li>
+<li>docs/testing/pending-tests.md</li>
+<li>src/fem_em_solver/ports/<strong>init</strong>.py</li>
+<li>src/fem_em_solver/ports/definitions.py</li>
+<li>tests/ports/test_port_definition.py</li>
+<li>Manual test command: scripts/testing/run_and_log.sh D1 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/ports/test_port_definition.py -v'"</li>
+<li>Expected pass signal:</li>
+<li>tests/ports/test_port_definition.py::test_run_port_calibration_checks_accepts_consistent_order_orientation_and_area PASSED</li>
+<li>tests/ports/test_port_definition.py::test_run_port_calibration_checks_rejects_order_mismatch_with_checklist_reference PASSED</li>
+<li>tests/ports/test_port_definition.py::test_run_port_calibration_checks_rejects_missing_orientation_metadata PASSED</li>
+<li>tests/ports/test_port_definition.py::test_run_port_calibration_checks_rejects_inconsistent_face_area_ratio PASSED</li>
+<li>Output/error diagnostics for failing calibration assertions include docs/ports/human_port_calibration_checklist.md reference</li>
 <li>Notes/blockers: none</li>
 </ul>
 

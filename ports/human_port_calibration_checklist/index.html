@@ -571,6 +571,10 @@
 
 <h1 id="human-port-calibration-checklist">Human Port Calibration Checklist<a class="headerlink" href="#human-port-calibration-checklist" title="Permanent link">&para;</a></h1>
 <p>Use this checklist before trusting birdcage lumped-port S-parameter results for tuning decisions.</p>
+<p>Executable bridge: <code>fem_em_solver.ports.run_port_calibration_checks(...)</code> enforces three checklist-derived assertions in code:
+- expected port ordering matches declared solver/export order,
+- every port has non-empty orientation metadata,
+- per-port face areas are present/positive and within a configurable max ratio.</p>
 <h2 id="1-port-placement-realism">1) Port placement realism<a class="headerlink" href="#1-port-placement-realism" title="Permanent link">&para;</a></h2>
 <ul>
 <li>[ ] Confirm each port tag is physically located between the intended leg pair.</li>
