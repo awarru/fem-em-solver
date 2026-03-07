@@ -1,6 +1,11 @@
 """Core FEM formulations and solvers."""
 
-from .solvers import MagnetostaticProblem, MagnetostaticSolver
+from .solvers import (
+    LinearSolveDiagnostics,
+    MagnetostaticProblem,
+    MagnetostaticSolver,
+    classify_residual_trend,
+)
 from .time_harmonic import (
     HomogeneousMaterial,
     TimeHarmonicBoundaryCondition,
@@ -12,8 +17,10 @@ from .time_harmonic import (
 )
 
 __all__ = [
+    "LinearSolveDiagnostics",
     "MagnetostaticProblem",
     "MagnetostaticSolver",
+    "classify_residual_trend",
     "HomogeneousMaterial",
     "TimeHarmonicBoundaryCondition",
     "TimeHarmonicFields",

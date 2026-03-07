@@ -121,12 +121,32 @@ def main():
         facet_tags=facet_tags,
         phantom_material=phantom,
         phantom_tag=3,
+        solver_petsc_options={
+            "ksp_type": "gmres",
+            "pc_type": "jacobi",
+            "ksp_rtol": 1e-8,
+            "ksp_max_it": 300,
+        },
+        collect_solver_diagnostics=True,
     )
     th_solver = TimeHarmonicSolver(th_problem, degree=1)
     th_fields = th_solver.solve(current_density=current_density, subdomain_ids=[1, 2], gauge_penalty=1e-3)
     e_field = th_fields.e_imag
     if comm.rank == 0:
         print("  Time-harmonic solve complete (using E_imag as reported E field)")
+        if th_fields.solve_diagnostics is not None:
+            d = th_fields.solve_diagnostics
+            print("  solve health diagnostics:")
+            print(
+                "    "
+                f"ksp={d.ksp_type}, pc={d.pc_type}, converged={d.converged} "
+                f"(reason={d.converged_reason}), iterations={d.iterations}"
+            )
+            print(
+                "    "
+                f"residual_norm={d.residual_norm:.6e}, residual_trend={d.residual_trend}, "
+                f"history_samples={len(d.residual_history)}"
+            )
 
     # Phantom metrics + phantom-only CSV/JSON exports.
     output_dir = Path("paraview_output")

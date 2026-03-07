@@ -345,7 +345,7 @@ scripts/testing/run_and_log.sh C5 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### C6 — Convergence/conditioning diagnostics
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Surface conditioning issues early for human tuning.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: C6 — Convergence/conditioning diagnostics.**
+**Next chunk: D1 — Calibration checklist to executable checks bridge.**
 
-Reason: C5 now adds solver-level energy/consistency diagnostics (including warning thresholds) beyond finite/non-zero checks. Next, surface convergence/conditioning health indicators for human tuning.
+Reason: C6 now adds optional convergence/conditioning health diagnostics (including residual trend summaries) for the time-harmonic path. Next, convert calibration checklist expectations into executable port-definition checks.

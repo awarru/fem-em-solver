@@ -19,7 +19,7 @@ Boundary conditions:
     - Natural: (∇ × A) × n = 0 (magnetic insulation)
 """
 
-from typing import Optional, Callable, Union, List, Sequence
+from typing import Optional, Callable, Union, List, Sequence, Mapping, Any
 import numpy as np
 from dataclasses import dataclass
 
@@ -41,7 +41,54 @@ class MagnetostaticProblem:
     cell_tags: Optional[dolfinx.mesh.MeshTags] = None
     facet_tags: Optional[dolfinx.mesh.MeshTags] = None
     mu: Union[float, Callable] = MU_0
-    
+
+
+@dataclass(frozen=True)
+class LinearSolveDiagnostics:
+    """Best-effort PETSc linear solve diagnostics for health monitoring."""
+
+    ksp_type: str
+    pc_type: str
+    converged_reason: int
+    iterations: int
+    residual_norm: float
+    residual_history: tuple[float, ...]
+    residual_trend: str
+
+    @property
+    def converged(self) -> bool:
+        """True when PETSc converged reason indicates success (> 0)."""
+        return self.converged_reason > 0
+
+
+def classify_residual_trend(residual_history: Sequence[float]) -> str:
+    """Classify residual progression for compact diagnostics.
+
+    Parameters
+    ----------
+    residual_history:
+        Sequence of finite non-negative residual norms collected per iteration.
+    """
+    if len(residual_history) == 0:
+        return "unavailable"
+    if len(residual_history) == 1:
+        return "single-sample"
+
+    history = np.asarray(residual_history, dtype=np.float64)
+    if not np.isfinite(history).all() or np.any(history < 0):
+        return "invalid"
+
+    deltas = np.diff(history)
+    decrease_fraction = float(np.count_nonzero(deltas <= 0.0)) / float(len(deltas))
+
+    if np.all(deltas <= 0.0):
+        return "monotone-decrease"
+    if decrease_fraction >= 0.75:
+        return "mostly-decreasing"
+    if decrease_fraction >= 0.5:
+        return "mixed"
+    return "mostly-increasing"
+
 
 class MagnetostaticSolver:
     """Solver for magnetostatic problems using vector potential formulation.
@@ -69,12 +116,47 @@ class MagnetostaticSolver:
         # Solution field
         self.A = fem.Function(self.V, name="A")
         self._solved = False
+        self._last_solve_diagnostics: Optional[LinearSolveDiagnostics] = None
         
+    @property
+    def last_solve_diagnostics(self) -> Optional[LinearSolveDiagnostics]:
+        """Return diagnostics from the most recent linear solve, if requested."""
+        return self._last_solve_diagnostics
+
+    @staticmethod
+    def _extract_ksp_diagnostics(ksp) -> Optional[LinearSolveDiagnostics]:
+        """Extract best-effort PETSc KSP diagnostics."""
+        if ksp is None:
+            return None
+
+        try:
+            history_raw = ksp.getConvergenceHistory()
+            history = tuple(float(value) for value in history_raw)
+        except Exception:
+            history = tuple()
+
+        try:
+            residual_norm = float(ksp.getResidualNorm())
+        except Exception:
+            residual_norm = float("nan")
+
+        return LinearSolveDiagnostics(
+            ksp_type=str(ksp.getType()),
+            pc_type=str(ksp.getPC().getType()),
+            converged_reason=int(ksp.getConvergedReason()),
+            iterations=int(ksp.getIterationNumber()),
+            residual_norm=residual_norm,
+            residual_history=history,
+            residual_trend=classify_residual_trend(history),
+        )
+
     def solve(self, current_density: Optional[Callable] = None, 
               bc_functions: Optional[List] = None,
               subdomain_id: Optional[int] = None,
               subdomain_ids: Optional[Sequence[int]] = None,
-              gauge_penalty: float = 1e-3) -> fem.Function:
+              gauge_penalty: float = 1e-3,
+              petsc_options: Optional[Mapping[str, Any]] = None,
+              collect_solver_diagnostics: bool = False) -> fem.Function:
         """Solve the magnetostatic problem.
         
         Parameters
@@ -94,7 +176,13 @@ class MagnetostaticSolver:
         gauge_penalty : float, optional
             Small regularization term added to remove the nullspace in
             pure curl-curl problems (default: 1e-3).
-            
+        petsc_options : mapping, optional
+            PETSc KSP/PC options override. Defaults to direct solve
+            (``ksp_type=preonly``, ``pc_type=lu``).
+        collect_solver_diagnostics : bool, optional
+            If True, request PETSc convergence history and expose
+            ``last_solve_diagnostics`` for residual trend summaries.
+
         Returns
         -------
         fem.Function
@@ -153,14 +241,27 @@ class MagnetostaticSolver:
             bcs = bc_functions
             
         # Solve
+        options = {"ksp_type": "preonly", "pc_type": "lu"}
+        if petsc_options:
+            options.update(dict(petsc_options))
+
         problem = LinearProblem(
-            a, L, 
+            a,
+            L,
             bcs=bcs,
-            petsc_options={"ksp_type": "preonly", "pc_type": "lu"}
+            petsc_options=options,
         )
+
+        if collect_solver_diagnostics:
+            try:
+                problem.solver.setConvergenceHistory()
+            except Exception:
+                pass
+
         self.A = problem.solve()
         self._solved = True
-        
+        self._last_solve_diagnostics = self._extract_ksp_diagnostics(problem.solver)
+
         return self.A
     
     def compute_b_field(self) -> fem.Function:

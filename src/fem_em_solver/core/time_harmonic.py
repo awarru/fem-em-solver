@@ -12,7 +12,7 @@ from dolfinx import fem
 
 from ..materials import GelledSalinePhantomMaterial
 from ..utils.constants import EPSILON_0, MU_0
-from .solvers import MagnetostaticProblem, MagnetostaticSolver
+from .solvers import LinearSolveDiagnostics, MagnetostaticProblem, MagnetostaticSolver
 
 
 class TimeHarmonicBoundaryCondition(str, Enum):
@@ -77,6 +77,8 @@ class TimeHarmonicProblem:
     phantom_material: Optional[GelledSalinePhantomMaterial] = None
     phantom_tag: int = 3
     boundary_condition: TimeHarmonicBoundaryCondition | str = TimeHarmonicBoundaryCondition.NATURAL
+    solver_petsc_options: Optional[Mapping[str, object]] = None
+    collect_solver_diagnostics: bool = False
 
 
 @dataclass
@@ -90,6 +92,7 @@ class TimeHarmonicFields:
     epsilon_r_field: Optional[fem.Function] = None
     boundary_condition: TimeHarmonicBoundaryCondition = TimeHarmonicBoundaryCondition.NATURAL
     dirichlet_dof_count: int = 0
+    solve_diagnostics: Optional[LinearSolveDiagnostics] = None
 
     @property
     def omega(self) -> float:
@@ -269,6 +272,8 @@ class TimeHarmonicSolver:
             subdomain_id=subdomain_id,
             subdomain_ids=subdomain_ids,
             gauge_penalty=gauge_penalty,
+            petsc_options=self.problem.solver_petsc_options,
+            collect_solver_diagnostics=self.problem.collect_solver_diagnostics,
         )
 
         dg = fem.functionspace(self.mesh, ("DG", self.degree, (3,)))
@@ -296,6 +301,7 @@ class TimeHarmonicSolver:
             epsilon_r_field=epsilon_r_field,
             boundary_condition=selected_bc,
             dirichlet_dof_count=dirichlet_dof_count,
+            solve_diagnostics=mag_solver.last_solve_diagnostics,
         )
         return self._fields
 

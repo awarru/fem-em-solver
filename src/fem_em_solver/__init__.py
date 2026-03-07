@@ -10,8 +10,10 @@ __author__ = "Awarru"
 # Core imports
 from .core import (
     HomogeneousMaterial,
+    LinearSolveDiagnostics,
     MagnetostaticProblem,
     MagnetostaticSolver,
+    classify_residual_trend,
     TimeHarmonicBoundaryCondition,
     TimeHarmonicFields,
     TimeHarmonicProblem,
@@ -33,8 +35,10 @@ from .ports import (
 )
 
 __all__ = [
+    "LinearSolveDiagnostics",
     "MagnetostaticProblem",
     "MagnetostaticSolver",
+    "classify_residual_trend",
     "HomogeneousMaterial",
     "TimeHarmonicBoundaryCondition",
     "TimeHarmonicFields",
