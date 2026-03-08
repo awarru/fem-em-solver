@@ -853,6 +853,12 @@
 <td>none</td>
 </tr>
 <tr>
+<td>D2</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>9bc581074a33c5f5de2f5102a53f8f5fd01f2b40</code></td>
+<td>none</td>
+</tr>
+<tr>
 <td>A1</td>
 <td>🧪 AWAITING-HUMAN-TEST</td>
 <td><code>79e5cb22abfb2ed757cd30937d6a4d97e5363b29</code></td>
@@ -1484,6 +1490,28 @@
 <li>tests/ports/test_port_definition.py::test_run_port_calibration_checks_rejects_missing_orientation_metadata PASSED</li>
 <li>tests/ports/test_port_definition.py::test_run_port_calibration_checks_rejects_inconsistent_face_area_ratio PASSED</li>
 <li>Output/error diagnostics for failing calibration assertions include docs/ports/human_port_calibration_checklist.md reference</li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: D2 — Multi-port drive/termination consistency checks</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 9bc581074a33c5f5de2f5102a53f8f5fd01f2b40</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>docs/testing/pending-tests.md</li>
+<li>src/fem_em_solver/ports/<strong>init</strong>.py</li>
+<li>src/fem_em_solver/ports/excitation.py</li>
+<li>src/fem_em_solver/ports/sparameters.py</li>
+<li>tests/ports/test_sparameter_assembly.py</li>
+<li>tests/solver/test_single_port_excitation.py</li>
+<li>Manual test command: scripts/testing/run_and_log.sh D2 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver/test_single_port_excitation.py -v'"</li>
+<li>Expected pass signal:</li>
+<li>tests/solver/test_single_port_excitation.py::test_single_port_excitation_returns_finite_estimates PASSED</li>
+<li>tests/solver/test_single_port_excitation.py::test_single_port_excitation_rejects_driven_index_mismatch PASSED</li>
+<li>tests/solver/test_single_port_excitation.py::test_single_port_excitation_rejects_invalid_passive_termination_map PASSED</li>
+<li>Output includes <code>single-port excitation diagnostics:</code> lines with <code>driven_port: ... (index=...)</code> and per-port <code>idx=</code>, <code>driven=</code>, <code>distance=</code>, <code>coupling=</code>, and <code>termination=</code> fields</li>
 <li>Notes/blockers: none</li>
 </ul>
 
