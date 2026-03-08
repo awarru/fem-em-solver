@@ -32,10 +32,15 @@ def test_n_port_sweep_assembles_finite_matrix_with_expected_shape(monkeypatch):
     ]
 
     def _fake_single_port_case(problem, ports, *, driven_port_id, drive_voltage_v, **_kwargs):
-        from fem_em_solver.ports import PortVoltageCurrentEstimate, SinglePortExcitationResult
+        from fem_em_solver.ports import (
+            PortSolveContext,
+            PortVoltageCurrentEstimate,
+            SinglePortExcitationResult,
+        )
 
         drive_idx = [p.port_id for p in ports].index(driven_port_id)
         responses = {}
+        solve_context = {}
         for idx, port in enumerate(ports):
             if idx == drive_idx:
                 voltage = complex(drive_voltage_v)
@@ -50,11 +55,22 @@ def test_n_port_sweep_assembles_finite_matrix_with_expected_shape(monkeypatch):
             else:
                 current = 0.5 * voltage / port.z0_ohm
 
+            is_driven = idx == drive_idx
             responses[port.port_id] = PortVoltageCurrentEstimate(
                 port_id=port.port_id,
                 voltage_v=voltage,
                 current_a=current,
-                is_driven=(idx == drive_idx),
+                is_driven=is_driven,
+                termination_ohm=port.z0_ohm,
+            )
+            solve_context[port.port_id] = PortSolveContext(
+                port_id=port.port_id,
+                port_index=idx,
+                driven_port_id=driven_port_id,
+                driven_port_index=drive_idx,
+                is_driven=is_driven,
+                wrapped_ring_distance=min(abs(idx - drive_idx), len(ports) - abs(idx - drive_idx)),
+                coupling_factor=1.0 if is_driven else 0.15,
                 termination_ohm=port.z0_ohm,
             )
 
@@ -62,6 +78,7 @@ def test_n_port_sweep_assembles_finite_matrix_with_expected_shape(monkeypatch):
             driven_port_id=driven_port_id,
             frequency_hz=problem.frequency_hz,
             responses=responses,
+            solve_context=solve_context,
         )
 
     monkeypatch.setattr(sparam_module, "run_single_port_excitation_case", _fake_single_port_case)
@@ -92,11 +109,18 @@ def test_n_port_sweep_rejects_zero_incident_drive(monkeypatch):
     ]
 
     def _fake_zero_incident(problem, ports, *, driven_port_id, **_kwargs):
-        from fem_em_solver.ports import PortVoltageCurrentEstimate, SinglePortExcitationResult
+        from fem_em_solver.ports import (
+            PortSolveContext,
+            PortVoltageCurrentEstimate,
+            SinglePortExcitationResult,
+        )
 
         responses = {}
-        for port in ports:
-            if port.port_id == driven_port_id:
+        solve_context = {}
+        drive_idx = [p.port_id for p in ports].index(driven_port_id)
+        for idx, port in enumerate(ports):
+            is_driven = port.port_id == driven_port_id
+            if is_driven:
                 voltage = 1.0 + 0.0j
                 current = -(1.0 / port.z0_ohm) + 0.0j  # forces a = (V + Z0*I)/(2*sqrt(Z0)) = 0
             else:
@@ -107,7 +131,17 @@ def test_n_port_sweep_rejects_zero_incident_drive(monkeypatch):
                 port_id=port.port_id,
                 voltage_v=voltage,
                 current_a=current,
-                is_driven=(port.port_id == driven_port_id),
+                is_driven=is_driven,
+                termination_ohm=port.z0_ohm,
+            )
+            solve_context[port.port_id] = PortSolveContext(
+                port_id=port.port_id,
+                port_index=idx,
+                driven_port_id=driven_port_id,
+                driven_port_index=drive_idx,
+                is_driven=is_driven,
+                wrapped_ring_distance=min(abs(idx - drive_idx), len(ports) - abs(idx - drive_idx)),
+                coupling_factor=1.0 if is_driven else 0.0,
                 termination_ohm=port.z0_ohm,
             )
 
@@ -115,6 +149,7 @@ def test_n_port_sweep_rejects_zero_incident_drive(monkeypatch):
             driven_port_id=driven_port_id,
             frequency_hz=problem.frequency_hz,
             responses=responses,
+            solve_context=solve_context,
         )
 
     monkeypatch.setattr(sparam_module, "run_single_port_excitation_case", _fake_zero_incident)

@@ -19,6 +19,7 @@ from .definitions import (
     validate_required_port_tags_exist,
 )
 from .excitation import (
+    PortSolveContext,
     PortVoltageCurrentEstimate,
     SinglePortExcitationResult,
     run_single_port_excitation_case,
@@ -43,6 +44,7 @@ __all__ = [
     "validate_port_ordering",
     "validate_port_orientation_metadata",
     "validate_required_port_tags_exist",
+    "PortSolveContext",
     "PortVoltageCurrentEstimate",
     "SinglePortExcitationResult",
     "run_single_port_excitation_case",

@@ -383,7 +383,7 @@ scripts/testing/run_and_log.sh D1 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### D2 — Multi-port drive/termination consistency checks
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Ensure driven/passive configuration is deterministic and traceable.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: D2 — Multi-port drive/termination consistency checks.**
+**Next chunk: D3 — S-matrix reciprocity/passivity sanity metrics.**
 
-Reason: D1 now bridges calibration checklist assumptions into executable checks for port ordering, orientation metadata, and face-area consistency. Next, enforce deterministic driven/passive setup diagnostics.
+Reason: D2 now enforces deterministic driven/passive setup validation and per-port solve-context diagnostics. Next, add matrix-level physical sanity metrics for reciprocity and passivity.

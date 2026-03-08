@@ -43,6 +43,7 @@ Optional helpers:
 | C5 | 🧪 AWAITING-HUMAN-TEST | `388c2c0a07ed278facf5f04391527c39ba3a5ecc` | none |
 | C6 | 🧪 AWAITING-HUMAN-TEST | `59a69892181593e7228c329077ddd225f508966c` | none |
 | D1 | 🧪 AWAITING-HUMAN-TEST | `4de76c5c30c92f45ba04f4ff2ac75a3f55046e2b` | none |
+| D2 | 🧪 AWAITING-HUMAN-TEST | `06c5689e3f3e534fc7d367bf8b5b72fcbf54c658` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -569,4 +570,23 @@ Optional helpers:
   - tests/ports/test_port_definition.py::test_run_port_calibration_checks_rejects_missing_orientation_metadata PASSED
   - tests/ports/test_port_definition.py::test_run_port_calibration_checks_rejects_inconsistent_face_area_ratio PASSED
   - Output/error diagnostics for failing calibration assertions include docs/ports/human_port_calibration_checklist.md reference
+- Notes/blockers: none
+
+- Chunk: D2 — Multi-port drive/termination consistency checks
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 06c5689e3f3e534fc7d367bf8b5b72fcbf54c658
+- Files changed:
+  - ROADMAP.md
+  - docs/testing/pending-tests.md
+  - src/fem_em_solver/ports/__init__.py
+  - src/fem_em_solver/ports/excitation.py
+  - src/fem_em_solver/ports/sparameters.py
+  - tests/ports/test_sparameter_assembly.py
+  - tests/solver/test_single_port_excitation.py
+- Manual test command: scripts/testing/run_and_log.sh D2 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/solver/test_single_port_excitation.py -v'"
+- Expected pass signal:
+  - tests/solver/test_single_port_excitation.py::test_single_port_excitation_returns_finite_estimates PASSED
+  - tests/solver/test_single_port_excitation.py::test_single_port_excitation_rejects_driven_index_mismatch PASSED
+  - tests/solver/test_single_port_excitation.py::test_single_port_excitation_rejects_invalid_passive_termination_map PASSED
+  - Output includes `single-port excitation diagnostics:` lines with `driven_port: ... (index=...)` and per-port `idx=`, `driven=`, `distance=`, `coupling=`, and `termination=` fields
 - Notes/blockers: none

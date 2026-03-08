@@ -102,11 +102,12 @@ def run_n_port_sparameter_sweep(
         raise ValueError("port_id values must be unique")
 
     excitation_results: dict[str, SinglePortExcitationResult] = {}
-    for port in ports:
+    for drive_idx, port in enumerate(ports):
         excitation_results[port.port_id] = run_single_port_excitation_case(
             problem,
             ports,
             driven_port_id=port.port_id,
+            driven_port_index=drive_idx,
             drive_voltage_v=drive_voltage_v,
             terminated_port_impedance_ohm=terminated_port_impedance_ohm,
             current_density=current_density,

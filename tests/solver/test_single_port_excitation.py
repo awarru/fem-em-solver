@@ -1,4 +1,4 @@
-"""Tests for single-port excitation hook and V/I estimates (chunk E3)."""
+"""Tests for single-port excitation hook and V/I estimates (chunk E3/D2)."""
 
 from __future__ import annotations
 
@@ -79,6 +79,7 @@ def test_single_port_excitation_returns_finite_estimates(monkeypatch):
         problem,
         ports,
         driven_port_id="P1",
+        driven_port_index=0,
         drive_voltage_v=1.0 + 0.0j,
         terminated_port_impedance_ohm=50.0,
     )
@@ -100,6 +101,15 @@ def test_single_port_excitation_returns_finite_estimates(monkeypatch):
     assert abs(passive.voltage_v) < abs(driven.voltage_v)
     assert abs(passive.current_a) > 0.0
 
+    driven_context = result.solve_context["P1"]
+    passive_context = result.solve_context["P2"]
+    assert driven_context.port_index == 0
+    assert driven_context.driven_port_index == 0
+    assert driven_context.coupling_factor == pytest.approx(1.0)
+    assert passive_context.port_index == 1
+    assert passive_context.wrapped_ring_distance == 1
+    assert passive_context.termination_ohm == pytest.approx(50.0)
+
 
 def test_single_port_excitation_rejects_missing_required_tags():
     problem = _build_test_problem()
@@ -110,4 +120,92 @@ def test_single_port_excitation_rejects_missing_required_tags():
             problem,
             ports,
             driven_port_id="P1",
+        )
+
+
+def test_single_port_excitation_rejects_driven_index_mismatch(monkeypatch):
+    problem = _build_test_problem()
+
+    from fem_em_solver.ports import excitation as excitation_module
+
+    class DummyTimeHarmonicSolver:
+        def __init__(self, problem, degree=1):
+            self.problem = problem
+
+        def solve(self, **_kwargs):
+            dg_vec = fem.functionspace(self.problem.mesh, ("DG", 1, (3,)))
+            dg0 = fem.functionspace(self.problem.mesh, ("DG", 0))
+            e_real = fem.Function(dg_vec, name="E_real_dummy")
+            e_imag = fem.Function(dg_vec, name="E_imag_dummy")
+            sigma = fem.Function(dg0, name="sigma_dummy")
+            epsilon_r = fem.Function(dg0, name="epsilon_dummy")
+            return TimeHarmonicFields(
+                e_real=e_real,
+                e_imag=e_imag,
+                frequency_hz=self.problem.frequency_hz,
+                sigma_field=sigma,
+                epsilon_r_field=epsilon_r,
+            )
+
+    monkeypatch.setattr(excitation_module, "TimeHarmonicSolver", DummyTimeHarmonicSolver)
+
+    ports = [
+        PortDefinition(port_id="P1", positive_tag=11, negative_tag=12, orientation="cw"),
+        PortDefinition(port_id="P2", positive_tag=21, negative_tag=22, orientation="cw"),
+    ]
+
+    with pytest.raises(ValueError, match=r"driven_port_id/index mismatch"):
+        run_single_port_excitation_case(
+            problem,
+            ports,
+            driven_port_id="P1",
+            driven_port_index=1,
+        )
+
+
+def test_single_port_excitation_rejects_invalid_passive_termination_map(monkeypatch):
+    problem = _build_test_problem()
+
+    from fem_em_solver.ports import excitation as excitation_module
+
+    class DummyTimeHarmonicSolver:
+        def __init__(self, problem, degree=1):
+            self.problem = problem
+
+        def solve(self, **_kwargs):
+            dg_vec = fem.functionspace(self.problem.mesh, ("DG", 1, (3,)))
+            dg0 = fem.functionspace(self.problem.mesh, ("DG", 0))
+            e_real = fem.Function(dg_vec, name="E_real_dummy")
+            e_imag = fem.Function(dg_vec, name="E_imag_dummy")
+            sigma = fem.Function(dg0, name="sigma_dummy")
+            epsilon_r = fem.Function(dg0, name="epsilon_dummy")
+            return TimeHarmonicFields(
+                e_real=e_real,
+                e_imag=e_imag,
+                frequency_hz=self.problem.frequency_hz,
+                sigma_field=sigma,
+                epsilon_r_field=epsilon_r,
+            )
+
+    monkeypatch.setattr(excitation_module, "TimeHarmonicSolver", DummyTimeHarmonicSolver)
+
+    ports = [
+        PortDefinition(port_id="P1", positive_tag=11, negative_tag=12, orientation="cw"),
+        PortDefinition(port_id="P2", positive_tag=21, negative_tag=22, orientation="cw"),
+    ]
+
+    with pytest.raises(ValueError, match=r"must not include driven port"):
+        run_single_port_excitation_case(
+            problem,
+            ports,
+            driven_port_id="P1",
+            passive_port_terminations_ohm={"P1": 25.0},
+        )
+
+    with pytest.raises(ValueError, match=r"passive termination must be finite and positive"):
+        run_single_port_excitation_case(
+            problem,
+            ports,
+            driven_port_id="P1",
+            passive_port_terminations_ohm={"P2": 0.0},
         )
