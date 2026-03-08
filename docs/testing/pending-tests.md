@@ -44,6 +44,7 @@ Optional helpers:
 | C6 | 🧪 AWAITING-HUMAN-TEST | `59a69892181593e7228c329077ddd225f508966c` | none |
 | D1 | 🧪 AWAITING-HUMAN-TEST | `4de76c5c30c92f45ba04f4ff2ac75a3f55046e2b` | none |
 | D2 | 🧪 AWAITING-HUMAN-TEST | `9bc581074a33c5f5de2f5102a53f8f5fd01f2b40` | none |
+| D3 | 🧪 AWAITING-HUMAN-TEST | `1c71ea3d3e42f97ff41aa2003697b44a93f4e684` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -589,4 +590,21 @@ Optional helpers:
   - tests/solver/test_single_port_excitation.py::test_single_port_excitation_rejects_driven_index_mismatch PASSED
   - tests/solver/test_single_port_excitation.py::test_single_port_excitation_rejects_invalid_passive_termination_map PASSED
   - Output includes `single-port excitation diagnostics:` lines with `driven_port: ... (index=...)` and per-port `idx=`, `driven=`, `distance=`, `coupling=`, and `termination=` fields
+- Notes/blockers: none
+
+- Chunk: D3 — S-matrix reciprocity/passivity sanity metrics
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 1c71ea3d3e42f97ff41aa2003697b44a93f4e684
+- Files changed:
+  - ROADMAP.md
+  - docs/testing/pending-tests.md
+  - src/fem_em_solver/ports/__init__.py
+  - src/fem_em_solver/ports/sparameters.py
+  - tests/ports/test_sparameter_assembly.py
+- Manual test command: scripts/testing/run_and_log.sh D3 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/ports/test_sparameter_assembly.py -v'"
+- Expected pass signal:
+  - tests/ports/test_sparameter_assembly.py::test_n_port_sweep_assembles_finite_matrix_with_expected_shape PASSED
+  - tests/ports/test_sparameter_assembly.py::test_sparameter_sanity_metrics_report_low_reciprocity_delta_for_symmetric_matrix PASSED
+  - tests/ports/test_sparameter_assembly.py::test_sparameter_sanity_metrics_emit_warnings_for_non_reciprocal_or_non_passive_matrix PASSED
+  - Output includes `S-matrix sanity metrics:` with `max|Sij-Sji|`, `max rel`, `sigma_max`, and `max column power sum`
 - Notes/blockers: none
