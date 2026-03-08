@@ -1,11 +1,15 @@
-"""Tests for N-port sweep and S-parameter matrix assembly (chunk E4)."""
+"""Tests for N-port sweep and S-parameter matrix assembly (chunk E4/D3)."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
 
-from fem_em_solver.ports import PortDefinition, run_n_port_sparameter_sweep
+from fem_em_solver.ports import (
+    PortDefinition,
+    run_n_port_sparameter_sweep,
+    summarize_sparameter_sanity,
+)
 
 
 class _DummyComm:
@@ -99,6 +103,12 @@ def test_n_port_sweep_assembles_finite_matrix_with_expected_shape(monkeypatch):
     diagonal = np.diag(result.s_matrix)
     assert np.all(np.abs(diagonal) > 0.0)
 
+    # D3 sanity report should be populated and warning-oriented.
+    assert result.sanity_report.reciprocity_max_abs_delta >= 0.0
+    assert result.sanity_report.reciprocity_max_rel_delta >= 0.0
+    assert result.sanity_report.passivity_max_sigma >= 0.0
+    assert result.sanity_report.passivity_max_column_power_sum >= 0.0
+
 
 def test_n_port_sweep_rejects_zero_incident_drive(monkeypatch):
     from fem_em_solver.ports import sparameters as sparam_module
@@ -156,3 +166,40 @@ def test_n_port_sweep_rejects_zero_incident_drive(monkeypatch):
 
     with pytest.raises(ValueError, match="incident wave.*is zero"):
         run_n_port_sparameter_sweep(_DummyProblem(), ports)
+
+
+def test_sparameter_sanity_metrics_report_low_reciprocity_delta_for_symmetric_matrix():
+    s_matrix = np.array(
+        [
+            [0.05 + 0.01j, 0.10 - 0.02j, 0.08 + 0.00j],
+            [0.10 - 0.02j, 0.04 + 0.00j, 0.07 + 0.01j],
+            [0.08 + 0.00j, 0.07 + 0.01j, 0.03 - 0.01j],
+        ],
+        dtype=np.complex128,
+    )
+
+    report = summarize_sparameter_sanity(s_matrix)
+
+    assert report.reciprocity_max_abs_delta <= 1e-12
+    assert report.reciprocity_max_rel_delta <= 1e-12
+    assert report.passivity_max_sigma <= 1.0
+    assert report.passivity_max_column_power_sum <= 1.0
+    assert report.warnings == ()
+
+
+def test_sparameter_sanity_metrics_emit_warnings_for_non_reciprocal_or_non_passive_matrix():
+    s_matrix = np.array(
+        [
+            [0.10 + 0.00j, 0.70 + 0.00j],
+            [0.20 + 0.00j, 1.20 + 0.00j],
+        ],
+        dtype=np.complex128,
+    )
+
+    report = summarize_sparameter_sanity(s_matrix)
+
+    assert report.reciprocity_max_abs_delta > 0.05
+    assert report.passivity_max_sigma > 1.05
+    assert report.passivity_max_column_power_sum > 1.05
+    assert any("reciprocity" in warning for warning in report.warnings)
+    assert any("passivity" in warning for warning in report.warnings)

@@ -1,4 +1,4 @@
-"""N-port sweep and S-parameter assembly helpers (chunk E4)."""
+"""N-port sweep and S-parameter assembly helpers (chunk E4/D3)."""
 
 from __future__ import annotations
 
@@ -16,6 +16,17 @@ from .excitation import (
 
 
 @dataclass(frozen=True)
+class SMatrixSanityReport:
+    """First-line physical sanity metrics for an S-matrix (chunk D3)."""
+
+    reciprocity_max_abs_delta: float
+    reciprocity_max_rel_delta: float
+    passivity_max_sigma: float
+    passivity_max_column_power_sum: float
+    warnings: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class SParameterSweepResult:
     """Container for one frequency-point N-port S-parameter sweep."""
 
@@ -23,6 +34,7 @@ class SParameterSweepResult:
     port_ids: tuple[str, ...]
     s_matrix: np.ndarray
     excitation_results: dict[str, SinglePortExcitationResult]
+    sanity_report: SMatrixSanityReport
 
 
 def _power_waves(voltage_v: complex, current_a: complex, z0_ohm: float) -> tuple[complex, complex]:
@@ -34,6 +46,68 @@ def _power_waves(voltage_v: complex, current_a: complex, z0_ohm: float) -> tuple
     a_wave = (voltage_v + z0_ohm * current_a) / (2.0 * sqrt_z0)
     b_wave = (voltage_v - z0_ohm * current_a) / (2.0 * sqrt_z0)
     return a_wave, b_wave
+
+
+def summarize_sparameter_sanity(
+    s_matrix: np.ndarray,
+    *,
+    reciprocity_abs_warn_threshold: float = 5e-2,
+    reciprocity_rel_warn_threshold: float = 2e-1,
+    passivity_warn_margin: float = 5e-2,
+) -> SMatrixSanityReport:
+    """Compute reciprocity/passivity sanity metrics with warning-oriented thresholds."""
+    if s_matrix.ndim != 2:
+        raise ValueError("s_matrix must be rank-2")
+    if s_matrix.shape[0] != s_matrix.shape[1]:
+        raise ValueError("s_matrix must be square")
+    if not np.all(np.isfinite(s_matrix.real)) or not np.all(np.isfinite(s_matrix.imag)):
+        raise ValueError("s_matrix contains non-finite values")
+
+    reciprocity_delta = s_matrix - s_matrix.T
+    reciprocity_max_abs_delta = float(np.max(np.abs(reciprocity_delta)))
+
+    scale = np.maximum(np.maximum(np.abs(s_matrix), np.abs(s_matrix.T)), 1e-12)
+    reciprocity_max_rel_delta = float(np.max(np.abs(reciprocity_delta) / scale))
+
+    singular_values = np.linalg.svd(s_matrix, compute_uv=False)
+    passivity_max_sigma = float(np.max(singular_values))
+
+    column_power_sums = np.sum(np.abs(s_matrix) ** 2, axis=0)
+    passivity_max_column_power_sum = float(np.max(column_power_sums))
+
+    warnings: list[str] = []
+    if reciprocity_max_abs_delta > reciprocity_abs_warn_threshold:
+        warnings.append(
+            "reciprocity abs delta exceeds warning threshold: "
+            f"{reciprocity_max_abs_delta:.3e} > {reciprocity_abs_warn_threshold:.3e}"
+        )
+    if reciprocity_max_rel_delta > reciprocity_rel_warn_threshold:
+        warnings.append(
+            "reciprocity rel delta exceeds warning threshold: "
+            f"{reciprocity_max_rel_delta:.3e} > {reciprocity_rel_warn_threshold:.3e}"
+        )
+
+    sigma_limit = 1.0 + passivity_warn_margin
+    if passivity_max_sigma > sigma_limit:
+        warnings.append(
+            "passivity sigma exceeds warning threshold: "
+            f"{passivity_max_sigma:.3e} > {sigma_limit:.3e}"
+        )
+
+    power_sum_limit = 1.0 + passivity_warn_margin
+    if passivity_max_column_power_sum > power_sum_limit:
+        warnings.append(
+            "passivity column power sum exceeds warning threshold: "
+            f"{passivity_max_column_power_sum:.3e} > {power_sum_limit:.3e}"
+        )
+
+    return SMatrixSanityReport(
+        reciprocity_max_abs_delta=reciprocity_max_abs_delta,
+        reciprocity_max_rel_delta=reciprocity_max_rel_delta,
+        passivity_max_sigma=passivity_max_sigma,
+        passivity_max_column_power_sum=passivity_max_column_power_sum,
+        warnings=tuple(warnings),
+    )
 
 
 def _assemble_sparameter_matrix(
@@ -118,6 +192,7 @@ def run_n_port_sparameter_sweep(
         )
 
     s_matrix = _assemble_sparameter_matrix(ports, excitation_results)
+    sanity_report = summarize_sparameter_sanity(s_matrix)
 
     if problem.mesh.comm.rank == 0:
         print("n-port S-parameter sweep diagnostics:")
@@ -130,10 +205,28 @@ def run_n_port_sparameter_sweep(
             for idx, value in enumerate(diagonal)
         )
         print(f"  diagonal terms: {diag_text}")
+        print("  S-matrix sanity metrics:")
+        print(
+            "    reciprocity: "
+            f"max|Sij-Sji|={sanity_report.reciprocity_max_abs_delta:.3e}, "
+            f"max rel={sanity_report.reciprocity_max_rel_delta:.3e}"
+        )
+        print(
+            "    passivity: "
+            f"sigma_max={sanity_report.passivity_max_sigma:.3e}, "
+            f"max column power sum={sanity_report.passivity_max_column_power_sum:.3e}"
+        )
+        if sanity_report.warnings:
+            print("    warnings:")
+            for warning in sanity_report.warnings:
+                print(f"      - {warning}")
+        else:
+            print("    warnings: none")
 
     return SParameterSweepResult(
         frequency_hz=problem.frequency_hz,
         port_ids=tuple(port_ids),
         s_matrix=s_matrix,
         excitation_results=excitation_results,
+        sanity_report=sanity_report,
     )

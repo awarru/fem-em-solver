@@ -24,7 +24,12 @@ from .excitation import (
     SinglePortExcitationResult,
     run_single_port_excitation_case,
 )
-from .sparameters import SParameterSweepResult, run_n_port_sparameter_sweep
+from .sparameters import (
+    SMatrixSanityReport,
+    SParameterSweepResult,
+    run_n_port_sparameter_sweep,
+    summarize_sparameter_sanity,
+)
 from .touchstone import export_touchstone, load_touchstone
 
 __all__ = [
@@ -48,8 +53,10 @@ __all__ = [
     "PortVoltageCurrentEstimate",
     "SinglePortExcitationResult",
     "run_single_port_excitation_case",
+    "SMatrixSanityReport",
     "SParameterSweepResult",
     "run_n_port_sparameter_sweep",
+    "summarize_sparameter_sanity",
     "export_touchstone",
     "load_touchstone",
 ]

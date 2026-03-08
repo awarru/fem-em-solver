@@ -401,7 +401,7 @@ scripts/testing/run_and_log.sh D2 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### D3 — S-matrix reciprocity/passivity sanity metrics
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Add first-line physical sanity checks for computed S-matrices.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: D3 — S-matrix reciprocity/passivity sanity metrics.**
+**Next chunk: D4 — Frequency sweep orchestration utility.**
 
-Reason: D2 now enforces deterministic driven/passive setup validation and per-port solve-context diagnostics. Next, add matrix-level physical sanity metrics for reciprocity and passivity.
+Reason: D3 now adds matrix-level reciprocity/passivity sanity diagnostics. Next, add deterministic coarse-to-refined sweep planning and metadata capture.
