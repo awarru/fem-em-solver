@@ -1580,7 +1580,7 @@
 <li>src/fem_em_solver/ports/touchstone.py</li>
 <li>tests/io/test_touchstone_export.py</li>
 <li>docs/testing/pending-tests.md</li>
-<li>Manual test command: scripts/testing/run_and_log.sh D5 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src python3 -m pytest tests/io/test_touchstone_export.py -v'"</li>
+<li>Manual test command: scripts/testing/run_and_log.sh D5 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/io/test_touchstone_export.py -v'"</li>
 <li>Expected pass signal:</li>
 <li>tests/io/test_touchstone_export.py::test_touchstone_export_and_roundtrip_loader PASSED</li>
 <li>tests/io/test_touchstone_export.py::test_touchstone_loader_rejects_frequency_metadata_mismatch PASSED</li>
