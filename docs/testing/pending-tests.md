@@ -45,6 +45,7 @@ Optional helpers:
 | D1 | 🧪 AWAITING-HUMAN-TEST | `4de76c5c30c92f45ba04f4ff2ac75a3f55046e2b` | none |
 | D2 | 🧪 AWAITING-HUMAN-TEST | `9bc581074a33c5f5de2f5102a53f8f5fd01f2b40` | none |
 | D3 | 🧪 AWAITING-HUMAN-TEST | `1c71ea3d3e42f97ff41aa2003697b44a93f4e684` | none |
+| D4 | 🧪 AWAITING-HUMAN-TEST | `1d7a06cc6502cb81b4cc49e39f6eeba1b5e13a3a` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -607,4 +608,22 @@ Optional helpers:
   - tests/ports/test_sparameter_assembly.py::test_sparameter_sanity_metrics_report_low_reciprocity_delta_for_symmetric_matrix PASSED
   - tests/ports/test_sparameter_assembly.py::test_sparameter_sanity_metrics_emit_warnings_for_non_reciprocal_or_non_passive_matrix PASSED
   - Output includes `S-matrix sanity metrics:` with `max|Sij-Sji|`, `max rel`, `sigma_max`, and `max column power sum`
+- Notes/blockers: none
+
+- Chunk: D4 — Frequency sweep orchestration utility
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 1d7a06cc6502cb81b4cc49e39f6eeba1b5e13a3a
+- Files changed:
+  - ROADMAP.md
+  - docs/testing/pending-tests.md
+  - src/fem_em_solver/__init__.py
+  - src/fem_em_solver/ports/__init__.py
+  - src/fem_em_solver/ports/sweep.py
+  - tests/ports/test_frequency_sweep_planner.py
+- Manual test command: scripts/testing/run_and_log.sh D4 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src python3 -m pytest tests/ports -v -k sweep'"
+- Expected pass signal:
+  - tests/ports/test_frequency_sweep_planner.py::test_plan_frequency_sweep_coarse_only_is_deterministic_and_inclusive PASSED
+  - tests/ports/test_frequency_sweep_planner.py::test_plan_frequency_sweep_coarse_plus_refined_merges_and_sorts_frequencies PASSED
+  - tests/ports/test_frequency_sweep_planner.py::test_plan_frequency_sweep_rejects_invalid_refined_config PASSED
+  - Output has no duplicate frequency points and includes coarse endpoints with refined interior points near target center
 - Notes/blockers: none
