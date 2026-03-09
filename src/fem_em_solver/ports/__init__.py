@@ -30,6 +30,7 @@ from .sparameters import (
     run_n_port_sparameter_sweep,
     summarize_sparameter_sanity,
 )
+from .sweep import FrequencySweepPlan, plan_frequency_sweep
 from .touchstone import export_touchstone, load_touchstone
 
 __all__ = [
@@ -57,6 +58,8 @@ __all__ = [
     "SParameterSweepResult",
     "run_n_port_sparameter_sweep",
     "summarize_sparameter_sanity",
+    "FrequencySweepPlan",
+    "plan_frequency_sweep",
     "export_touchstone",
     "load_touchstone",
 ]

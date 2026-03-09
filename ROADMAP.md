@@ -419,7 +419,7 @@ scripts/testing/run_and_log.sh D3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### D4 — Frequency sweep orchestration utility
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Support practical coarse-to-refined frequency sweeps.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: D4 — Frequency sweep orchestration utility.**
+**Next chunk: D5 — Touchstone metadata completeness + parser cross-check.**
 
-Reason: D3 now adds matrix-level reciprocity/passivity sanity diagnostics. Next, add deterministic coarse-to-refined sweep planning and metadata capture.
+Reason: D4 now adds deterministic coarse-to-refined sweep planning and metadata capture. Next, strengthen Touchstone metadata completeness and parser roundtrip assertions.
