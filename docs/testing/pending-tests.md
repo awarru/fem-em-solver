@@ -46,6 +46,7 @@ Optional helpers:
 | D2 | 🧪 AWAITING-HUMAN-TEST | `9bc581074a33c5f5de2f5102a53f8f5fd01f2b40` | none |
 | D3 | 🧪 AWAITING-HUMAN-TEST | `1c71ea3d3e42f97ff41aa2003697b44a93f4e684` | none |
 | D4 | 🧪 AWAITING-HUMAN-TEST | `1d7a06cc6502cb81b4cc49e39f6eeba1b5e13a3a` | none |
+| D5 | 🧪 AWAITING-HUMAN-TEST | `0402f2a76b8a45a0c585bf0af4413cd4ffe76822` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -626,4 +627,19 @@ Optional helpers:
   - tests/ports/test_frequency_sweep_planner.py::test_plan_frequency_sweep_coarse_plus_refined_merges_and_sorts_frequencies PASSED
   - tests/ports/test_frequency_sweep_planner.py::test_plan_frequency_sweep_rejects_invalid_refined_config PASSED
   - Output has no duplicate frequency points and includes coarse endpoints with refined interior points near target center
+- Notes/blockers: none
+- Chunk: D5 — Touchstone metadata completeness + parser cross-check
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 0402f2a76b8a45a0c585bf0af4413cd4ffe76822
+- Files changed:
+  - ROADMAP.md
+  - src/fem_em_solver/ports/touchstone.py
+  - tests/io/test_touchstone_export.py
+  - docs/testing/pending-tests.md
+- Manual test command: scripts/testing/run_and_log.sh D5 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src python3 -m pytest tests/io/test_touchstone_export.py -v'"
+- Expected pass signal:
+  - tests/io/test_touchstone_export.py::test_touchstone_export_and_roundtrip_loader PASSED
+  - tests/io/test_touchstone_export.py::test_touchstone_loader_rejects_frequency_metadata_mismatch PASSED
+  - tests/io/test_touchstone_export.py::test_touchstone_loader_rejects_z0_metadata_mismatch PASSED
+  - Touchstone header includes generated_utc, port_order, frequency_points_hz, and z0_ohm metadata; loader rejects mismatched metadata with explicit ValueError diagnostics
 - Notes/blockers: none
