@@ -636,7 +636,7 @@ Optional helpers:
   - src/fem_em_solver/ports/touchstone.py
   - tests/io/test_touchstone_export.py
   - docs/testing/pending-tests.md
-- Manual test command: scripts/testing/run_and_log.sh D5 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src python3 -m pytest tests/io/test_touchstone_export.py -v'"
+- Manual test command: scripts/testing/run_and_log.sh D5 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/io/test_touchstone_export.py -v'"
 - Expected pass signal:
   - tests/io/test_touchstone_export.py::test_touchstone_export_and_roundtrip_loader PASSED
   - tests/io/test_touchstone_export.py::test_touchstone_loader_rejects_frequency_metadata_mismatch PASSED
