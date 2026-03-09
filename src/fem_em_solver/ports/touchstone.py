@@ -1,7 +1,8 @@
-"""Touchstone export/load helpers for S-parameter workflows (chunk E5)."""
+"""Touchstone export/load helpers for S-parameter workflows (chunk D5)."""
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Sequence
 
@@ -111,8 +112,11 @@ def export_touchstone(
 
     frequency_values = np.array([float(s.frequency_hz) for s in sweep_results], dtype=np.float64)
 
+    generated_utc = datetime.now(timezone.utc).replace(microsecond=0)
+
     with touchstone_path.open("w", encoding="utf-8") as handle:
         handle.write("! FEM-EM Solver Touchstone export\n")
+        handle.write(f"! generated_utc: {generated_utc.isoformat().replace('+00:00', 'Z')}\n")
         handle.write(f"! port_order: {','.join(port_ids)}\n")
         handle.write(f"! frequency_points_hz: {','.join(f'{f:.9e}' for f in frequency_values)}\n")
         handle.write(f"! z0_ohm: {z0_ohm:.6f}\n")
@@ -158,6 +162,9 @@ def load_touchstone(path: str | Path) -> tuple[np.ndarray, np.ndarray, tuple[str
         raise ValueError("touchstone file extension must include port count (e.g., .s2p)")
 
     port_ids: tuple[str, ...] = tuple(f"P{i + 1}" for i in range(port_count))
+    header_frequency_points_hz: np.ndarray | None = None
+    header_z0_ohm: float | None = None
+    option_line_z0_ohm: float | None = None
     data_rows: list[list[float]] = []
 
     with touchstone_path.open("r", encoding="utf-8") as handle:
@@ -166,14 +173,29 @@ def load_touchstone(path: str | Path) -> tuple[np.ndarray, np.ndarray, tuple[str
             if not stripped:
                 continue
             if stripped.startswith("!"):
-                if stripped.lower().startswith("! port_order:"):
+                lower = stripped.lower()
+                if lower.startswith("! port_order:"):
                     raw = stripped.split(":", 1)[1].strip()
                     if raw:
                         parsed = tuple(token.strip() for token in raw.split(",") if token.strip())
                         if parsed:
                             port_ids = parsed
+                elif lower.startswith("! frequency_points_hz:"):
+                    raw = stripped.split(":", 1)[1].strip()
+                    if raw:
+                        header_frequency_points_hz = np.asarray(
+                            [float(token) for token in raw.split(",") if token.strip()],
+                            dtype=np.float64,
+                        )
+                elif lower.startswith("! z0_ohm:"):
+                    raw = stripped.split(":", 1)[1].strip()
+                    if raw:
+                        header_z0_ohm = float(raw)
                 continue
             if stripped.startswith("#"):
+                fields = stripped.split()
+                if len(fields) >= 6 and fields[4].upper() == "R":
+                    option_line_z0_ohm = float(fields[5])
                 continue
 
             fields = stripped.split()
@@ -190,6 +212,28 @@ def load_touchstone(path: str | Path) -> tuple[np.ndarray, np.ndarray, tuple[str
         )
 
     frequencies_hz = data[:, 0]
+    if len(port_ids) != port_count:
+        raise ValueError(
+            f"port_order metadata length {len(port_ids)} does not match file port count {port_count}"
+        )
+
+    if header_frequency_points_hz is not None:
+        if header_frequency_points_hz.shape != frequencies_hz.shape or not np.allclose(
+            header_frequency_points_hz,
+            frequencies_hz,
+            rtol=0.0,
+            atol=1e-3,
+        ):
+            raise ValueError("frequency_points_hz metadata does not match numeric data rows")
+
+    if header_z0_ohm is not None and option_line_z0_ohm is not None and not np.isclose(
+        header_z0_ohm,
+        option_line_z0_ohm,
+        rtol=0.0,
+        atol=1e-12,
+    ):
+        raise ValueError("z0_ohm metadata does not match Touchstone option line")
+
     s_matrices = np.zeros((data.shape[0], port_count, port_count), dtype=np.complex128)
 
     for idx in range(data.shape[0]):

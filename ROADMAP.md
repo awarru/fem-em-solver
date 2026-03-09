@@ -437,7 +437,7 @@ scripts/testing/run_and_log.sh D4 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### D5 — Touchstone metadata completeness + parser cross-check
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Make exported files robust for external tooling pipelines.
 
 **Agent tasks:**
