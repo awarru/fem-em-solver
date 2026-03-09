@@ -871,6 +871,12 @@
 <td>none</td>
 </tr>
 <tr>
+<td>D5</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>0402f2a76b8a45a0c585bf0af4413cd4ffe76822</code></td>
+<td>none</td>
+</tr>
+<tr>
 <td>A1</td>
 <td>🧪 AWAITING-HUMAN-TEST</td>
 <td><code>79e5cb22abfb2ed757cd30937d6a4d97e5363b29</code></td>
@@ -1565,6 +1571,21 @@
 <li>tests/ports/test_frequency_sweep_planner.py::test_plan_frequency_sweep_coarse_plus_refined_merges_and_sorts_frequencies PASSED</li>
 <li>tests/ports/test_frequency_sweep_planner.py::test_plan_frequency_sweep_rejects_invalid_refined_config PASSED</li>
 <li>Output has no duplicate frequency points and includes coarse endpoints with refined interior points near target center</li>
+<li>Notes/blockers: none</li>
+<li>Chunk: D5 — Touchstone metadata completeness + parser cross-check</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 0402f2a76b8a45a0c585bf0af4413cd4ffe76822</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>src/fem_em_solver/ports/touchstone.py</li>
+<li>tests/io/test_touchstone_export.py</li>
+<li>docs/testing/pending-tests.md</li>
+<li>Manual test command: scripts/testing/run_and_log.sh D5 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src python3 -m pytest tests/io/test_touchstone_export.py -v'"</li>
+<li>Expected pass signal:</li>
+<li>tests/io/test_touchstone_export.py::test_touchstone_export_and_roundtrip_loader PASSED</li>
+<li>tests/io/test_touchstone_export.py::test_touchstone_loader_rejects_frequency_metadata_mismatch PASSED</li>
+<li>tests/io/test_touchstone_export.py::test_touchstone_loader_rejects_z0_metadata_mismatch PASSED</li>
+<li>Touchstone header includes generated_utc, port_order, frequency_points_hz, and z0_ohm metadata; loader rejects mismatched metadata with explicit ValueError diagnostics</li>
 <li>Notes/blockers: none</li>
 </ul>
 
