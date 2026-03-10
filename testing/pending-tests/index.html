@@ -877,6 +877,12 @@
 <td>none</td>
 </tr>
 <tr>
+<td>D6</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>13cce30aae3f07e5262154ebd37f67819ef3c1a0</code></td>
+<td>none</td>
+</tr>
+<tr>
 <td>A1</td>
 <td>🧪 AWAITING-HUMAN-TEST</td>
 <td><code>79e5cb22abfb2ed757cd30937d6a4d97e5363b29</code></td>
@@ -1586,6 +1592,25 @@
 <li>tests/io/test_touchstone_export.py::test_touchstone_loader_rejects_frequency_metadata_mismatch PASSED</li>
 <li>tests/io/test_touchstone_export.py::test_touchstone_loader_rejects_z0_metadata_mismatch PASSED</li>
 <li>Touchstone header includes generated_utc, port_order, frequency_points_hz, and z0_ohm metadata; loader rejects mismatched metadata with explicit ValueError diagnostics</li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: D6 — Port-orientation sensitivity tests</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 13cce30aae3f07e5262154ebd37f67819ef3c1a0</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>docs/ports/human_port_calibration_checklist.md</li>
+<li>docs/testing/pending-tests.md</li>
+<li>src/fem_em_solver/ports/excitation.py</li>
+<li>tests/ports/test_port_orientation_sensitivity.py</li>
+<li>Manual test command: scripts/testing/run_and_log.sh D6 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src python3 -m pytest tests/ports -v -k orientation'"</li>
+<li>Expected pass signal:</li>
+<li>tests/ports/test_port_orientation_sensitivity.py::test_port_orientation_flip_changes_induced_voltage_sign PASSED</li>
+<li>tests/ports/test_port_orientation_sensitivity.py::test_port_orientation_flip_changes_off_diagonal_sparameter_sign PASSED</li>
+<li>Output includes <code>single-port excitation diagnostics:</code> lines where flipped orientation shows negative coupling for the flipped passive port</li>
 <li>Notes/blockers: none</li>
 </ul>
 

@@ -517,6 +517,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#orientation-sensitivity-quick-guide-d6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Orientation sensitivity quick guide (D6)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#4-comparison-against-known-or-bench-measurements" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -595,6 +606,14 @@
 <li>[ ] Recompute or rerun with alternate <code>Z0</code> (for example 50 Ω vs 75 Ω) when interpreting mismatch-sensitive trends.</li>
 <li>[ ] Record port ordering used in exported Touchstone metadata and keep it consistent across runs.</li>
 </ul>
+<h2 id="orientation-sensitivity-quick-guide-d6">Orientation sensitivity quick guide (D6)<a class="headerlink" href="#orientation-sensitivity-quick-guide-d6" title="Permanent link">&para;</a></h2>
+<p>Expected qualitative behavior when one port orientation is flipped relative to others:</p>
+<ul>
+<li>Coupling sign for that flipped port reverses in the excitation proxy diagnostics (<code>coupling</code> becomes negative).</li>
+<li>Off-diagonal transfer terms involving the flipped port (for example <code>S21</code>/<code>S12</code> in a 2-port case) should flip sign/phase direction versus the all-aligned case.</li>
+<li>Magnitude trends should remain in the same order if only orientation metadata changed (sign convention effect, not a geometry change).</li>
+</ul>
+<p>If these expectations do not hold, treat it as a possible sign-convention regression and re-check <code>positive_tag -&gt; negative_tag</code> direction labels.</p>
 <h2 id="4-comparison-against-known-or-bench-measurements">4) Comparison against known or bench measurements<a class="headerlink" href="#4-comparison-against-known-or-bench-measurements" title="Permanent link">&para;</a></h2>
 <ul>
 <li>[ ] Compare simulated <code>S11</code> resonance region to known coil behavior or prior validated runs.</li>
