@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
     
     
       
@@ -848,9 +848,9 @@
 </tr>
 <tr>
 <td>D1</td>
-<td>🧪 AWAITING-HUMAN-TEST</td>
+<td>🚫 BLOCKED</td>
 <td><code>4de76c5c30c92f45ba04f4ff2ac75a3f55046e2b</code></td>
-<td>none</td>
+<td><code>docs/testing/logs/20260226T163405Z_D1.log</code></td>
 </tr>
 <tr>
 <td>D2</td>
@@ -1498,7 +1498,7 @@
 <li>
 <p>Chunk: D1 — Calibration checklist to executable checks bridge</p>
 </li>
-<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Status: 🚫 BLOCKED</li>
 <li>Commit: 4de76c5c30c92f45ba04f4ff2ac75a3f55046e2b</li>
 <li>Files changed:</li>
 <li>ROADMAP.md</li>
@@ -1515,7 +1515,7 @@
 <li>tests/ports/test_port_definition.py::test_run_port_calibration_checks_rejects_inconsistent_face_area_ratio PASSED</li>
 <li>Output/error diagnostics for failing calibration assertions include docs/ports/human_port_calibration_checklist.md reference</li>
 <li>
-<p>Notes/blockers: none</p>
+<p>Notes/blockers: human-run log 20260226T163405Z_D1.log failed before pytest because docker compose service fem-em-solver was not running; rerun after container start</p>
 </li>
 <li>
 <p>Chunk: D2 — Multi-port drive/termination consistency checks</p>
