@@ -47,7 +47,7 @@ Optional helpers:
 | D3 | 🧪 AWAITING-HUMAN-TEST | `1c71ea3d3e42f97ff41aa2003697b44a93f4e684` | none |
 | D4 | 🧪 AWAITING-HUMAN-TEST | `1d7a06cc6502cb81b4cc49e39f6eeba1b5e13a3a` | none |
 | D5 | 🧪 AWAITING-HUMAN-TEST | `0402f2a76b8a45a0c585bf0af4413cd4ffe76822` | none |
-| D6 | 🧪 AWAITING-HUMAN-TEST | `<pending-commit>` | none |
+| D6 | 🧪 AWAITING-HUMAN-TEST | `13cce30aae3f07e5262154ebd37f67819ef3c1a0` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -647,7 +647,7 @@ Optional helpers:
 
 - Chunk: D6 — Port-orientation sensitivity tests
 - Status: 🧪 AWAITING-HUMAN-TEST
-- Commit: <pending-commit>
+- Commit: 13cce30aae3f07e5262154ebd37f67819ef3c1a0
 - Files changed:
   - ROADMAP.md
   - docs/ports/human_port_calibration_checklist.md
