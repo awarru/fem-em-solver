@@ -27,6 +27,16 @@ Executable bridge: `fem_em_solver.ports.run_port_calibration_checks(...)` enforc
 - [ ] Recompute or rerun with alternate `Z0` (for example 50 Ω vs 75 Ω) when interpreting mismatch-sensitive trends.
 - [ ] Record port ordering used in exported Touchstone metadata and keep it consistent across runs.
 
+## Orientation sensitivity quick guide (D6)
+
+Expected qualitative behavior when one port orientation is flipped relative to others:
+
+- Coupling sign for that flipped port reverses in the excitation proxy diagnostics (`coupling` becomes negative).
+- Off-diagonal transfer terms involving the flipped port (for example `S21`/`S12` in a 2-port case) should flip sign/phase direction versus the all-aligned case.
+- Magnitude trends should remain in the same order if only orientation metadata changed (sign convention effect, not a geometry change).
+
+If these expectations do not hold, treat it as a possible sign-convention regression and re-check `positive_tag -> negative_tag` direction labels.
+
 ## 4) Comparison against known or bench measurements
 
 - [ ] Compare simulated `S11` resonance region to known coil behavior or prior validated runs.

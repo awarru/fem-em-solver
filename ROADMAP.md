@@ -455,7 +455,7 @@ scripts/testing/run_and_log.sh D5 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### D6 — Port-orientation sensitivity tests
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Quantify effect of orientation mistakes and catch sign convention regressions.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: D5 — Touchstone metadata completeness + parser cross-check.**
+**Next chunk: E1 — Harden MRI example CLI/config.**
 
-Reason: D4 now adds deterministic coarse-to-refined sweep planning and metadata capture. Next, strengthen Touchstone metadata completeness and parser roundtrip assertions.
+Reason: Port-model baseline chunks through D6 are now implemented in code and queued for human verification. Next, prioritize reproducible CLI/config controls for the end-to-end MRI example workflow.

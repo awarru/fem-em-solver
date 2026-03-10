@@ -77,6 +77,20 @@ def _material_response_mean(fields: TimeHarmonicFields, fallback: HomogeneousMat
     return complex(global_sum_real[0] / global_count[0], global_sum_imag[0] / global_count[0])
 
 
+def _orientation_alignment_sign(driven_orientation: str, target_orientation: str) -> float:
+    """Return orientation alignment sign (+1 aligned, -1 flipped).
+
+    For this MVP convention, orientation metadata is treated as a directional label;
+    a passive port with a different normalized orientation label than the driven
+    port is interpreted as flipped polarity relative to the driven reference.
+    """
+    driven = str(driven_orientation).strip().lower()
+    target = str(target_orientation).strip().lower()
+    if not driven or not target:
+        return 1.0
+    return 1.0 if driven == target else -1.0
+
+
 def _normalize_passive_termination_map(
     ports: Sequence[PortDefinition],
     *,
@@ -199,6 +213,7 @@ def run_single_port_excitation_case(
     comm = problem.mesh.comm
 
     driven_index = inferred_driven_index
+    driven_orientation = ports[driven_index].orientation
     responses: dict[str, PortVoltageCurrentEstimate] = {}
     solve_context: dict[str, PortSolveContext] = {}
 
@@ -222,7 +237,8 @@ def run_single_port_excitation_case(
             term_ohm = float(port.z0_ohm)
             coupling = 1.0
         else:
-            coupling = 0.20 / (1.0 + wrapped_distance)
+            orientation_sign = _orientation_alignment_sign(driven_orientation, port.orientation)
+            coupling = orientation_sign * (0.20 / (1.0 + wrapped_distance))
             induced_open_voltage = complex(drive_voltage_v) * coupling
 
             term_ohm = float(passive_termination_map[port.port_id])
@@ -260,6 +276,7 @@ def run_single_port_excitation_case(
                 "  "
                 f"{response.port_id}: idx={context.port_index}, "
                 f"driven={response.is_driven}, "
+                f"orientation={port.orientation}, "
                 f"distance={context.wrapped_ring_distance}, "
                 f"coupling={context.coupling_factor:.6e}, "
                 f"termination={response.termination_ohm:.6f} ohm, "
