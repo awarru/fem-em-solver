@@ -365,7 +365,7 @@ scripts/testing/run_and_log.sh C6 "docker compose exec fem-em-solver bash -lc 'c
 ## Track D — Port Model & S-Parameter Credibility
 
 ### D1 — Calibration checklist to executable checks bridge
-**Status:** 🧪 AWAITING-HUMAN-TEST
+**Status:** 🚫 BLOCKED
 **Goal:** Convert manual calibration guidance into partial automated assertions.
 
 **Agent tasks:**

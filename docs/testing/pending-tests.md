@@ -42,7 +42,7 @@ Optional helpers:
 | C4 | 🧪 AWAITING-HUMAN-TEST | `393e53b9e888b17ba31ee70f69d17c4996b25fdc` | none |
 | C5 | 🧪 AWAITING-HUMAN-TEST | `388c2c0a07ed278facf5f04391527c39ba3a5ecc` | none |
 | C6 | 🧪 AWAITING-HUMAN-TEST | `59a69892181593e7228c329077ddd225f508966c` | none |
-| D1 | 🧪 AWAITING-HUMAN-TEST | `4de76c5c30c92f45ba04f4ff2ac75a3f55046e2b` | none |
+| D1 | 🚫 BLOCKED | `4de76c5c30c92f45ba04f4ff2ac75a3f55046e2b` | `docs/testing/logs/20260226T163405Z_D1.log` |
 | D2 | 🧪 AWAITING-HUMAN-TEST | `9bc581074a33c5f5de2f5102a53f8f5fd01f2b40` | none |
 | D3 | 🧪 AWAITING-HUMAN-TEST | `1c71ea3d3e42f97ff41aa2003697b44a93f4e684` | none |
 | D4 | 🧪 AWAITING-HUMAN-TEST | `1d7a06cc6502cb81b4cc49e39f6eeba1b5e13a3a` | none |
@@ -558,7 +558,7 @@ Optional helpers:
 - Notes/blockers: none
 
 - Chunk: D1 — Calibration checklist to executable checks bridge
-- Status: 🧪 AWAITING-HUMAN-TEST
+- Status: 🚫 BLOCKED
 - Commit: 4de76c5c30c92f45ba04f4ff2ac75a3f55046e2b
 - Files changed:
   - ROADMAP.md
@@ -574,7 +574,7 @@ Optional helpers:
   - tests/ports/test_port_definition.py::test_run_port_calibration_checks_rejects_missing_orientation_metadata PASSED
   - tests/ports/test_port_definition.py::test_run_port_calibration_checks_rejects_inconsistent_face_area_ratio PASSED
   - Output/error diagnostics for failing calibration assertions include docs/ports/human_port_calibration_checklist.md reference
-- Notes/blockers: none
+- Notes/blockers: human-run log 20260226T163405Z_D1.log failed before pytest because docker compose service fem-em-solver was not running; rerun after container start
 
 - Chunk: D2 — Multi-port drive/termination consistency checks
 - Status: 🧪 AWAITING-HUMAN-TEST
