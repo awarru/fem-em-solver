@@ -49,7 +49,7 @@ Optional helpers:
 | D5 | 🧪 AWAITING-HUMAN-TEST | `0402f2a76b8a45a0c585bf0af4413cd4ffe76822` | none |
 | D6 | 🧪 AWAITING-HUMAN-TEST | `13cce30aae3f07e5262154ebd37f67819ef3c1a0` | none |
 | E1 | 🧪 AWAITING-HUMAN-TEST | `0c1e1ccbf3e84fdb0f35199ab14b5a644d30924b` | none |
-| E2 | 🧪 AWAITING-HUMAN-TEST | `6ed39c6de8e3062c48dc521e0996e57261616c9e` | none |
+| E2 | 🧪 AWAITING-HUMAN-TEST | `74ee3d6ec65b23734e836bddf1e3a86bcc31c6e8` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -678,7 +678,7 @@ Optional helpers:
 
 - Chunk: E2 — Reproducible output bundle manifest
 - Status: 🧪 AWAITING-HUMAN-TEST
-- Commit: 5b2bdcac4a010342043e5fca0dcedc0290e1b883
+- Commit: 74ee3d6ec65b23734e836bddf1e3a86bcc31c6e8
 - Files changed:
   - ROADMAP.md
   - examples/mri/01_coil_phantom_fields.py
