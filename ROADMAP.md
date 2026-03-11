@@ -493,7 +493,7 @@ scripts/testing/run_and_log.sh E1 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### E2 — Reproducible output bundle manifest
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Package outputs + metadata for easier review/comparison.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: E1 — Harden MRI example CLI/config.**
+**Next chunk: E3 — Quick-look phantom metrics report.**
 
-Reason: Port-model baseline chunks through D6 are now implemented in code and queued for human verification. Next, prioritize reproducible CLI/config controls for the end-to-end MRI example workflow.
+Reason: E1 and E2 are now implemented and queued for human verification. Next, prioritize compact run-summary output for faster human review of MRI workflow quality.

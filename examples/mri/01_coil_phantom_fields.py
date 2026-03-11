@@ -11,7 +11,10 @@ This example demonstrates an end-to-end coarse workflow:
 from __future__ import annotations
 
 import argparse
+import json
+from datetime import datetime, timezone
 from pathlib import Path
+import subprocess
 import numpy as np
 import ufl
 from mpi4py import MPI
@@ -84,6 +87,66 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _resolve_git_commit_hash() -> str:
+    """Return current git commit hash, or 'unknown' when unavailable."""
+    try:
+        return (
+            subprocess.check_output(["git", "rev-parse", "HEAD"], text=True)
+            .strip()
+        )
+    except Exception:
+        return "unknown"
+
+
+def _write_output_manifest(
+    *,
+    output_dir: Path,
+    args: argparse.Namespace,
+    current_a: float,
+    mesh_params: dict[str, float],
+    written_files: dict[str, str],
+    metrics: dict,
+) -> Path:
+    """Write a reproducible run manifest capturing config + produced artifacts."""
+    artifact_paths = [Path(path) for path in written_files.values()]
+    phantom_metrics_json = output_dir / "mri_coil_phantom_phantom_metrics.json"
+    phantom_e_csv = output_dir / "mri_coil_phantom_phantom_E_samples.csv"
+    phantom_b_csv = output_dir / "mri_coil_phantom_phantom_B_samples.csv"
+    artifact_paths.extend([phantom_metrics_json, phantom_e_csv, phantom_b_csv])
+
+    manifest_payload = {
+        "generated_utc": datetime.now(timezone.utc).isoformat(),
+        "git_commit": _resolve_git_commit_hash(),
+        "parameters": {
+            "frequency_hz": float(args.frequency_hz),
+            "resolution_preset": args.resolution_preset,
+            "resolution_m": float(RESOLUTION_PRESETS[args.resolution_preset]),
+            "output_dir": str(output_dir),
+            "current_per_coil_a": float(current_a),
+            "mesh": mesh_params,
+        },
+        "artifacts": [
+            {
+                "name": path.name,
+                "path": str(path),
+                "exists": path.exists(),
+            }
+            for path in sorted(artifact_paths, key=lambda p: p.name)
+        ],
+        "key_metrics": {
+            "phantom_metrics_json": str(phantom_metrics_json),
+            "e_magnitude_mean": float(metrics["E_magnitude"]["mean"]),
+            "b_magnitude_mean": float(metrics["B_magnitude"]["mean"]),
+            "e_to_b_mean_ratio": float(metrics["consistency"]["e_to_b_mean_ratio"]),
+            "consistency_warning_count": int(len(metrics["consistency"]["warnings"])),
+        },
+    }
+
+    manifest_path = output_dir / "mri_coil_phantom_manifest.json"
+    manifest_path.write_text(json.dumps(manifest_payload, indent=2, sort_keys=True) + "\n")
+    return manifest_path
+
+
 def main(argv: list[str] | None = None):
     """Run MRI coil + phantom field workflow."""
     comm = MPI.COMM_WORLD
@@ -108,15 +171,19 @@ def main(argv: list[str] | None = None):
     print(f"  Mesh resolution: {resolution:.4f} m")
     print(f"  Output directory: {args.output_dir}")
 
+    mesh_params = {
+        "coil_major_radius": 0.08,
+        "coil_minor_radius": 0.01,
+        "coil_separation": 0.08,
+        "phantom_radius": 0.04,
+        "phantom_height": 0.10,
+        "air_padding": 0.04,
+        "resolution": resolution,
+    }
+
     print("\nGenerating coil + phantom mesh...")
     mesh, cell_tags, facet_tags = MeshGenerator.coil_phantom_domain(
-        coil_major_radius=0.08,
-        coil_minor_radius=0.01,
-        coil_separation=0.08,
-        phantom_radius=0.04,
-        phantom_height=0.10,
-        air_padding=0.04,
-        resolution=resolution,
+        **mesh_params,
         comm=comm,
     )
 
@@ -226,6 +293,17 @@ def main(argv: list[str] | None = None):
         comm=comm,
     )
 
+    manifest_path = None
+    if comm.rank == 0:
+        manifest_path = _write_output_manifest(
+            output_dir=output_dir,
+            args=args,
+            current_a=current_a,
+            mesh_params=mesh_params,
+            written_files=written_files,
+            metrics=metrics,
+        )
+
     # Centerline diagnostics through phantom.
     z_line = np.linspace(-0.045, 0.045, 9)
     sample_points = np.zeros((len(z_line), 3), dtype=np.float64)
@@ -279,6 +357,8 @@ def main(argv: list[str] | None = None):
         print("  phantom metrics json: mri_coil_phantom_phantom_metrics.json")
         print("  phantom E csv: mri_coil_phantom_phantom_E_samples.csv")
         print("  phantom B csv: mri_coil_phantom_phantom_B_samples.csv")
+        if manifest_path is not None:
+            print(f"  manifest json: {manifest_path.name}")
 
     print("\n" + "=" * 72)
     print("Example completed")
