@@ -48,7 +48,7 @@ Optional helpers:
 | D4 | 🧪 AWAITING-HUMAN-TEST | `1d7a06cc6502cb81b4cc49e39f6eeba1b5e13a3a` | none |
 | D5 | 🧪 AWAITING-HUMAN-TEST | `0402f2a76b8a45a0c585bf0af4413cd4ffe76822` | none |
 | D6 | 🧪 AWAITING-HUMAN-TEST | `13cce30aae3f07e5262154ebd37f67819ef3c1a0` | none |
-| E1 | 🧪 AWAITING-HUMAN-TEST | `1237b8231b68d4ef62582649e4b4a03d865d531d` | none |
+| E1 | 🧪 AWAITING-HUMAN-TEST | `0c1e1ccbf3e84fdb0f35199ab14b5a644d30924b` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -664,7 +664,7 @@ Optional helpers:
 
 - Chunk: E1 — Harden MRI example CLI/config
 - Status: 🧪 AWAITING-HUMAN-TEST
-- Commit: 1237b8231b68d4ef62582649e4b4a03d865d531d
+- Commit: 0c1e1ccbf3e84fdb0f35199ab14b5a644d30924b
 - Files changed:
   - ROADMAP.md
   - examples/mri/01_coil_phantom_fields.py
