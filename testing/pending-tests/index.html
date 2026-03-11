@@ -883,6 +883,12 @@
 <td>none</td>
 </tr>
 <tr>
+<td>E1</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>0c1e1ccbf3e84fdb0f35199ab14b5a644d30924b</code></td>
+<td>none</td>
+</tr>
+<tr>
 <td>A1</td>
 <td>🧪 AWAITING-HUMAN-TEST</td>
 <td><code>79e5cb22abfb2ed757cd30937d6a4d97e5363b29</code></td>
@@ -1611,6 +1617,22 @@
 <li>tests/ports/test_port_orientation_sensitivity.py::test_port_orientation_flip_changes_induced_voltage_sign PASSED</li>
 <li>tests/ports/test_port_orientation_sensitivity.py::test_port_orientation_flip_changes_off_diagonal_sparameter_sign PASSED</li>
 <li>Output includes <code>single-port excitation diagnostics:</code> lines where flipped orientation shows negative coupling for the flipped passive port</li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: E1 — Harden MRI example CLI/config</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 0c1e1ccbf3e84fdb0f35199ab14b5a644d30924b</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>examples/mri/01_coil_phantom_fields.py</li>
+<li>docs/testing/pending-tests.md</li>
+<li>Manual test command: scripts/testing/run_and_log.sh E1 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/mri/01_coil_phantom_fields.py --help'"</li>
+<li>Expected pass signal:</li>
+<li>Help output includes <code>--frequency-hz</code>, <code>--resolution-preset</code>, and <code>--output-dir</code></li>
+<li>Command exits with status <code>0</code></li>
 <li>Notes/blockers: none</li>
 </ul>
 
