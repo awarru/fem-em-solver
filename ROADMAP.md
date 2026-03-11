@@ -475,7 +475,7 @@ scripts/testing/run_and_log.sh D6 "docker compose exec fem-em-solver bash -lc 'c
 ## Track E — End-to-End MRI Workflow & Outputs
 
 ### E1 — Harden MRI example CLI/config
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Make `examples/mri/01_coil_phantom_fields.py` configurable and reproducible.
 
 **Agent tasks:**

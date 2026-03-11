@@ -10,6 +10,7 @@ This example demonstrates an end-to-end coarse workflow:
 
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 import numpy as np
 import ufl
@@ -51,9 +52,42 @@ def _print_tag_summary(cell_tags, comm: MPI.Intracomm) -> None:
             print(f"  tag {tag} ({name}): {global_count} cells")
 
 
-def main():
+RESOLUTION_PRESETS = {
+    "coarse": 0.02,
+    "medium": 0.015,
+    "fine": 0.01,
+}
+
+
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run MRI-like coil+phantom field workflow and export diagnostics.",
+    )
+    parser.add_argument(
+        "--frequency-hz",
+        type=float,
+        default=127.74e6,
+        help="Drive frequency in Hz (default: 127.74e6).",
+    )
+    parser.add_argument(
+        "--resolution-preset",
+        choices=sorted(RESOLUTION_PRESETS),
+        default="coarse",
+        help="Mesh resolution preset controlling characteristic size.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=Path("paraview_output"),
+        help="Directory for ParaView and phantom metric exports.",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None):
     """Run MRI coil + phantom field workflow."""
     comm = MPI.COMM_WORLD
+    args = _parse_args(argv)
 
     print("=" * 72)
     print("Example: MRI coil + gelled saline phantom fields")
@@ -61,13 +95,18 @@ def main():
 
     # Coarse VPS-safe geometry/mesh settings.
     current_a = 1.0
-    frequency_hz = 127.74e6
-    resolution = 0.02
+    frequency_hz = args.frequency_hz
+    resolution = RESOLUTION_PRESETS[args.resolution_preset]
+
+    if frequency_hz <= 0.0:
+        raise ValueError(f"--frequency-hz must be positive; received {frequency_hz}")
 
     print("\nParameters:")
     print(f"  Current per driven coil region: {current_a:.3f} A")
     print(f"  Frequency: {frequency_hz:.6e} Hz")
+    print(f"  Mesh resolution preset: {args.resolution_preset}")
     print(f"  Mesh resolution: {resolution:.4f} m")
+    print(f"  Output directory: {args.output_dir}")
 
     print("\nGenerating coil + phantom mesh...")
     mesh, cell_tags, facet_tags = MeshGenerator.coil_phantom_domain(
@@ -149,8 +188,8 @@ def main():
             )
 
     # Phantom metrics + phantom-only CSV/JSON exports.
-    output_dir = Path("paraview_output")
-    output_dir.mkdir(exist_ok=True)
+    output_dir = args.output_dir
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     metrics = compute_phantom_eb_metrics_and_export(
         e_field,

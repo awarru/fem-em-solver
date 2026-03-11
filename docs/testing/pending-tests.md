@@ -48,6 +48,7 @@ Optional helpers:
 | D4 | 🧪 AWAITING-HUMAN-TEST | `1d7a06cc6502cb81b4cc49e39f6eeba1b5e13a3a` | none |
 | D5 | 🧪 AWAITING-HUMAN-TEST | `0402f2a76b8a45a0c585bf0af4413cd4ffe76822` | none |
 | D6 | 🧪 AWAITING-HUMAN-TEST | `13cce30aae3f07e5262154ebd37f67819ef3c1a0` | none |
+| E1 | 🧪 AWAITING-HUMAN-TEST | `1237b8231b68d4ef62582649e4b4a03d865d531d` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -659,4 +660,17 @@ Optional helpers:
   - tests/ports/test_port_orientation_sensitivity.py::test_port_orientation_flip_changes_induced_voltage_sign PASSED
   - tests/ports/test_port_orientation_sensitivity.py::test_port_orientation_flip_changes_off_diagonal_sparameter_sign PASSED
   - Output includes `single-port excitation diagnostics:` lines where flipped orientation shows negative coupling for the flipped passive port
+- Notes/blockers: none
+
+- Chunk: E1 — Harden MRI example CLI/config
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 1237b8231b68d4ef62582649e4b4a03d865d531d
+- Files changed:
+  - ROADMAP.md
+  - examples/mri/01_coil_phantom_fields.py
+  - docs/testing/pending-tests.md
+- Manual test command: scripts/testing/run_and_log.sh E1 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/mri/01_coil_phantom_fields.py --help'"
+- Expected pass signal:
+  - Help output includes `--frequency-hz`, `--resolution-preset`, and `--output-dir`
+  - Command exits with status `0`
 - Notes/blockers: none
