@@ -889,6 +889,12 @@
 <td>none</td>
 </tr>
 <tr>
+<td>E2</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>74ee3d6ec65b23734e836bddf1e3a86bcc31c6e8</code></td>
+<td>none</td>
+</tr>
+<tr>
 <td>A1</td>
 <td>🧪 AWAITING-HUMAN-TEST</td>
 <td><code>79e5cb22abfb2ed757cd30937d6a4d97e5363b29</code></td>
@@ -1633,6 +1639,23 @@
 <li>Expected pass signal:</li>
 <li>Help output includes <code>--frequency-hz</code>, <code>--resolution-preset</code>, and <code>--output-dir</code></li>
 <li>Command exits with status <code>0</code></li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: E2 — Reproducible output bundle manifest</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 74ee3d6ec65b23734e836bddf1e3a86bcc31c6e8</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>examples/mri/01_coil_phantom_fields.py</li>
+<li>docs/testing/pending-tests.md</li>
+<li>Manual test command: scripts/testing/run_and_log.sh E2 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/mri/01_coil_phantom_fields.py'"</li>
+<li>Expected pass signal:</li>
+<li>Output lists <code>manifest json: mri_coil_phantom_manifest.json</code></li>
+<li>Output directory contains <code>mri_coil_phantom_manifest.json</code> with <code>git_commit</code>, <code>parameters</code>, and <code>artifacts</code> sections</li>
+<li>Manifest <code>artifacts</code> includes entries for <code>mri_coil_phantom_fields_combined.xdmf</code> and <code>mri_coil_phantom_phantom_metrics.json</code></li>
 <li>Notes/blockers: none</li>
 </ul>
 
