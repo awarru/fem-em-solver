@@ -50,7 +50,7 @@ Optional helpers:
 | D6 | 🧪 AWAITING-HUMAN-TEST | `13cce30aae3f07e5262154ebd37f67819ef3c1a0` | none |
 | E1 | 🧪 AWAITING-HUMAN-TEST | `0c1e1ccbf3e84fdb0f35199ab14b5a644d30924b` | none |
 | E2 | 🧪 AWAITING-HUMAN-TEST | `74ee3d6ec65b23734e836bddf1e3a86bcc31c6e8` | none |
-| E3 | 🧪 AWAITING-HUMAN-TEST | `<pending>` | none |
+| E3 | 🧪 AWAITING-HUMAN-TEST | `b3777eba0b519dc53fa41a93f1bd2214eb5136bd` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -693,7 +693,7 @@ Optional helpers:
 
 - Chunk: E3 — Quick-look phantom metrics report
 - Status: 🧪 AWAITING-HUMAN-TEST
-- Commit: <pending>
+- Commit: b3777eba0b519dc53fa41a93f1bd2214eb5136bd
 - Files changed:
   - ROADMAP.md
   - docs/testing/pending-tests.md
