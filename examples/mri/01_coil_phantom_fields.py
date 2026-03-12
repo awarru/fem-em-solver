@@ -31,8 +31,11 @@ from fem_em_solver.io.mesh import MeshGenerator
 from fem_em_solver.io.paraview_utils import write_combined_paraview_output
 from fem_em_solver.materials import GelledSalinePhantomMaterial
 from fem_em_solver.post import (
+    build_phantom_quicklook_report,
     compute_phantom_eb_metrics_and_export,
     evaluate_vector_field_parallel,
+    format_phantom_quicklook_report,
+    write_phantom_quicklook_report,
 )
 from fem_em_solver.utils.constants import MU_0
 
@@ -106,6 +109,7 @@ def _write_output_manifest(
     mesh_params: dict[str, float],
     written_files: dict[str, str],
     metrics: dict,
+    quicklook_artifacts: dict[str, str | None] | None = None,
 ) -> Path:
     """Write a reproducible run manifest capturing config + produced artifacts."""
     artifact_paths = [Path(path) for path in written_files.values()]
@@ -113,6 +117,11 @@ def _write_output_manifest(
     phantom_e_csv = output_dir / "mri_coil_phantom_phantom_E_samples.csv"
     phantom_b_csv = output_dir / "mri_coil_phantom_phantom_B_samples.csv"
     artifact_paths.extend([phantom_metrics_json, phantom_e_csv, phantom_b_csv])
+
+    if quicklook_artifacts is not None:
+        for maybe_path in quicklook_artifacts.values():
+            if maybe_path is not None:
+                artifact_paths.append(Path(maybe_path))
 
     manifest_payload = {
         "generated_utc": datetime.now(timezone.utc).isoformat(),
@@ -268,6 +277,17 @@ def main(argv: list[str] | None = None):
         comm=comm,
     )
 
+    quicklook = build_phantom_quicklook_report(metrics)
+    quicklook_artifacts = {"json": None, "markdown": None}
+    if comm.rank == 0:
+        quicklook_artifacts = write_phantom_quicklook_report(
+            quicklook,
+            output_dir=output_dir,
+            basename="mri_coil_phantom",
+            write_markdown=True,
+            write_json=True,
+        )
+
     # Interpolate to Lagrange for XDMF compatibility, then export combined outputs.
     v_lagrange = fem.functionspace(mesh, ("Lagrange", 1, (3,)))
 
@@ -302,6 +322,7 @@ def main(argv: list[str] | None = None):
             mesh_params=mesh_params,
             written_files=written_files,
             metrics=metrics,
+            quicklook_artifacts=quicklook_artifacts,
         )
 
     # Centerline diagnostics through phantom.
@@ -312,6 +333,7 @@ def main(argv: list[str] | None = None):
     b_samples, b_valid = evaluate_vector_field_parallel(b_lagrange, sample_points, comm=comm)
 
     if comm.rank == 0:
+        print("\n" + format_phantom_quicklook_report(quicklook))
         print("\nPhantom diagnostics:")
         print(
             "  |E| min/max/mean: "
@@ -357,6 +379,10 @@ def main(argv: list[str] | None = None):
         print("  phantom metrics json: mri_coil_phantom_phantom_metrics.json")
         print("  phantom E csv: mri_coil_phantom_phantom_E_samples.csv")
         print("  phantom B csv: mri_coil_phantom_phantom_B_samples.csv")
+        if quicklook_artifacts["json"] is not None:
+            print(f"  quick-look json: {Path(quicklook_artifacts['json']).name}")
+        if quicklook_artifacts["markdown"] is not None:
+            print(f"  quick-look markdown: {Path(quicklook_artifacts['markdown']).name}")
         if manifest_path is not None:
             print(f"  manifest json: {manifest_path.name}")
 

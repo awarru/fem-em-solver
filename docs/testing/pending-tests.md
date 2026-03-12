@@ -50,6 +50,7 @@ Optional helpers:
 | D6 | 🧪 AWAITING-HUMAN-TEST | `13cce30aae3f07e5262154ebd37f67819ef3c1a0` | none |
 | E1 | 🧪 AWAITING-HUMAN-TEST | `0c1e1ccbf3e84fdb0f35199ab14b5a644d30924b` | none |
 | E2 | 🧪 AWAITING-HUMAN-TEST | `74ee3d6ec65b23734e836bddf1e3a86bcc31c6e8` | none |
+| E3 | 🧪 AWAITING-HUMAN-TEST | `<pending>` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -688,4 +689,21 @@ Optional helpers:
   - Output lists `manifest json: mri_coil_phantom_manifest.json`
   - Output directory contains `mri_coil_phantom_manifest.json` with `git_commit`, `parameters`, and `artifacts` sections
   - Manifest `artifacts` includes entries for `mri_coil_phantom_fields_combined.xdmf` and `mri_coil_phantom_phantom_metrics.json`
+- Notes/blockers: none
+
+- Chunk: E3 — Quick-look phantom metrics report
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: <pending>
+- Files changed:
+  - ROADMAP.md
+  - docs/testing/pending-tests.md
+  - examples/mri/01_coil_phantom_fields.py
+  - src/fem_em_solver/post/__init__.py
+  - src/fem_em_solver/post/quicklook.py
+  - tests/post/test_quicklook_report.py
+- Manual test command: scripts/testing/run_and_log.sh E3 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/mri/01_coil_phantom_fields.py'"
+- Expected pass signal:
+  - Output includes `quick-look phantom metrics:` followed by `status: OK` or `status: WARN`
+  - Output includes finite `|E| min/max/mean` and `|B| min/max/mean` lines in the quick-look section
+  - Output lists `quick-look json: mri_coil_phantom_quicklook.json` and `quick-look markdown: mri_coil_phantom_quicklook.md`
 - Notes/blockers: none
