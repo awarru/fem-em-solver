@@ -529,7 +529,7 @@ scripts/testing/run_and_log.sh E3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### E4 — Scenario presets (debug/dev/benchmark-lite)
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Standardize run profiles for iterative work.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: E4 — Scenario presets (debug/dev/benchmark-lite).**
+**Next chunk: F1 — Expand run-and-log metadata.**
 
-Reason: E3 is now implemented and queued for human verification. Next, add named scenario presets so humans can choose predictable runtime/fidelity tradeoffs.
+Reason: E4 is now implemented and queued for human verification. Next, improve manual-run traceability metadata to accelerate human-in-the-loop testing operations.

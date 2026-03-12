@@ -51,6 +51,7 @@ Optional helpers:
 | E1 | 🧪 AWAITING-HUMAN-TEST | `0c1e1ccbf3e84fdb0f35199ab14b5a644d30924b` | none |
 | E2 | 🧪 AWAITING-HUMAN-TEST | `74ee3d6ec65b23734e836bddf1e3a86bcc31c6e8` | none |
 | E3 | 🧪 AWAITING-HUMAN-TEST | `b3777eba0b519dc53fa41a93f1bd2214eb5136bd` | none |
+| E4 | 🧪 AWAITING-HUMAN-TEST | `e9b2d3ac520e33067be47e4640ecd103b4f607c5` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -706,4 +707,19 @@ Optional helpers:
   - Output includes `quick-look phantom metrics:` followed by `status: OK` or `status: WARN`
   - Output includes finite `|E| min/max/mean` and `|B| min/max/mean` lines in the quick-look section
   - Output lists `quick-look json: mri_coil_phantom_quicklook.json` and `quick-look markdown: mri_coil_phantom_quicklook.md`
+- Notes/blockers: none
+
+- Chunk: E4 — Scenario presets (debug/dev/benchmark-lite)
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: e9b2d3ac520e33067be47e4640ecd103b4f607c5
+- Files changed:
+  - ROADMAP.md
+  - examples/mri/01_coil_phantom_fields.py
+  - docs/testing/pending-tests.md
+- Manual test command: scripts/testing/run_and_log.sh E4 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/mri/01_coil_phantom_fields.py --preset debug'"
+- Expected pass signal:
+  - Output includes `Scenario preset: debug`
+  - Output includes `Mesh resolution preset: coarse` and `Centerline sample count: 5`
+  - Output includes `Frequency probe points (Hz):` with a single frequency matching the requested drive frequency
+  - Output includes `Example completed`
 - Notes/blockers: none

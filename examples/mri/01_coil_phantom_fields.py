@@ -64,6 +64,27 @@ RESOLUTION_PRESETS = {
     "fine": 0.01,
 }
 
+SCENARIO_PRESETS = {
+    "benchmark-lite": {
+        "resolution_preset": "fine",
+        "centerline_sample_count": 17,
+        "ksp_max_it": 450,
+        "frequency_probe_scale_factors": [0.995, 1.0, 1.005],
+    },
+    "debug": {
+        "resolution_preset": "coarse",
+        "centerline_sample_count": 5,
+        "ksp_max_it": 180,
+        "frequency_probe_scale_factors": [1.0],
+    },
+    "dev": {
+        "resolution_preset": "medium",
+        "centerline_sample_count": 9,
+        "ksp_max_it": 300,
+        "frequency_probe_scale_factors": [0.999, 1.0, 1.001],
+    },
+}
+
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -76,10 +97,16 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Drive frequency in Hz (default: 127.74e6).",
     )
     parser.add_argument(
+        "--preset",
+        choices=sorted(SCENARIO_PRESETS),
+        default="debug",
+        help="Scenario preset controlling mesh/detail/sweep diagnostics.",
+    )
+    parser.add_argument(
         "--resolution-preset",
         choices=sorted(RESOLUTION_PRESETS),
-        default="coarse",
-        help="Mesh resolution preset controlling characteristic size.",
+        default=None,
+        help="Optional mesh resolution override for the selected scenario preset.",
     )
     parser.add_argument(
         "--output-dir",
@@ -101,10 +128,42 @@ def _resolve_git_commit_hash() -> str:
         return "unknown"
 
 
+def _resolve_scenario(args: argparse.Namespace) -> dict[str, object]:
+    """Build effective scenario config from preset + optional CLI overrides."""
+    preset_config = dict(SCENARIO_PRESETS[args.preset])
+
+    effective_resolution_preset = (
+        args.resolution_preset
+        if args.resolution_preset is not None
+        else str(preset_config["resolution_preset"])
+    )
+
+    if effective_resolution_preset not in RESOLUTION_PRESETS:
+        raise ValueError(
+            f"Unsupported resolution preset: {effective_resolution_preset!r}. "
+            f"Expected one of {sorted(RESOLUTION_PRESETS)}"
+        )
+
+    frequency_probe_scale_factors = [
+        float(scale) for scale in preset_config["frequency_probe_scale_factors"]
+    ]
+    frequency_probe_scale_factors = sorted(frequency_probe_scale_factors)
+
+    return {
+        "name": args.preset,
+        "resolution_preset": effective_resolution_preset,
+        "resolution_m": float(RESOLUTION_PRESETS[effective_resolution_preset]),
+        "centerline_sample_count": int(preset_config["centerline_sample_count"]),
+        "ksp_max_it": int(preset_config["ksp_max_it"]),
+        "frequency_probe_scale_factors": frequency_probe_scale_factors,
+    }
+
+
 def _write_output_manifest(
     *,
     output_dir: Path,
     args: argparse.Namespace,
+    scenario: dict[str, object],
     current_a: float,
     mesh_params: dict[str, float],
     written_files: dict[str, str],
@@ -128,8 +187,13 @@ def _write_output_manifest(
         "git_commit": _resolve_git_commit_hash(),
         "parameters": {
             "frequency_hz": float(args.frequency_hz),
-            "resolution_preset": args.resolution_preset,
-            "resolution_m": float(RESOLUTION_PRESETS[args.resolution_preset]),
+            "scenario_preset": str(scenario["name"]),
+            "resolution_preset": str(scenario["resolution_preset"]),
+            "resolution_m": float(scenario["resolution_m"]),
+            "frequency_probe_hz": [
+                float(args.frequency_hz) * float(scale)
+                for scale in scenario["frequency_probe_scale_factors"]
+            ],
             "output_dir": str(output_dir),
             "current_per_coil_a": float(current_a),
             "mesh": mesh_params,
@@ -168,16 +232,29 @@ def main(argv: list[str] | None = None):
     # Coarse VPS-safe geometry/mesh settings.
     current_a = 1.0
     frequency_hz = args.frequency_hz
-    resolution = RESOLUTION_PRESETS[args.resolution_preset]
+    scenario = _resolve_scenario(args)
+    resolution = float(scenario["resolution_m"])
 
     if frequency_hz <= 0.0:
         raise ValueError(f"--frequency-hz must be positive; received {frequency_hz}")
 
+    probe_frequencies = [
+        frequency_hz * float(scale)
+        for scale in scenario["frequency_probe_scale_factors"]
+    ]
+
     print("\nParameters:")
     print(f"  Current per driven coil region: {current_a:.3f} A")
     print(f"  Frequency: {frequency_hz:.6e} Hz")
-    print(f"  Mesh resolution preset: {args.resolution_preset}")
+    print(f"  Scenario preset: {scenario['name']}")
+    print(f"  Mesh resolution preset: {scenario['resolution_preset']}")
     print(f"  Mesh resolution: {resolution:.4f} m")
+    print(f"  Centerline sample count: {scenario['centerline_sample_count']}")
+    print(f"  Solver ksp_max_it: {scenario['ksp_max_it']}")
+    print(
+        "  Frequency probe points (Hz): "
+        + ", ".join(f"{freq:.6e}" for freq in probe_frequencies)
+    )
     print(f"  Output directory: {args.output_dir}")
 
     mesh_params = {
@@ -240,7 +317,7 @@ def main(argv: list[str] | None = None):
             "ksp_type": "gmres",
             "pc_type": "jacobi",
             "ksp_rtol": 1e-8,
-            "ksp_max_it": 300,
+            "ksp_max_it": int(scenario["ksp_max_it"]),
         },
         collect_solver_diagnostics=True,
     )
@@ -318,6 +395,7 @@ def main(argv: list[str] | None = None):
         manifest_path = _write_output_manifest(
             output_dir=output_dir,
             args=args,
+            scenario=scenario,
             current_a=current_a,
             mesh_params=mesh_params,
             written_files=written_files,
@@ -326,7 +404,7 @@ def main(argv: list[str] | None = None):
         )
 
     # Centerline diagnostics through phantom.
-    z_line = np.linspace(-0.045, 0.045, 9)
+    z_line = np.linspace(-0.045, 0.045, int(scenario["centerline_sample_count"]))
     sample_points = np.zeros((len(z_line), 3), dtype=np.float64)
     sample_points[:, 2] = z_line
     e_samples, e_valid = evaluate_vector_field_parallel(e_lagrange, sample_points, comm=comm)
