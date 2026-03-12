@@ -895,6 +895,12 @@
 <td>none</td>
 </tr>
 <tr>
+<td>E3</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>b3777eba0b519dc53fa41a93f1bd2214eb5136bd</code></td>
+<td>none</td>
+</tr>
+<tr>
 <td>A1</td>
 <td>🧪 AWAITING-HUMAN-TEST</td>
 <td><code>79e5cb22abfb2ed757cd30937d6a4d97e5363b29</code></td>
@@ -1656,6 +1662,26 @@
 <li>Output lists <code>manifest json: mri_coil_phantom_manifest.json</code></li>
 <li>Output directory contains <code>mri_coil_phantom_manifest.json</code> with <code>git_commit</code>, <code>parameters</code>, and <code>artifacts</code> sections</li>
 <li>Manifest <code>artifacts</code> includes entries for <code>mri_coil_phantom_fields_combined.xdmf</code> and <code>mri_coil_phantom_phantom_metrics.json</code></li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: E3 — Quick-look phantom metrics report</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: b3777eba0b519dc53fa41a93f1bd2214eb5136bd</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>docs/testing/pending-tests.md</li>
+<li>examples/mri/01_coil_phantom_fields.py</li>
+<li>src/fem_em_solver/post/<strong>init</strong>.py</li>
+<li>src/fem_em_solver/post/quicklook.py</li>
+<li>tests/post/test_quicklook_report.py</li>
+<li>Manual test command: scripts/testing/run_and_log.sh E3 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/mri/01_coil_phantom_fields.py'"</li>
+<li>Expected pass signal:</li>
+<li>Output includes <code>quick-look phantom metrics:</code> followed by <code>status: OK</code> or <code>status: WARN</code></li>
+<li>Output includes finite <code>|E| min/max/mean</code> and <code>|B| min/max/mean</code> lines in the quick-look section</li>
+<li>Output lists <code>quick-look json: mri_coil_phantom_quicklook.json</code> and <code>quick-look markdown: mri_coil_phantom_quicklook.md</code></li>
 <li>Notes/blockers: none</li>
 </ul>
 
