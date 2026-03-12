@@ -901,6 +901,12 @@
 <td>none</td>
 </tr>
 <tr>
+<td>E4</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>e9b2d3ac520e33067be47e4640ecd103b4f607c5</code></td>
+<td>none</td>
+</tr>
+<tr>
 <td>A1</td>
 <td>🧪 AWAITING-HUMAN-TEST</td>
 <td><code>79e5cb22abfb2ed757cd30937d6a4d97e5363b29</code></td>
@@ -1682,6 +1688,24 @@
 <li>Output includes <code>quick-look phantom metrics:</code> followed by <code>status: OK</code> or <code>status: WARN</code></li>
 <li>Output includes finite <code>|E| min/max/mean</code> and <code>|B| min/max/mean</code> lines in the quick-look section</li>
 <li>Output lists <code>quick-look json: mri_coil_phantom_quicklook.json</code> and <code>quick-look markdown: mri_coil_phantom_quicklook.md</code></li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: E4 — Scenario presets (debug/dev/benchmark-lite)</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: e9b2d3ac520e33067be47e4640ecd103b4f607c5</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>examples/mri/01_coil_phantom_fields.py</li>
+<li>docs/testing/pending-tests.md</li>
+<li>Manual test command: scripts/testing/run_and_log.sh E4 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/mri/01_coil_phantom_fields.py --preset debug'"</li>
+<li>Expected pass signal:</li>
+<li>Output includes <code>Scenario preset: debug</code></li>
+<li>Output includes <code>Mesh resolution preset: coarse</code> and <code>Centerline sample count: 5</code></li>
+<li>Output includes <code>Frequency probe points (Hz):</code> with a single frequency matching the requested drive frequency</li>
+<li>Output includes <code>Example completed</code></li>
 <li>Notes/blockers: none</li>
 </ul>
 
