@@ -567,7 +567,7 @@ scripts/testing/run_and_log.sh F1 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### F2 — Guided pending-test queue helper
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Surface the next most useful human test to run.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: F2 — Guided pending-test queue helper.**
+**Next chunk: F3 — Define v1 milestone acceptance checklist.**
 
-Reason: F1 is now implemented and queued for human verification. Next, add a recommendation helper so humans can run the highest-value pending test first.
+Reason: F2 is now implemented and queued for human verification. Next, define explicit v1 acceptance criteria and signoff artifacts.
