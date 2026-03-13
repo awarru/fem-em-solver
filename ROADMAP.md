@@ -549,7 +549,7 @@ scripts/testing/run_and_log.sh E4 "docker compose exec fem-em-solver bash -lc 'c
 ## Track F — Human-in-the-Loop Testing Operations
 
 ### F1 — Expand run-and-log metadata
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Improve traceability of manual verification runs.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: F1 — Expand run-and-log metadata.**
+**Next chunk: F2 — Guided pending-test queue helper.**
 
-Reason: E4 is now implemented and queued for human verification. Next, improve manual-run traceability metadata to accelerate human-in-the-loop testing operations.
+Reason: F1 is now implemented and queued for human verification. Next, add a recommendation helper so humans can run the highest-value pending test first.

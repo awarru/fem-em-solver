@@ -36,8 +36,8 @@ if [[ ! -f "$INDEX_FILE" ]]; then
 This file is append-only and records test runs executed by the human operator.
 Each run has a full log in `docs/testing/logs/`.
 
-| UTC Timestamp | Chunk | Exit | Log |
-|---|---|---:|---|
+| UTC Timestamp | Chunk | Commit | Elapsed (s) | Env | Exit | Log |
+|---|---|---|---:|---|---:|---|
 EOF
 fi
 
