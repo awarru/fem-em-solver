@@ -907,6 +907,12 @@
 <td>none</td>
 </tr>
 <tr>
+<td>F1</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>b7909f53d04b9b2bb68b0013984cf7f491d87326</code></td>
+<td>none</td>
+</tr>
+<tr>
 <td>A1</td>
 <td>🧪 AWAITING-HUMAN-TEST</td>
 <td><code>79e5cb22abfb2ed757cd30937d6a4d97e5363b29</code></td>
@@ -1161,18 +1167,20 @@
 <p>Notes/blockers: none</p>
 </li>
 <li>
-<p>Chunk: F1 — New example: MRI coil with gelled saline phantom</p>
+<p>Chunk: F1 — Expand run-and-log metadata</p>
 </li>
 <li>Status: 🧪 AWAITING-HUMAN-TEST</li>
-<li>Commit: 800829bf61aab91f834ba55a5dd7940140264139</li>
+<li>Commit: b7909f53d04b9b2bb68b0013984cf7f491d87326</li>
 <li>Files changed:</li>
 <li>ROADMAP.md</li>
-<li>examples/mri/01_coil_phantom_fields.py</li>
-<li>Manual test command: scripts/testing/run_and_log.sh F1 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/mri/01_coil_phantom_fields.py'"</li>
+<li>docs/testing/test-results.md</li>
+<li>scripts/testing/preflight.sh</li>
+<li>scripts/testing/run_and_log.sh</li>
+<li>Manual test command: scripts/testing/run_and_log.sh F1 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; ./run_tests.sh --list'"</li>
 <li>Expected pass signal:</li>
-<li>Output contains <code>Example: MRI coil + gelled saline phantom fields</code></li>
-<li>Output contains <code>Phantom diagnostics:</code> plus finite <code>|E| min/max/mean</code> and <code>|B| min/max/mean</code> lines</li>
-<li>Output lists <code>mri_coil_phantom_fields_combined.xdmf</code> and ends with <code>Example completed</code></li>
+<li><code>docs/testing/test-results.md</code> table header includes <code>Commit</code>, <code>Elapsed (s)</code>, and <code>Env</code> columns</li>
+<li>F1 run appends a row where the <code>Commit</code> cell is a full hash and <code>Elapsed (s)</code> is a non-negative integer</li>
+<li>F1 run log contains <code>## Exit</code> with both <code>Status:</code> and <code>Elapsed (s):</code> lines</li>
 <li>
 <p>Notes/blockers: none</p>
 </li>
