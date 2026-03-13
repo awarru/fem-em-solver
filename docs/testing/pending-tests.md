@@ -53,7 +53,7 @@ Optional helpers:
 | E3 | 🧪 AWAITING-HUMAN-TEST | `b3777eba0b519dc53fa41a93f1bd2214eb5136bd` | none |
 | E4 | 🧪 AWAITING-HUMAN-TEST | `e9b2d3ac520e33067be47e4640ecd103b4f607c5` | none |
 | F1 | 🧪 AWAITING-HUMAN-TEST | `b7909f53d04b9b2bb68b0013984cf7f491d87326` | none |
-| F2 | 🧪 AWAITING-HUMAN-TEST | `b30ff626bd304441c587e53a55a639a2c5173039` | none |
+| F2 | 🧪 AWAITING-HUMAN-TEST | `de0c1e5931bc1fe77780565dde107dda237e948c` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -730,7 +730,7 @@ Optional helpers:
 
 - Chunk: F2 — Guided pending-test queue helper
 - Status: 🧪 AWAITING-HUMAN-TEST
-- Commit: b30ff626bd304441c587e53a55a639a2c5173039
+- Commit: de0c1e5931bc1fe77780565dde107dda237e948c
 - Files changed:
   - ROADMAP.md
   - docs/testing/pending-tests.md
