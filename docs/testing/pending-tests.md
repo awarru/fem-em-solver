@@ -52,6 +52,7 @@ Optional helpers:
 | E2 | 🧪 AWAITING-HUMAN-TEST | `74ee3d6ec65b23734e836bddf1e3a86bcc31c6e8` | none |
 | E3 | 🧪 AWAITING-HUMAN-TEST | `b3777eba0b519dc53fa41a93f1bd2214eb5136bd` | none |
 | E4 | 🧪 AWAITING-HUMAN-TEST | `e9b2d3ac520e33067be47e4640ecd103b4f607c5` | none |
+| F1 | 🧪 AWAITING-HUMAN-TEST | `b7909f53d04b9b2bb68b0013984cf7f491d87326` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -258,17 +259,19 @@ Optional helpers:
   - Command exits with status `0`
 - Notes/blockers: none
 
-- Chunk: F1 — New example: MRI coil with gelled saline phantom
+- Chunk: F1 — Expand run-and-log metadata
 - Status: 🧪 AWAITING-HUMAN-TEST
-- Commit: 800829bf61aab91f834ba55a5dd7940140264139
+- Commit: b7909f53d04b9b2bb68b0013984cf7f491d87326
 - Files changed:
   - ROADMAP.md
-  - examples/mri/01_coil_phantom_fields.py
-- Manual test command: scripts/testing/run_and_log.sh F1 "docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 examples/mri/01_coil_phantom_fields.py'"
+  - docs/testing/test-results.md
+  - scripts/testing/preflight.sh
+  - scripts/testing/run_and_log.sh
+- Manual test command: scripts/testing/run_and_log.sh F1 "docker compose exec fem-em-solver bash -lc 'cd /workspace && ./run_tests.sh --list'"
 - Expected pass signal:
-  - Output contains `Example: MRI coil + gelled saline phantom fields`
-  - Output contains `Phantom diagnostics:` plus finite `|E| min/max/mean` and `|B| min/max/mean` lines
-  - Output lists `mri_coil_phantom_fields_combined.xdmf` and ends with `Example completed`
+  - `docs/testing/test-results.md` table header includes `Commit`, `Elapsed (s)`, and `Env` columns
+  - F1 run appends a row where the `Commit` cell is a full hash and `Elapsed (s)` is a non-negative integer
+  - F1 run log contains `## Exit` with both `Status:` and `Elapsed (s):` lines
 - Notes/blockers: none
 
 - Chunk: F2 — Add “human test checklist” doc
