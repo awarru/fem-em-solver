@@ -913,6 +913,12 @@
 <td>none</td>
 </tr>
 <tr>
+<td>F2</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>de0c1e5931bc1fe77780565dde107dda237e948c</code></td>
+<td>none</td>
+</tr>
+<tr>
 <td>A1</td>
 <td>🧪 AWAITING-HUMAN-TEST</td>
 <td><code>79e5cb22abfb2ed757cd30937d6a4d97e5363b29</code></td>
@@ -1714,6 +1720,23 @@
 <li>Output includes <code>Mesh resolution preset: coarse</code> and <code>Centerline sample count: 5</code></li>
 <li>Output includes <code>Frequency probe points (Hz):</code> with a single frequency matching the requested drive frequency</li>
 <li>Output includes <code>Example completed</code></li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: F2 — Guided pending-test queue helper</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: de0c1e5931bc1fe77780565dde107dda237e948c</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>docs/testing/pending-tests.md</li>
+<li>scripts/testing/run_pending_tests.sh</li>
+<li>Manual test command: scripts/testing/run_and_log.sh F2 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; ./run_tests.sh --list'"</li>
+<li>Expected pass signal:</li>
+<li>Output begins with <code>Discovered manual test commands (latest per chunk):</code></li>
+<li>Output includes <code>Recommended next test order:</code></li>
+<li>Recommended section lists ranked entries with status/reason/command lines (for example, <code>1) &lt;chunk&gt; [&lt;status&gt;]</code> followed by <code>reason:</code> and <code>command:</code>)</li>
 <li>Notes/blockers: none</li>
 </ul>
 
