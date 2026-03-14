@@ -67,6 +67,8 @@ Optional helpers:
 | B5 | 🧪 AWAITING-HUMAN-TEST | `dcdf6ec83d5ad3a84386f5b3604930f4ca80b88f` | none |
 | B6 | 🧪 AWAITING-HUMAN-TEST | `f1031362f6eb4ccf10f599fddf7fa4fdbf03dbda` | none |
 
+Dashboard audit note (2026-03-14 UTC): reviewed `docs/testing/test-results.md` and available logs; no new command-matching human test outcomes were found for currently pending A2+ chunk commands, so no additional chunk promotions were applied in this cron cycle.
+
 ---
 
 ## C1 — Solve B-field on coil+phantom model (✅ COMPLETE)
@@ -755,4 +757,16 @@ Optional helpers:
   - Log contains `OK`
   - Command exits with status `0`
   - Checklist includes measurable criteria for geometry validity, field plausibility, S-parameter sanity, and reproducibility with required logs/artifacts called out
+- Notes/blockers: none
+
+- Chunk: A5 — Testing status dashboard section
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 74d754da9c4ed7af1145d5fa70e5675959d879b3
+- Files changed:
+  - docs/testing/pending-tests.md
+- Manual test command: scripts/testing/run_and_log.sh A5 "docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/testing/pending-tests.md && echo OK'"
+- Expected pass signal:
+  - Log contains `OK`
+  - Command exits with status `0`
+  - `docs/testing/pending-tests.md` includes the dashboard audit note dated `2026-03-14 UTC`
 - Notes/blockers: none
