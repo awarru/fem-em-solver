@@ -919,6 +919,12 @@
 <td>none</td>
 </tr>
 <tr>
+<td>F3</td>
+<td>🧪 AWAITING-HUMAN-TEST</td>
+<td><code>6211da2dfad4e4f7f6ce31c00f7d44f4f21f267e</code></td>
+<td>none</td>
+</tr>
+<tr>
 <td>A1</td>
 <td>🧪 AWAITING-HUMAN-TEST</td>
 <td><code>79e5cb22abfb2ed757cd30937d6a4d97e5363b29</code></td>
@@ -1737,6 +1743,23 @@
 <li>Output begins with <code>Discovered manual test commands (latest per chunk):</code></li>
 <li>Output includes <code>Recommended next test order:</code></li>
 <li>Recommended section lists ranked entries with status/reason/command lines (for example, <code>1) &lt;chunk&gt; [&lt;status&gt;]</code> followed by <code>reason:</code> and <code>command:</code>)</li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: F3 — Define v1 milestone acceptance checklist</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 6211da2dfad4e4f7f6ce31c00f7d44f4f21f267e</li>
+<li>Files changed:</li>
+<li>ROADMAP.md</li>
+<li>docs/testing/pending-tests.md</li>
+<li>docs/testing/v1_acceptance_checklist.md</li>
+<li>Manual test command: scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; test -f docs/testing/v1_acceptance_checklist.md &amp;&amp; echo OK'"</li>
+<li>Expected pass signal:</li>
+<li>Log contains <code>OK</code></li>
+<li>Command exits with status <code>0</code></li>
+<li>Checklist includes measurable criteria for geometry validity, field plausibility, S-parameter sanity, and reproducibility with required logs/artifacts called out</li>
 <li>Notes/blockers: none</li>
 </ul>
 
