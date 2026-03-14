@@ -54,6 +54,7 @@ Optional helpers:
 | E4 | 🧪 AWAITING-HUMAN-TEST | `e9b2d3ac520e33067be47e4640ecd103b4f607c5` | none |
 | F1 | 🧪 AWAITING-HUMAN-TEST | `b7909f53d04b9b2bb68b0013984cf7f491d87326` | none |
 | F2 | 🧪 AWAITING-HUMAN-TEST | `de0c1e5931bc1fe77780565dde107dda237e948c` | none |
+| F3 | 🧪 AWAITING-HUMAN-TEST | `TBD` | none |
 | A1 | 🧪 AWAITING-HUMAN-TEST | `79e5cb22abfb2ed757cd30937d6a4d97e5363b29` | none |
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
@@ -740,4 +741,18 @@ Optional helpers:
   - Output begins with `Discovered manual test commands (latest per chunk):`
   - Output includes `Recommended next test order:`
   - Recommended section lists ranked entries with status/reason/command lines (for example, `1) <chunk> [<status>]` followed by `reason:` and `command:`)
+- Notes/blockers: none
+
+- Chunk: F3 — Define v1 milestone acceptance checklist
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: TBD
+- Files changed:
+  - ROADMAP.md
+  - docs/testing/pending-tests.md
+  - docs/testing/v1_acceptance_checklist.md
+- Manual test command: scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/testing/v1_acceptance_checklist.md && echo OK'"
+- Expected pass signal:
+  - Log contains `OK`
+  - Command exits with status `0`
+  - Checklist includes measurable criteria for geometry validity, field plausibility, S-parameter sanity, and reproducibility with required logs/artifacts called out
 - Notes/blockers: none

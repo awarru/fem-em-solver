@@ -585,7 +585,7 @@ scripts/testing/run_and_log.sh F2 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ### F3 — Define v1 milestone acceptance checklist
-**Status:** ⬜
+**Status:** 🧪 AWAITING-HUMAN-TEST
 **Goal:** Establish explicit criteria for “MRI birdcage + phantom v1 achieved”.
 
 **Agent tasks:**
@@ -611,6 +611,6 @@ scripts/testing/run_and_log.sh F3 "docker compose exec fem-em-solver bash -lc 'c
 ---
 
 ## Current priority
-**Next chunk: F3 — Define v1 milestone acceptance checklist.**
+**Next chunk: review newly arrived human test logs for pending chunks, then continue from the first remaining ⬜ chunk.**
 
-Reason: F2 is now implemented and queued for human verification. Next, define explicit v1 acceptance criteria and signoff artifacts.
+Reason: F3 is now implemented and awaiting human verification; chunk promotion to ✅/🚫 should follow logged human test outcomes.
