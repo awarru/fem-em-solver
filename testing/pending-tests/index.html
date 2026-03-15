@@ -992,7 +992,7 @@
 </tr>
 </tbody>
 </table>
-<p>Dashboard audit note (2026-03-14 UTC): reviewed <code>docs/testing/test-results.md</code> and available logs; no new command-matching human test outcomes were found for currently pending A2+ chunk commands, so no additional chunk promotions were applied in this cron cycle.</p>
+<p>Dashboard audit note (2026-03-15 UTC): reviewed <code>docs/testing/test-results.md</code> and available logs; no new command-matching human test outcomes were found for currently pending chunk commands, so no additional chunk promotions were applied in this cron cycle.</p>
 <hr />
 <h2 id="c1-solve-b-field-on-coilphantom-model-complete">C1 — Solve B-field on coil+phantom model (✅ COMPLETE)<a class="headerlink" href="#c1-solve-b-field-on-coilphantom-model-complete" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1776,6 +1776,21 @@
 <li>Log contains <code>OK</code></li>
 <li>Command exits with status <code>0</code></li>
 <li><code>docs/testing/pending-tests.md</code> includes the dashboard audit note dated <code>2026-03-14 UTC</code></li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: A5 — Testing status dashboard section</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 891ec75e16a6afb320ff946ea3d32965e0dda2eb</li>
+<li>Files changed:</li>
+<li>docs/testing/pending-tests.md</li>
+<li>Manual test command: scripts/testing/run_and_log.sh A5 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; test -f docs/testing/pending-tests.md &amp;&amp; echo OK'"</li>
+<li>Expected pass signal:</li>
+<li>Log contains <code>OK</code></li>
+<li>Command exits with status <code>0</code></li>
+<li><code>docs/testing/pending-tests.md</code> includes the dashboard audit note dated <code>2026-03-15 UTC</code></li>
 <li>Notes/blockers: none</li>
 </ul>
 
