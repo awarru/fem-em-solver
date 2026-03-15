@@ -770,3 +770,15 @@ Dashboard audit note (2026-03-15 UTC): reviewed `docs/testing/test-results.md` a
   - Command exits with status `0`
   - `docs/testing/pending-tests.md` includes the dashboard audit note dated `2026-03-14 UTC`
 - Notes/blockers: none
+
+- Chunk: A5 — Testing status dashboard section
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 891ec75e16a6afb320ff946ea3d32965e0dda2eb
+- Files changed:
+  - docs/testing/pending-tests.md
+- Manual test command: scripts/testing/run_and_log.sh A5 "docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/testing/pending-tests.md && echo OK'"
+- Expected pass signal:
+  - Log contains `OK`
+  - Command exits with status `0`
+  - `docs/testing/pending-tests.md` includes the dashboard audit note dated `2026-03-15 UTC`
+- Notes/blockers: none
