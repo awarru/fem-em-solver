@@ -59,7 +59,7 @@ Optional helpers:
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
 | A4 | 🧪 AWAITING-HUMAN-TEST | `7c9b2c49cceb5f1035da23503e567ca242f6f821` | none |
-| A5 | 🧪 AWAITING-HUMAN-TEST | `527529e435a37968863f518e02b20c3619aed690` | none |
+| A5 | 🧪 AWAITING-HUMAN-TEST | `5fbf4bcb3432db035e805f775ea0b911fc7ca268` | none |
 | B1 | 🧪 AWAITING-HUMAN-TEST | `463c3c3c5bdb312859cfcf8ca59938f77a2bee95` | none |
 | B2 | 🧪 AWAITING-HUMAN-TEST | `136cf051039809710bb672eccae1b3e53d2766d6` | none |
 | B3 | 🧪 AWAITING-HUMAN-TEST | `e732d76d2f23d53fa775c1309b27f7d69dda2411` | none |
@@ -67,7 +67,7 @@ Optional helpers:
 | B5 | 🧪 AWAITING-HUMAN-TEST | `dcdf6ec83d5ad3a84386f5b3604930f4ca80b88f` | none |
 | B6 | 🧪 AWAITING-HUMAN-TEST | `f1031362f6eb4ccf10f599fddf7fa4fdbf03dbda` | none |
 
-Dashboard audit note (2026-03-15 UTC): reviewed `docs/testing/test-results.md` and available logs; no new command-matching human test outcomes were found for currently pending chunk commands, so no additional chunk promotions were applied in this cron cycle.
+Dashboard audit note (2026-03-15 17:00 UTC): reviewed `docs/testing/test-results.md` and `docs/testing/logs/*.log` (including newly present local legacy logs for B2/C1/C2); no new command-matching human test outcomes were found for currently pending chunk commands, so no additional chunk promotions were applied in this cron cycle.
 
 ---
 
@@ -781,4 +781,16 @@ Dashboard audit note (2026-03-15 UTC): reviewed `docs/testing/test-results.md` a
   - Log contains `OK`
   - Command exits with status `0`
   - `docs/testing/pending-tests.md` includes the dashboard audit note dated `2026-03-15 UTC`
+- Notes/blockers: none
+
+- Chunk: A5 — Testing status dashboard section
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 5fbf4bcb3432db035e805f775ea0b911fc7ca268
+- Files changed:
+  - docs/testing/pending-tests.md
+- Manual test command: scripts/testing/run_and_log.sh A5 "docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/testing/pending-tests.md && echo OK'"
+- Expected pass signal:
+  - Log contains `OK`
+  - Command exits with status `0`
+  - `docs/testing/pending-tests.md` includes the dashboard audit note dated `2026-03-15 17:00 UTC`
 - Notes/blockers: none
