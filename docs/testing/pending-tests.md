@@ -67,7 +67,7 @@ Optional helpers:
 | B5 | 🧪 AWAITING-HUMAN-TEST | `dcdf6ec83d5ad3a84386f5b3604930f4ca80b88f` | none |
 | B6 | 🧪 AWAITING-HUMAN-TEST | `f1031362f6eb4ccf10f599fddf7fa4fdbf03dbda` | none |
 
-Dashboard audit note (2026-03-14 UTC): reviewed `docs/testing/test-results.md` and available logs; no new command-matching human test outcomes were found for currently pending A2+ chunk commands, so no additional chunk promotions were applied in this cron cycle.
+Dashboard audit note (2026-03-15 UTC): reviewed `docs/testing/test-results.md` and available logs; no new command-matching human test outcomes were found for currently pending chunk commands, so no additional chunk promotions were applied in this cron cycle.
 
 ---
 
