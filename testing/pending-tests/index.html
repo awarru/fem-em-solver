@@ -951,7 +951,7 @@
 <tr>
 <td>A5</td>
 <td>🧪 AWAITING-HUMAN-TEST</td>
-<td><code>527529e435a37968863f518e02b20c3619aed690</code></td>
+<td><code>5fbf4bcb3432db035e805f775ea0b911fc7ca268</code></td>
 <td>none</td>
 </tr>
 <tr>
@@ -992,7 +992,7 @@
 </tr>
 </tbody>
 </table>
-<p>Dashboard audit note (2026-03-15 UTC): reviewed <code>docs/testing/test-results.md</code> and available logs; no new command-matching human test outcomes were found for currently pending chunk commands, so no additional chunk promotions were applied in this cron cycle.</p>
+<p>Dashboard audit note (2026-03-15 17:00 UTC): reviewed <code>docs/testing/test-results.md</code> and <code>docs/testing/logs/*.log</code> (including newly present local legacy logs for B2/C1/C2); no new command-matching human test outcomes were found for currently pending chunk commands, so no additional chunk promotions were applied in this cron cycle.</p>
 <hr />
 <h2 id="c1-solve-b-field-on-coilphantom-model-complete">C1 — Solve B-field on coil+phantom model (✅ COMPLETE)<a class="headerlink" href="#c1-solve-b-field-on-coilphantom-model-complete" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1791,6 +1791,21 @@
 <li>Log contains <code>OK</code></li>
 <li>Command exits with status <code>0</code></li>
 <li><code>docs/testing/pending-tests.md</code> includes the dashboard audit note dated <code>2026-03-15 UTC</code></li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: A5 — Testing status dashboard section</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 5fbf4bcb3432db035e805f775ea0b911fc7ca268</li>
+<li>Files changed:</li>
+<li>docs/testing/pending-tests.md</li>
+<li>Manual test command: scripts/testing/run_and_log.sh A5 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; test -f docs/testing/pending-tests.md &amp;&amp; echo OK'"</li>
+<li>Expected pass signal:</li>
+<li>Log contains <code>OK</code></li>
+<li>Command exits with status <code>0</code></li>
+<li><code>docs/testing/pending-tests.md</code> includes the dashboard audit note dated <code>2026-03-15 17:00 UTC</code></li>
 <li>Notes/blockers: none</li>
 </ul>
 
