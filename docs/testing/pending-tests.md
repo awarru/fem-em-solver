@@ -59,7 +59,7 @@ Optional helpers:
 | A2 | 🧪 AWAITING-HUMAN-TEST | `529cc557998f51e48025a7fef4323cc54c259a2d` | none |
 | A3 | 🧪 AWAITING-HUMAN-TEST | `9a61957e79936c9588d15805cfec10509afb76f3` | none |
 | A4 | 🧪 AWAITING-HUMAN-TEST | `7c9b2c49cceb5f1035da23503e567ca242f6f821` | none |
-| A5 | 🧪 AWAITING-HUMAN-TEST | `5fbf4bcb3432db035e805f775ea0b911fc7ca268` | none |
+| A5 | 🧪 AWAITING-HUMAN-TEST | `e5ddb81cbbc0ad68cb6dd726d9d89d4143fb40d3` | none |
 | B1 | 🧪 AWAITING-HUMAN-TEST | `463c3c3c5bdb312859cfcf8ca59938f77a2bee95` | none |
 | B2 | 🧪 AWAITING-HUMAN-TEST | `136cf051039809710bb672eccae1b3e53d2766d6` | none |
 | B3 | 🧪 AWAITING-HUMAN-TEST | `e732d76d2f23d53fa775c1309b27f7d69dda2411` | none |
@@ -785,7 +785,7 @@ Dashboard audit note (2026-03-15 17:00 UTC): reviewed `docs/testing/test-results
 
 - Chunk: A5 — Testing status dashboard section
 - Status: 🧪 AWAITING-HUMAN-TEST
-- Commit: 5fbf4bcb3432db035e805f775ea0b911fc7ca268
+- Commit: e5ddb81cbbc0ad68cb6dd726d9d89d4143fb40d3
 - Files changed:
   - docs/testing/pending-tests.md
 - Manual test command: scripts/testing/run_and_log.sh A5 "docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/testing/pending-tests.md && echo OK'"
