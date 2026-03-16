@@ -800,7 +800,7 @@ Dashboard audit note (2026-03-16 11:00 UTC): reviewed `docs/testing/test-results
 
 - Chunk: A5 — Testing status dashboard section
 - Status: 🧪 AWAITING-HUMAN-TEST
-- Commit: HASH_PLACEHOLDER
+- Commit: 694bfad4a7e8402c85ff4c00342eb0c96292db80
 - Files changed:
   - docs/testing/pending-tests.md
 - Manual test command: scripts/testing/run_and_log.sh A5 "docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/testing/pending-tests.md && echo OK'"
