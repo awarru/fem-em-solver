@@ -994,6 +994,7 @@
 </table>
 <p>Dashboard audit note (2026-03-15 17:00 UTC): reviewed <code>docs/testing/test-results.md</code> and <code>docs/testing/logs/*.log</code> (including newly present local legacy logs for B2/C1/C2); no new command-matching human test outcomes were found for currently pending chunk commands, so no additional chunk promotions were applied in this cron cycle.</p>
 <p>Dashboard audit note (2026-03-16 11:00 UTC): reviewed <code>docs/testing/test-results.md</code> and <code>docs/testing/logs/*.log</code> (including 20260226T163405Z_C1/C2/D1/D2/D3 and 20260226T163406Z_E1/E2/E3/E4). Newly reviewed logs fail at docker preflight (<code>service "fem-em-solver" is not running</code>) and do not provide command-matching PASS outcomes for currently pending chunk commands, so no additional chunk promotions were applied in this cron cycle.</p>
+<p>Dashboard audit note (2026-03-16 17:00 UTC): reviewed <code>docs/testing/test-results.md</code> and <code>docs/testing/logs/*.log</code>; no new human test logs were added since the 2026-03-16 11:00 UTC audit, so no additional chunk promotions were applied in this cron cycle.</p>
 <hr />
 <h2 id="c1-solve-b-field-on-coilphantom-model-complete">C1 — Solve B-field on coil+phantom model (✅ COMPLETE)<a class="headerlink" href="#c1-solve-b-field-on-coilphantom-model-complete" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1822,6 +1823,21 @@
 <li>Log contains <code>OK</code></li>
 <li>Command exits with status <code>0</code></li>
 <li><code>docs/testing/pending-tests.md</code> includes the dashboard audit note dated <code>2026-03-16 11:00 UTC</code></li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: A5 — Testing status dashboard section</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 74a8929f0fa5298adade6f8c2a3e0dc231b3b1b8</li>
+<li>Files changed:</li>
+<li>docs/testing/pending-tests.md</li>
+<li>Manual test command: scripts/testing/run_and_log.sh A5 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; test -f docs/testing/pending-tests.md &amp;&amp; echo OK'"</li>
+<li>Expected pass signal:</li>
+<li>Log contains <code>OK</code></li>
+<li>Command exits with status <code>0</code></li>
+<li><code>docs/testing/pending-tests.md</code> includes the dashboard audit note dated <code>2026-03-16 17:00 UTC</code></li>
 <li>Notes/blockers: none</li>
 </ul>
 
