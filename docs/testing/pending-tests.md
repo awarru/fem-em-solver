@@ -75,6 +75,8 @@ Dashboard audit note (2026-03-16 17:00 UTC): reviewed `docs/testing/test-results
 
 Dashboard audit note (2026-03-17 11:00 UTC): reviewed `docs/testing/test-results.md` and `docs/testing/logs/*.log`; no new human test logs were added since the 2026-03-16 17:00 UTC audit, so no additional chunk promotions were applied in this cron cycle.
 
+Dashboard audit note (2026-03-17 17:00 UTC): reviewed `docs/testing/test-results.md` and `docs/testing/logs/*.log`; newly present local legacy logs (`20260223T021944Z_B2.log`, `20260223T022334Z_B2.log`, `20260223T022337Z_C1.log`, `20260223T022341Z_C2.log`) were audited, but their commands target prior chunk-command mappings and do not satisfy the current pending command/pass-signal criteria, so no additional chunk promotions were applied in this cron cycle.
+
 ---
 
 ## C1 — Solve B-field on coil+phantom model (✅ COMPLETE)
@@ -836,4 +838,16 @@ Dashboard audit note (2026-03-17 11:00 UTC): reviewed `docs/testing/test-results
   - Log contains `OK`
   - Command exits with status `0`
   - `docs/testing/pending-tests.md` includes the dashboard audit note dated `2026-03-17 11:00 UTC`
+- Notes/blockers: none
+
+- Chunk: A5 — Testing status dashboard section
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: a74cf03cf521b06f5aac923392b99424c13155a2
+- Files changed:
+  - docs/testing/pending-tests.md
+- Manual test command: scripts/testing/run_and_log.sh A5 "docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/testing/pending-tests.md && echo OK'"
+- Expected pass signal:
+  - Log contains `OK`
+  - Command exits with status `0`
+  - `docs/testing/pending-tests.md` includes the dashboard audit note dated `2026-03-17 17:00 UTC`
 - Notes/blockers: none
