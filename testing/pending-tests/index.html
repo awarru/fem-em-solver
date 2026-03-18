@@ -997,6 +997,7 @@
 <p>Dashboard audit note (2026-03-16 17:00 UTC): reviewed <code>docs/testing/test-results.md</code> and <code>docs/testing/logs/*.log</code>; no new human test logs were added since the 2026-03-16 11:00 UTC audit, so no additional chunk promotions were applied in this cron cycle.</p>
 <p>Dashboard audit note (2026-03-17 11:00 UTC): reviewed <code>docs/testing/test-results.md</code> and <code>docs/testing/logs/*.log</code>; no new human test logs were added since the 2026-03-16 17:00 UTC audit, so no additional chunk promotions were applied in this cron cycle.</p>
 <p>Dashboard audit note (2026-03-17 17:00 UTC): reviewed <code>docs/testing/test-results.md</code> and <code>docs/testing/logs/*.log</code>; newly present local legacy logs (<code>20260223T021944Z_B2.log</code>, <code>20260223T022334Z_B2.log</code>, <code>20260223T022337Z_C1.log</code>, <code>20260223T022341Z_C2.log</code>) were audited, but their commands target prior chunk-command mappings and do not satisfy the current pending command/pass-signal criteria, so no additional chunk promotions were applied in this cron cycle.</p>
+<p>Dashboard audit note (2026-03-18 11:01 UTC): reviewed <code>docs/testing/test-results.md</code> and <code>docs/testing/logs/*.log</code>; no new human test logs were added since the 2026-03-17 17:00 UTC audit, so no additional chunk promotions were applied in this cron cycle.</p>
 <hr />
 <h2 id="c1-solve-b-field-on-coilphantom-model-complete">C1 — Solve B-field on coil+phantom model (✅ COMPLETE)<a class="headerlink" href="#c1-solve-b-field-on-coilphantom-model-complete" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1870,6 +1871,21 @@
 <li>Log contains <code>OK</code></li>
 <li>Command exits with status <code>0</code></li>
 <li><code>docs/testing/pending-tests.md</code> includes the dashboard audit note dated <code>2026-03-17 17:00 UTC</code></li>
+<li>
+<p>Notes/blockers: none</p>
+</li>
+<li>
+<p>Chunk: A5 — Testing status dashboard section</p>
+</li>
+<li>Status: 🧪 AWAITING-HUMAN-TEST</li>
+<li>Commit: 885b2e55cd738a95000c1c4575c5ed04336532b5</li>
+<li>Files changed:</li>
+<li>docs/testing/pending-tests.md</li>
+<li>Manual test command: scripts/testing/run_and_log.sh A5 "docker compose exec fem-em-solver bash -lc 'cd /workspace &amp;&amp; test -f docs/testing/pending-tests.md &amp;&amp; echo OK'"</li>
+<li>Expected pass signal:</li>
+<li>Log contains <code>OK</code></li>
+<li>Command exits with status <code>0</code></li>
+<li><code>docs/testing/pending-tests.md</code> includes the dashboard audit note dated <code>2026-03-18 11:01 UTC</code></li>
 <li>Notes/blockers: none</li>
 </ul>
 
