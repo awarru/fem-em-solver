@@ -927,7 +927,7 @@ Dashboard audit note (2026-03-20 17:00 UTC): reviewed `docs/testing/test-results
 
 - Chunk: A5 — Testing status dashboard section
 - Status: 🧪 AWAITING-HUMAN-TEST
-- Commit: adb221f33ad0b03a3dcd9a9bc946d3a05c019ad5
+- Commit: 73fadf9d198e4fb18969e88dcba2cf57b5a1d6e9
 - Files changed:
   - docs/testing/pending-tests.md
 - Manual test command: scripts/testing/run_and_log.sh A5 "docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/testing/pending-tests.md && echo OK'"
