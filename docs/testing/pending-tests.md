@@ -964,3 +964,17 @@ Dashboard audit note (2026-03-21 17:00 UTC): reviewed `docs/testing/test-results
   - Command exits with status `0`
   - `docs/testing/pending-tests.md` includes the dashboard audit note dated `2026-03-21 17:00 UTC`
 - Notes/blockers: none
+
+Dashboard audit note (2026-03-22 11:00 UTC): reviewed `docs/testing/test-results.md` and `docs/testing/logs/*.log`; newly present local legacy logs (`20260226T162846Z_C1.log`, `20260226T162924Z_C1.log`, `20260226T162953Z_C1.log`) were audited and fail at docker preflight (`service "fem-em-solver" is not running`), so no additional chunk promotions were applied in this cron cycle.
+
+- Chunk: A5 — Testing status dashboard section
+- Status: 🧪 AWAITING-HUMAN-TEST
+- Commit: 9c119cf0da443a64620d6e9c204ac1957ccdd9ef
+- Files changed:
+  - docs/testing/pending-tests.md
+- Manual test command: scripts/testing/run_and_log.sh A5 "docker compose exec fem-em-solver bash -lc 'cd /workspace && test -f docs/testing/pending-tests.md && echo OK'"
+- Expected pass signal:
+  - Log contains `OK`
+  - Command exits with status `0`
+  - `docs/testing/pending-tests.md` includes the dashboard audit note dated `2026-03-22 11:00 UTC`
+- Notes/blockers: none
