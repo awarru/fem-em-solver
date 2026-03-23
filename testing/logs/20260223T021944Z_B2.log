@@ -1,0 +1,11 @@
+# Test Run
+- Chunk: B2
+- Time (UTC): 2026-02-23 02:19:44
+- Host: localhost
+- Command: docker compose exec fem-em-solver bash -lc 'cd /workspace && PYTHONPATH=/workspace/src mpiexec -n 2 python3 -m pytest tests/mesh/test_mesh_tag_integrity.py -v'
+
+## Output
+no configuration file provided: not found
+
+## Exit
+- Status: 1
